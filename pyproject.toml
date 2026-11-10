@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ti-brief"
+version = "0.1.0"
+description = "Resource-conscious MISP, OpenCTI and local Ollama intelligence briefs"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+ti-brief = "ti_brief.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ti_brief = ["demo.json"]

@@ -1,0 +1,66 @@
+{
+  "resolved_at": "2026-11-10T20:00:33.512446+00:00",
+  "platform": "linux/amd64",
+  "images": {
+    "misp-core": {
+      "tag": "ghcr.io/misp/misp-docker/misp-core:v2.5.51",
+      "image": "ghcr.io/misp/misp-docker/misp-core@sha256:c54b6f148db98de5744f854f328bc2e9316816a5c8bc4b478b443d6d60a3a439",
+      "digest": "sha256:c54b6f148db98de5744f854f328bc2e9316816a5c8bc4b478b443d6d60a3a439"
+    },
+    "misp-nginx": {
+      "tag": "ghcr.io/misp/misp-docker/misp-nginx:v2.5.51",
+      "image": "ghcr.io/misp/misp-docker/misp-nginx@sha256:b4486a149babc19767e5c8d241a9ec8d8e3f5dec4c5034a0c775819627ca92cb",
+      "digest": "sha256:b4486a149babc19767e5c8d241a9ec8d8e3f5dec4c5034a0c775819627ca92cb"
+    },
+    "misp-modules": {
+      "tag": "ghcr.io/misp/misp-docker/misp-modules:v3.1.4",
+      "image": "ghcr.io/misp/misp-docker/misp-modules@sha256:e0a4905137080383fe34053f98b4e80b8064147ce320b9a0d1a8e185b41a1935",
+      "digest": "sha256:e0a4905137080383fe34053f98b4e80b8064147ce320b9a0d1a8e185b41a1935"
+    },
+    "misp-db": {
+      "tag": "mariadb:10.11.15",
+      "image": "mariadb@sha256:85c39719200637250bb8abe3ccd239239d6f175156fc1698141409fcf8e01a38",
+      "digest": "sha256:85c39719200637250bb8abe3ccd239239d6f175156fc1698141409fcf8e01a38"
+    },
+    "misp-redis": {
+      "tag": "valkey/valkey:7.2.11",
+      "image": "valkey/valkey@sha256:9d09cdba3c2fc12605404d87b5e4adab15822bdada00bf3a19d9fd9d74c99e01",
+      "digest": "sha256:9d09cdba3c2fc12605404d87b5e4adab15822bdada00bf3a19d9fd9d74c99e01"
+    },
+    "opencti": {
+      "tag": "opencti/platform:7.261109.0",
+      "image": "opencti/platform@sha256:48016df2f1ab7c91adf2a9ecce4df8bea5794c28d48026b8f39de8e274d5081a",
+      "digest": "sha256:48016df2f1ab7c91adf2a9ecce4df8bea5794c28d48026b8f39de8e274d5081a"
+    },
+    "worker": {
+      "tag": "opencti/worker:7.261109.0",
+      "image": "opencti/worker@sha256:bdf42fa8a41ab3ea601f5cd740e52b09fb9669c689edf777fb105d03a5cb3783",
+      "digest": "sha256:bdf42fa8a41ab3ea601f5cd740e52b09fb9669c689edf777fb105d03a5cb3783"
+    },
+    "connector-misp": {
+      "tag": "opencti/connector-misp:7.261109.0",
+      "image": "opencti/connector-misp@sha256:0133b2ce8f2e354c6387be632eefc63b1faf98698a741ffb320c6169940bea3a",
+      "digest": "sha256:0133b2ce8f2e354c6387be632eefc63b1faf98698a741ffb320c6169940bea3a"
+    },
+    "elasticsearch": {
+      "tag": "docker.elastic.co/elasticsearch/elasticsearch:8.19.21",
+      "image": "docker.elastic.co/elasticsearch/elasticsearch@sha256:cbf5cd6cfe5532a9c02d510c66d238bf329cd51fe3d57170a2a880aca7d47419",
+      "digest": "sha256:cbf5cd6cfe5532a9c02d510c66d238bf329cd51fe3d57170a2a880aca7d47419"
+    },
+    "redis": {
+      "tag": "redis:8.2.3",
+      "image": "redis@sha256:0908d9af26bf9b985e984a40a5eb82eed229b07a3317eee6843832c3cc3a9619",
+      "digest": "sha256:0908d9af26bf9b985e984a40a5eb82eed229b07a3317eee6843832c3cc3a9619"
+    },
+    "rabbitmq": {
+      "tag": "rabbitmq:4.2.1-management",
+      "image": "rabbitmq@sha256:61fe7962792ad7bbaa3f9454122b366ff4b34fc1c224e528267f4ed3fd845f15",
+      "digest": "sha256:61fe7962792ad7bbaa3f9454122b366ff4b34fc1c224e528267f4ed3fd845f15"
+    },
+    "minio": {
+      "tag": "pgsty/silo:RELEASE.2026-11-09T00-00-00Z",
+      "image": "pgsty/silo@sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d",
+      "digest": "sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "source": "SYNTHETIC lab fixture",
+    "source_url": "https://example.org/synthetic/cve",
+    "kind": "vulnerability",
+    "value": "CVE-2099-0001",
+    "title": "SYNTHETIC example vulnerability",
+    "description": "This fictional vulnerability tests the reporting pipeline. It is not live threat intelligence.",
+    "published_at": "2026-11-09",
+    "action": "Exercise the lab patch-review process with this fictional record.",
+    "priority": 90
+  },
+  {
+    "source": "SYNTHETIC lab fixture",
+    "source_url": "https://example.org/synthetic/ioc",
+    "kind": "ip-dst",
+    "value": "192.0.2.25",
+    "title": "SYNTHETIC documentation-only indicator",
+    "description": "Documentation address used only to test deduplication and report rendering.",
+    "occurred_at": "2026-11-09T00:00:00+00:00",
+    "priority": 50
+  }
+]
