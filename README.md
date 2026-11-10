@@ -1,0 +1,1 @@
+# STIX-TAXII-Threat-Intel-Automated-Summary
