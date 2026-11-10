@@ -44,7 +44,7 @@ def validate_selection(value, allowed):
         if not isinstance(key, str) or key not in allowed or key in seen:
             raise ValueError("Unknown or duplicate evidence ID")
         record = allowed[key]
-        if not isinstance(excerpt, str) or not 1 <= len(excerpt) <= 400 or not (excerpt in record.title or excerpt in record.description):
+        if not isinstance(excerpt, str) or not 1 <= len(excerpt) <= 240 or not (excerpt in record.title or excerpt in record.description):
             raise ValueError("Model excerpt is not grounded in its referenced record")
         seen.add(key)
     return value["items"]

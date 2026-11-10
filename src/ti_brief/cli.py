@@ -63,6 +63,15 @@ def required(name):
     return value
 
 
+def resource_observation():
+    if not Path("/proc/meminfo").exists():
+        return {"available": False}
+    mem = dict(line.split(":", 1) for line in Path("/proc/meminfo").read_text().splitlines())
+    return {"guest_mem_available_mib": int(mem["MemAvailable"].split()[0]) // 1024,
+            "guest_swap_used_mib": (int(mem["SwapTotal"].split()[0]) - int(mem["SwapFree"].split()[0])) // 1024,
+            "load_1_5_15": os.getloadavg()}
+
+
 def execute(args):
     if not args.demo:
         load_env(args.env)
@@ -71,7 +80,7 @@ def execute(args):
     with run_lock(root / "run.lock"):
         store = Store(root / "state.sqlite3")
         run_id, started = store.start_run(), time.monotonic()
-        details = {"mode": mode, "collect_only": args.collect_only}
+        details = {"mode": mode, "collect_only": args.collect_only, "resources_at_start": resource_observation()}
         try:
             http = Http()
             records = [] if args.render_prepared else demo_records() if args.demo else collect(http, args.feeds.split(","), args.lookback_days)
@@ -79,6 +88,7 @@ def execute(args):
             details["changed"] = store.upsert(records)
             if args.collect_only:
                 details["elapsed_seconds"] = round(time.monotonic() - started, 2)
+                details["resources_at_end"] = resource_observation()
                 store.finish_run(run_id, "collected", details)
                 print(json.dumps(details))
                 return 0
@@ -122,6 +132,7 @@ def execute(args):
                 atomic_write(prepared_path, json.dumps({"prepared_at": datetime.now(timezone.utc).isoformat(),
                     "records": [{"id": r.key, "version": r.version} for r in selected], "platform_context": contexts}, indent=2))
                 details.update(status="prepared", records=len(selected), elapsed_seconds=round(time.monotonic() - started, 2))
+                details["resources_at_end"] = resource_observation()
                 store.finish_run(run_id, "prepared", details)
                 print(json.dumps(details))
                 return 0
@@ -147,12 +158,14 @@ def execute(args):
             details.update(report=str(output), status=status, reported=len(selected),
                            remaining=len(store.pending("reported_version", 1_000_000)),
                            elapsed_seconds=round(time.monotonic() - started, 2))
+            details["resources_at_end"] = resource_observation()
             store.finish_run(run_id, status, details)
             print(json.dumps(details))
             return 0 if status == "complete" else 2
         except Exception as exc:
             # Record type only: third-party errors can contain secrets or hostile data.
             details.update(error_type=type(exc).__name__, elapsed_seconds=round(time.monotonic() - started, 2))
+            details["resources_at_end"] = resource_observation()
             store.finish_run(run_id, "failed", details)
             print(json.dumps({"status": "failed", **details}), file=sys.stderr)
             return 1
