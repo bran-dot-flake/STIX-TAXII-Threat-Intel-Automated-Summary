@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 from .feeds import CIRCL, KEV, kev_records
 from .model import Record, canonical, utcnow
 from .report import atomic_write, evidence_digest, validate_selection
+from .stix_publication import empty_context, validate_context
 
 NEWS = "https://www.cisa.gov/cybersecurity-advisories/all.xml"
 SOURCE_NAMES = {"cisa-kev": "CISA KEV", "circl-osint": "CIRCL OSINT", "cisa-advisories": "CISA Advisories"}
@@ -192,9 +193,12 @@ def news_items(raw, now):
             url = source_url(node.findtext("link", ""), "cisa-advisories")
             parser = TextOnly()
             parser.feed(node.findtext("description", ""))
-            words = " ".join(parser.parts).split()
-            # Short attributed source excerpts, never a copied full article.
-            excerpt = " ".join(words[:22]) + ("…" if len(words) > 22 else "")
+            plain = " ".join(" ".join(parser.parts).split())
+            plain = re.sub(r'^View CSAF Summary\s*','',plain)
+            sentence = re.split(r'(?<=[.!?])\s+',plain,maxsplit=1)[0]
+            words = sentence.split()
+            # Prefer a complete introductory sentence over a clipped CVE list.
+            excerpt = " ".join(words[:45]) + ("…" if len(words) > 45 else "")
             title = clean_text(node.findtext("title", ""), 300)
             category = "Exploitation watch" if "known exploited" in title.lower() else "Security advisory"
             rows.append({"id": hashlib.sha256(url.encode()).hexdigest()[:24], "source": "cisa-advisories", "source_url": url,
@@ -202,7 +206,12 @@ def news_items(raw, now):
                 "artwork": "exploitation.svg" if category == "Exploitation watch" else "advisory.svg"})
         except (ValueError, TypeError, OverflowError):
             continue
-    return sorted({r["id"]: r for r in rows}.values(), key=lambda r: r["published_at"], reverse=True)[:18]
+    ranked = sorted({r["id"]: r for r in rows}.values(), key=lambda r: r["published_at"], reverse=True)
+    # Keep a few catalog updates; do not let near-identical KEV bulletins crowd
+    # source advisories out of the bounded editorial selection.
+    selected = [r for r in ranked if r['category']=='Exploitation watch'][:3]
+    selected += [r for r in ranked if r['category']!='Exploitation watch'][:18-len(selected)]
+    return sorted(selected,key=lambda r:r['published_at'],reverse=True)
 
 
 def collect_public(http, previous=None, now=None):
@@ -245,7 +254,8 @@ def collect_public(http, previous=None, now=None):
     result = {"schema_version": 1, "synthetic": False, "collected_at": max(successes) if successes else None,
         "exported_at": collected, "sources": statuses,
         "records": sorted({r["id"]: r for r in records}.values(), key=lambda r: (r["published_at"] or "", r["id"]), reverse=True),
-        "news": news, "reports": previous["reports"]}
+        "news": news, "reports": previous["reports"], "stix":previous.get("stix",empty_context())}
+    result["schema_version"]=2
     validate_snapshot(result)
     return result, originals
 
@@ -293,8 +303,8 @@ def attach_briefs(snapshot, originals, reports_dir):
 
 
 def empty_snapshot():
-    return {"schema_version": 1, "synthetic": False, "collected_at": None, "exported_at": None,
-        "sources": [], "records": [], "news": [], "reports": []}
+    return {"schema_version": 2, "synthetic": False, "collected_at": None, "exported_at": None,
+        "sources": [], "records": [], "news": [], "reports": [], "stix":empty_context()}
 
 
 def exact_fields(row, fields):
@@ -324,9 +334,11 @@ def validate_item(row):
 
 
 def validate_snapshot(value, allow_synthetic=False):
-    exact_fields(value, SNAPSHOT_FIELDS)
-    if value["schema_version"] != 1 or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
+    version=value.get("schema_version")
+    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version==2 else set()))
+    if version not in {1,2} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
         raise ValueError("Unsupported or synthetic public snapshot")
+    if version==2:validate_context(value["stix"])
     for field in ("collected_at", "exported_at"):
         if value[field] is not None:
             stamp(value[field])
@@ -360,7 +372,7 @@ def validate_snapshot(value, allow_synthetic=False):
         stamp(row["published_at"])
         clean_text(row["title"], 300)
         clean_text(row["excerpt"], 600)
-        if len(row["excerpt"].split()) > 22:
+        if len(row["excerpt"].split()) > 45:
             raise ValueError("Oversized news excerpt")
     for row in value["reports"]:
         exact_fields(row, REPORT_FIELDS)

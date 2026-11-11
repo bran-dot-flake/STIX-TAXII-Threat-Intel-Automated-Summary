@@ -1,0 +1,176 @@
+{
+  "type": "bundle",
+  "id": "bundle--00000000-0000-4000-8000-000000000099",
+  "objects": [
+    {
+      "created": "2017-05-31T21:32:03.807Z",
+      "external_references": [
+        {
+          "external_id": "G0032",
+          "source_name": "mitre-attack",
+          "url": "https://attack.mitre.org/groups/G0032"
+        },
+        {
+          "description": "(Citation: CrowdStrike Labyrinth Chollima Feb 2022)",
+          "source_name": "Labyrinth Chollima"
+        },
+        {
+          "description": "(Citation: Microsoft Threat Actor Naming July 2023)",
+          "source_name": "Diamond Sleet"
+        },
+        {
+          "description": "(Citation: Microsoft ZINC disruption Dec 2017)",
+          "source_name": "ZINC"
+        },
+        {
+          "description": "(Citation: Novetta Blockbuster)",
+          "source_name": "Lazarus Group"
+        },
+        {
+          "description": "(Citation: Secureworks NICKEL ACADEMY Dec 2017)",
+          "source_name": "NICKEL ACADEMY"
+        },
+        {
+          "description": "(Citation: US-CERT HIDDEN COBRA June 2017)",
+          "source_name": "Guardians of Peace"
+        },
+        {
+          "description": "CrowdStrike. (2022, February 1). CrowdStrike Adversary Labyrinth Chollima. Retrieved February 1, 2022.",
+          "source_name": "CrowdStrike Labyrinth Chollima Feb 2022",
+          "url": "https://web.archive.org/web/20210723190317/https://adversary.crowdstrike.com/en-US/adversary/labyrinth-chollima/"
+        },
+        {
+          "description": "Michael Barnhart, Austin Larsen, Jeff Johnson, Taylor Long, Michelle Cantos, Adrian Hernandez. (2023, October 10). Assessed Cyber Structure and Alignments of North Korea in 2023. Retrieved August 25, 2025.",
+          "source_name": "Mandiant DPRK Groups 2023",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/north-korea-cyber-structure-alignment-2023"
+        },
+        {
+          "description": "Michael Barnhart, Michelle Cantos, Jeffery Johnson, Elias fox, Gary Freas, Dan Scott. (2022, March 23). Not So Lazarus: Mapping DPRK Cyber Threat Groups to Government Organizations. Retrieved September 9, 2025.",
+          "source_name": "Mandiant DPRK Laz Org Breakdown 2022",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/mapping-dprk-groups-to-government/"
+        },
+        {
+          "description": "Microsoft . (2023, July 12). How Microsoft names threat actors. Retrieved November 17, 2023.",
+          "source_name": "Microsoft Threat Actor Naming July 2023",
+          "url": "https://learn.microsoft.com/en-us/microsoft-365/security/intelligence/microsoft-threat-actor-naming?view=o365-worldwide"
+        },
+        {
+          "description": "Novetta Threat Research Group. (2016, February 24). Operation Blockbuster: Unraveling the Long Thread of the Sony Attack. Retrieved February 25, 2016.",
+          "source_name": "Novetta Blockbuster",
+          "url": "https://web.archive.org/web/20160226161828/https://www.operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-Report.pdf"
+        },
+        {
+          "description": "Secureworks. (2017, December 15). Media Alert - Secureworks Discovers North Korean Cyber Threat Group, Lazarus, Spearphishing Financial Executives of Cryptocurrency Companies. Retrieved December 27, 2017.",
+          "source_name": "Secureworks NICKEL ACADEMY Dec 2017",
+          "url": "https://www.secureworks.com/about/press/media-alert-secureworks-discovers-north-korean-cyber-threat-group-lazarus-spearphishing"
+        },
+        {
+          "description": "Smith, B. (2017, December 19). Microsoft and Facebook disrupt ZINC malware attack to protect customers and the internet from ongoing cyberthreats. Retrieved December 20, 2017.",
+          "source_name": "Microsoft ZINC disruption Dec 2017",
+          "url": "https://blogs.microsoft.com/on-the-issues/2017/12/19/microsoft-facebook-disrupt-zinc-malware-attack-protect-customers-internet-ongoing-cyberthreats/"
+        },
+        {
+          "description": "The U.S. Government refers to malicious cyber activity by the North Korean government as HIDDEN COBRA.(Citation: US-CERT HIDDEN COBRA June 2017)(Citation: US-CERT HOPLIGHT Apr 2019)",
+          "source_name": "HIDDEN COBRA"
+        },
+        {
+          "description": "US Treasury . (2019, September 13). Treasury Sanctions North Korean State-Sponsored Malicious Cyber Groups. Retrieved September 29, 2021.",
+          "source_name": "Treasury North Korean Cyber Groups September 2019",
+          "url": "https://home.treasury.gov/news/press-releases/sm774"
+        },
+        {
+          "description": "US-CERT. (2017, June 13). Alert (TA17-164A) HIDDEN COBRA \u2013 North Korea\u2019s DDoS Botnet Infrastructure. Retrieved July 13, 2017.",
+          "source_name": "US-CERT HIDDEN COBRA June 2017",
+          "url": "https://www.us-cert.gov/ncas/alerts/TA17-164A"
+        },
+        {
+          "description": "US-CERT. (2019, April 10). MAR-10135536-8 \u2013 North Korean Trojan: HOPLIGHT. Retrieved April 19, 2019.",
+          "source_name": "US-CERT HOPLIGHT Apr 2019",
+          "url": "https://www.us-cert.gov/ncas/analysis-reports/AR19-100A"
+        },
+        {
+          "description": "\u4f50\u3005\u6728\u52c7\u4eba Hayato Sasaki. (2025, March 25). Tempted to Classifying APT Actors: Practical Challenges of Attribution in the Case of Lazarus\u2019s Subgroup. Retrieved August 25, 2025.",
+          "source_name": "JPCert Blog Laz Subgroups 2025",
+          "url": "https://blogs.jpcert.or.jp/en/2025/03/classifying-lazaruss-subgroup.html"
+        }
+      ],
+      "id": "intrusion-set--c93fccb1-e8e8-42cf-ae33-2ad1d183913a",
+      "modified": "2026-07-31T20:48:46.106Z",
+      "name": "Lazarus Group",
+      "object_marking_refs": [
+        "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+      ],
+      "revoked": false,
+      "spec_version": "2.1",
+      "type": "intrusion-set",
+      "x_mitre_deprecated": false
+    },
+    {
+      "created": "2017-06-01T00:00:00.000Z",
+      "definition": {
+        "statement": "Copyright 2015-2026, The MITRE Corporation. MITRE ATT&CK and ATT&CK are registered trademarks of The MITRE Corporation."
+      },
+      "definition_type": "statement",
+      "id": "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168",
+      "spec_version": "2.1",
+      "type": "marking-definition"
+    },
+    {
+      "created": "2019-04-12T17:01:01.266Z",
+      "external_references": [
+        {
+          "description": "Novetta Threat Research Group. (2016, February 24). Operation Blockbuster: Destructive Malware Report. Retrieved November 17, 2024.",
+          "source_name": "Novetta Blockbuster Destructive Malware",
+          "url": "https://web.archive.org/web/20160303200515/https:/operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-Destructive-Malware-Report.pdf"
+        },
+        {
+          "description": "Novetta Threat Research Group. (2016, February 24). Operation Blockbuster: Unraveling the Long Thread of the Sony Attack. Retrieved February 25, 2016.",
+          "source_name": "Novetta Blockbuster",
+          "url": "https://web.archive.org/web/20160226161828/https://www.operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-Report.pdf"
+        }
+      ],
+      "id": "relationship--00e9a38d-6dc5-4d67-b2fe-977b1c7d17dd",
+      "modified": "2026-07-31T20:48:46.352Z",
+      "object_marking_refs": [
+        "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+      ],
+      "relationship_type": "uses",
+      "revoked": false,
+      "source_ref": "intrusion-set--c93fccb1-e8e8-42cf-ae33-2ad1d183913a",
+      "spec_version": "2.1",
+      "target_ref": "tool--3ffbdc1f-d2bf-41ab-91a2-c7b857e98079",
+      "type": "relationship",
+      "x_mitre_deprecated": false
+    },
+    {
+      "created": "2019-03-25T12:30:40.919Z",
+      "external_references": [
+        {
+          "external_id": "S0364",
+          "source_name": "mitre-attack",
+          "url": "https://attack.mitre.org/software/S0364"
+        },
+        {
+          "description": "Edwards, M. (2007, March 14). EldoS Provides Raw Disk Access for Vista and XP. Retrieved March 26, 2019.",
+          "source_name": "EldoS RawDisk ITpro",
+          "url": "https://www.itprotoday.com/windows-78/eldos-provides-raw-disk-access-vista-and-xp"
+        },
+        {
+          "description": "Novetta Threat Research Group. (2016, February 24). Operation Blockbuster: Destructive Malware Report. Retrieved November 17, 2024.",
+          "source_name": "Novetta Blockbuster Destructive Malware",
+          "url": "https://web.archive.org/web/20160303200515/https:/operationblockbuster.com/wp-content/uploads/2016/02/Operation-Blockbuster-Destructive-Malware-Report.pdf"
+        }
+      ],
+      "id": "tool--3ffbdc1f-d2bf-41ab-91a2-c7b857e98079",
+      "modified": "2024-11-17T19:51:16.652Z",
+      "name": "RawDisk",
+      "object_marking_refs": [
+        "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+      ],
+      "revoked": false,
+      "spec_version": "2.1",
+      "type": "tool",
+      "x_mitre_deprecated": false
+    }
+  ]
+}

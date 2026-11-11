@@ -43,5 +43,25 @@ export function kindCounts(records) {
   return Object.entries(counts).sort((a,b) => b[1] - a[1]);
 }
 export function matches(item, query) {
-  return [item.title, item.value, item.kind, item.description, item.excerpt].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase());
+  return [item.title, item.name, item.external_id, item.value, item.kind, item.type, item.description, item.excerpt].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase());
+}
+
+export function groupStories(news) {
+  const groups = new Map();
+  for (const row of [...news].sort((a,b)=>b.published_at.localeCompare(a.published_at))) {
+    const key = row.category === 'Exploitation watch' ? 'kev-catalog' : row.title.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    if (!groups.has(key)) groups.set(key,{...row,related:[]});
+    else groups.get(key).related.push(row);
+  }
+  return [...groups.values()];
+}
+
+export function briefDigest(report) {
+  if (!report || report.mode === 'quiet-day') return [];
+  const seen = new Set();
+  return report.items.filter(row=>{
+    const key = `${row.kind}|${row.value}`;
+    if(seen.has(key)) return false;
+    seen.add(key);return true;
+  }).slice(0,3);
 }

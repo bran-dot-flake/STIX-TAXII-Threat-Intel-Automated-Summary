@@ -18,7 +18,9 @@ jobs:
       - name: Unit and local HTTP integration tests
         env:
           PYTHONPATH: src
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m pip install '.[stix]'
+          python -m unittest discover -s tests -v
       - name: Validate locked infrastructure
         run: python scripts/validate.py
       - uses: actions/setup-node@v4
@@ -36,3 +38,28 @@ jobs:
           python scripts/init_env.py
           docker compose --env-file .env -f deploy/compose.json --profile misp --profile opencti --profile integration config --quiet
           python -m ti_brief.cli --demo
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build labeled sample and start local preview
+        run: |
+          python scripts/build_dashboard.py --demo
+          mkdir -p work
+          python -m http.server 4173 --bind 127.0.0.1 --directory dist > work/preview.log 2>&1 &
+      - name: Install development browser tools
+        run: |
+          npm install --no-save --prefix work/browser playwright@1.62.1
+          browser_executable_path=$(command -v google-chrome)
+          printf 'BROWSER_EXECUTABLE=%s\n' "$browser_executable_path" >> "$GITHUB_ENV"
+      - name: Check compact dashboard interactions
+        env:
+          NODE_PATH: ${{ github.workspace }}/work/browser/node_modules
+        run: node scripts/check_dashboard.cjs

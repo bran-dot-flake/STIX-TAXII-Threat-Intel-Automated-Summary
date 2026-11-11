@@ -2,20 +2,22 @@
 
 `scripts/export_publication.py` independently recollects original public sources and optionally publishes through existing `gh` authentication. It does not call platform APIs or Ollama. The staged scheduler invokes it when `TI_PUBLICATION_ENABLED=true`, including after backend failures. All existing private reporting paths remain available.
 
-## Schema version 1
+## Schema version 2 (version 1 remains readable)
 
 `src/ti_brief/publication.py:validate_snapshot` is the executable contract. Unknown object keys are rejected. The live validator rejects synthetic data; only explicit `build_dashboard.py --demo` permits the labeled fixture.
 
 | Object | Exact fields |
 | --- | --- |
-| Snapshot | `schema_version` (1), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports` |
+| Snapshot | `schema_version` (2), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix` |
 | Source health | `id`, `status` (`ok`, `cached`, `unavailable`), `attempted_at`, `last_success_at` |
 | Observation | `id`, `source`, `source_url`, `kind`, `value`, `title`, `description`, `action`, `published_at`, `first_seen`, `last_seen` |
 | News | `id`, `source`, `source_url`, `title`, `excerpt`, `published_at`, `category`, `artwork` |
 | Brief | `id`, `generated_at`, `mode` (`ollama-extractive`, `deterministic`, `quiet-day`), `evidence_count`, `items` |
 | Brief item | `id`, `excerpt`, `title`, `source`, `source_url`, `value`, `kind`, `action`, `published_at` |
 
-Limits: 5,000 observations, eighteen news items, ninety accepted editions, eight source observations per brief, 240 characters per validated brief excerpt, and twenty-two words per news excerpt. Evidence IDs are 24-character hashes. Indicator values are canonicalized and defanged. Source IDs are `cisa-kev`, `circl-osint`, and `cisa-advisories`. Artwork is one of two bundled original SVGs.
+Limits: 5,000 observations, eighteen selected news items, ninety accepted editions, eight source observations per brief, 240 characters per validated brief excerpt, and forty-five words per news excerpt. Evidence IDs are 24-character hashes. Indicator values are canonicalized and defanged. Source IDs are `cisa-kev`, `circl-osint`, and `cisa-advisories`. Legacy artwork metadata remains accepted; the frontend uses at most one original advisory illustration in the visible grid.
+
+The `stix` object contains exactly `source`, `collected_at`, `status`, `objects`, `relationships`, `counts`, and `license`. Only `mitre-enterprise` is publishable. Up to 160 named objects expose `id`, `type`, `name`, `external_id`, `url`, `modified`, and `tactics`. Up to sixty resolved relationships expose original `id`, `source_ref`, `target_ref`, `relationship_type`, and `modified`. Counts must exactly equal published node types. Unknown keys, private links, unresolved endpoints, unsupported identities, and unreviewed licenses are rejected. [STIX policy](stix-taxii.md).
 
 Timestamps are ISO 8601 UTC; source date-only values display as midnight UTC. `published_at` can be null when unknown. `first_seen` means first collection by this publication, not source discovery or incident occurrence. Initial IOC counts form a bootstrap baseline. Catalog dates specifically mean KEV `dateAdded`.
 
@@ -57,6 +59,6 @@ Export/publish failure returns nonzero to the service journal and retry mechanis
 
 `website/analytics.js` deterministically deduplicates KEV CVE values and IOC type/value pairs. New IOCs use the earliest collection time across all matching observations. Advisories/24h use source publication time and exclude future dates. Charts zero-fill UTC days and count unique catalog additions over seven or thirty days. No chart number or relationship is model-generated. Catalog inclusion is not relabeled as CVSS severity.
 
-The four views cover overview, dated brief history, the searchable/paginated KEV register, and source health. Global search and evidence dialogs provide details. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Original illustrations are bundled SVG files. Charts include accessible labels and data tables.
+The frontend is one page: a multi-finding daily brief, compact statistics/trends, grouped editorial stories, expandable CVEs/archive, and optional catalog context. The former source/status page and sidebar were removed; operational details remain here. Global search includes STIX names/IDs. Dialogs show original evidence and resolved catalog relationships. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Charts include accessible labels and data tables.
 
 Run Python tests, Node calculation tests, the infrastructure validator, synthetic private reporting, and empty/demo builds. Browser acceptance uses real public data and prior validated briefs at widths 390, 768, and 1440: four primary views, no horizontal overflow or browser/CSP errors, metric agreement, chart/category filters, report selection, CVE filtering, search, and dialog Escape handling. Screenshots contain only public data. Browser tooling is a development aid, not a runtime dependency.

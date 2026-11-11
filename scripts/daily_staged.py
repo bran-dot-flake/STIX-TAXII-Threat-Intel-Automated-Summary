@@ -27,12 +27,17 @@ def verify_ownership():
             raise RuntimeError("Project-name conflict: found a container not owned by ti-brief")
 
 
-def orchestrate():
+def parse_args(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--manage-project", action="store_true", help="Explicit consent to start/stop only ti-lab containers")
-    args = p.parse_args()
+    args = p.parse_args(argv)
     if not args.manage_project:
         p.error("Requires explicit --manage-project after lab deployment approval")
+    return args
+
+
+def orchestrate(args=None):
+    args = args or parse_args()
     load_env(Path(".env"))
     for key in ("MISP_API_KEY", "OPENCTI_TOKEN", "OLLAMA_MODEL"):
         required(key)
@@ -59,12 +64,24 @@ def orchestrate():
     return 0
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
+    load_env(Path('.env'))
+    if os.environ.get('TI_TAXII_ENABLED')=='true':
+        try:
+            invoke([os.environ.get('TI_STIX_PYTHON',sys.executable),'scripts/sync_taxii.py','--sync'])
+        except Exception as exc:
+            print(json.dumps({'stage':'taxii','status':'failed-retaining-cache','error_type':type(exc).__name__}))
     # Public collection is independent: preserve the website even if a local
     # integration fails. The existing report exit status remains visible.
     try:
-        return orchestrate()
+        return orchestrate(args)
     finally:
+        if os.environ.get('TI_STIX_OPENCTI_ENABLED')=='true':
+            try:
+                invoke([sys.executable,'scripts/sync_stix_opencti.py','--max-objects','20'])
+            except Exception as exc:
+                print(json.dumps({'stage':'stix-opencti','status':'failed','error_type':type(exc).__name__}))
         if os.environ.get("TI_PUBLICATION_ENABLED") == "true":
             invoke([sys.executable, "scripts/export_publication.py", "--publish"])
 

@@ -58,7 +58,7 @@ The owner explicitly approved and installed the reviewed system service/timer. T
 
 The timer is enabled for daily 08:00 UTC with up to five minutes of jitter, independent of interactive logins. The next observed activation was 2026-11-12 at 08:04:05 UTC (03:04:05 US Eastern). Missed executions are persistent; failures retry after 15 minutes, bounded to three starts in six hours.
 
-Backup restoration, larger datasets, TAXII support and broader threat-entity feeds remain extensions. This is a functional small-data lab below OpenCTI's published production memory recommendations.
+At backend acceptance, TAXII and broader threat-entity feeds were still future work; the STIX/TAXII acceptance below closes the ingestion gap. Backup restoration and larger-scale operation remain extensions. This is a functional small-data lab below OpenCTI's published production memory recommendations.
 
 ## Public observatory accepted on 2026-11-11
 
@@ -75,3 +75,15 @@ Headless Chrome exercised all four primary views at widths 390, 768, and 1440, i
 The collector checkout was fast-forwarded to the merged source, and `TI_PUBLICATION_ENABLED=true` was added to its private environment without changing platform/model settings. No new administrative service or model was installed. The previously approved timer remains active; the observed next activation is November 12 at 08:04:05 UTC. It will run the public hook after its existing staged reporting workflow. Full automatic daily execution after this change awaits that scheduled activation; the publisher itself has been verified directly under the service's relevant authentication/privilege constraints.
 
 The static site stays accessible while the VM is offline, with collection age shown explicitly. It cannot collect new data during that outage. Only complete publicly eligible report batches appear in public history; private or restricted evidence remains local. See the [publication contract](publication.md) for schema, coverage, failure behavior, and operating commands.
+
+## Compact frontend and STIX/TAXII acceptance — 2026-11-11
+
+The revised frontend consolidates the prior views into a single page. The sidebar, decorative masthead, standalone status section, and repeated story art were removed. A multi-finding brief appears first, followed by four metrics, compact trends, grouped stories, and expandable CVEs/archive. Optional ATT&CK context remains collapsed until requested. Search includes catalog names/IDs and detail dialogs retain original relationship IDs/direction.
+
+Live verification used MITRE's original TAXII 2.1 discovery endpoint, default API root, and Enterprise collection. Bounded requests parsed and stored 220 original STIX objects. Repeated calls resumed later pages, preserved existing versions, and exercised the completed definitions stream's incremental date-added query. The public gate accepted 61 named catalog objects and five resolved relationships; incomplete, inactive, unsupported, and unmarked/restricted context remained local. This is sampled coverage, not a full ATT&CK download or incident activity measure.
+
+An OpenCTI pilot upserted/read back four catalog entities/relationships through native APIs. A separate real three-object source sample (two endpoints plus their relationship) completed read-back and repeated with zero additional writes. Original STIX IDs, native endpoint IDs, relationship type/direction, and source names were checked. No new MISP writer, container, model, or administrative unit was introduced.
+
+The expanded suite contains 56 Python tests with the optional STIX dependencies installed and six Node calculation/selection tests. It covers representative SDOs/SCOs/reports, raw references, version conflicts, revocation/deprecation, observable variants, marking definitions, pagination/resume/incrementals, expired tokens, configuration replay, rate deferral, credential isolation, platform checkpoint/read-back, cached publication during interrupted imports, optional-stage failures, and side-effect-free scheduler help. Existing ingestion/report tests remain intact. Development browser checks at 390/768/1440 passed with no page/CSP errors or overflow; they exercise search, chart filters, vulnerability details, archive selection, and live catalog relationships. CI adds the reproducible browser runner against the labeled fixture.
+
+Public snapshots now write schema 2 with a strictly validated STIX projection while retaining schema 1 read compatibility. The static Pages build still needs no STIX runtime dependencies or lab access. The revised source enables the existing daily hook to run bounded collection and the optional catalog bridge. [STIX operations](stix-taxii.md) documents authentication, limits, cached failure behavior, licensing, and the narrow bridge's lifecycle limitations.

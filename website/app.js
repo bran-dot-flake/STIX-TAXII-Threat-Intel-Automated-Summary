@@ -1,129 +1,163 @@
-import {metrics, dailyKev, kindCounts, matches} from './analytics.js';
+import {metrics, dailyKev, kindCounts, matches, groupStories, briefDigest} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
-const names = {'cisa-kev':'CISA KEV','circl-osint':'CIRCL OSINT','cisa-advisories':'CISA Advisories'};
-const sourceURLs = {'cisa-kev':'https://www.cisa.gov/known-exploited-vulnerabilities-catalog','circl-osint':'https://www.circl.lu/doc/misp/feed-osint/','cisa-advisories':'https://www.cisa.gov/news-events/cybersecurity-advisories'};
-const kinds = {'vulnerability':'Known exploited CVEs','ip-dst':'IP addresses',domain:'Domains',url:'URLs',md5:'MD5 hashes',sha1:'SHA-1 hashes',sha256:'SHA-256 hashes'};
-const e = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const date = value => value ? new Date(value).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}) : 'Not available';
+const names = {'cisa-kev':'CISA KEV','circl-osint':'CIRCL OSINT','cisa-advisories':'CISA','mitre-enterprise':'MITRE ATT&CK®'};
+const kinds = {'vulnerability':'CVEs','ip-dst':'IP addresses',domain:'Domains',url:'URLs',md5:'MD5',sha1:'SHA-1',sha256:'SHA-256'};
+const types = {'attack-pattern':'Technique','intrusion-set':'Group',malware:'Malware',tool:'Tool'};
+const e = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date = value => value ? new Date(value).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}) : 'Not available';
 const time = value => value ? `${date(value)} · ${new Date(value).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'UTC'})} UTC` : 'Not available';
-const number = value => Number(value).toLocaleString('en-US');
-const link = (url, text, cls='') => {
-  try {const p = new URL(url); if(p.protocol !== 'https:' || !['www.cisa.gov','www.circl.lu'].includes(p.hostname) || p.username || p.password) return e(text);}
+const num = value => Number(value).toLocaleString('en-US');
+const shortHeadline = title => title.length>105?title.slice(0,102).replace(/\s+\S*$/,'')+'…':title;
+const link = (url,text,cls='') => {
+  try {const p=new URL(url);if(p.protocol!=='https:'||!['www.cisa.gov','www.circl.lu','attack.mitre.org'].includes(p.hostname)||p.username||p.password)return e(text);}
   catch {return e(text);}
   return `<a class="${e(cls)}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)} ↗</a>`;
 };
-let data, build = {}, period = 30, newsCategory = 'all', newsLimit = 5, cveQuery = '', cvePage = 0, selectedReport = null;
-const empty = (title, body) => `<div class="empty"><h2>${e(title)}</h2><p>${e(body)}</p></div>`;
+let data, period=30, newsFilter='all', newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
+const empty = text => `<p class="empty">${e(text)}</p>`;
 
-function edition() {
-  const old = !data.collected_at || Date.now() - Date.parse(data.collected_at) > 36*3600000;
-  return `<div class="edition"><span><strong>THE DAILY SIGNAL</strong> &nbsp; / &nbsp; PUBLIC-SOURCE INTELLIGENCE</span><span class="freshness"><span class="status-dot"></span>${old ? 'LAST COLLECTION' : 'UPDATED'} ${e(time(data.collected_at))}</span></div>`;
+function warnings() {
+  if(data.synthetic)return '<div class="notice">Synthetic demonstration — fictional examples, not operational intelligence.</div>';
+  if(!data.exported_at)return '<div class="notice">Development preview — no collected data loaded.</div>';
+  const stale = !data.collected_at || Date.now()-Date.parse(data.collected_at)>36*3600000;
+  const failed = data.sources.filter(s=>s.status!=='ok');
+  return (stale?'<div class="notice">Collection is over 36 hours old. Showing the last valid dataset.</div>':'')+(failed.length?`<div class="notice">${failed.map(s=>e(names[s.id])).join(', ')} unavailable; showing retained data where available.</div>`:'');
 }
-function notice() {
-  if(data.synthetic) return '<div class="notice">SYNTHETIC DEMONSTRATION · All displayed examples are fictional test intelligence, not operational findings.</div>';
-  const failed = data.sources.filter(s=>s.status !== 'ok');
-  if(!data.exported_at) return '<div class="notice">DEVELOPMENT PREVIEW · No live intelligence loaded. No example statistics are presented as collected data.</div>';
-  const old = Date.now() - Date.parse(data.collected_at) > 36*3600000;
-  return (old ? '<div class="notice">Collection is older than 36 hours. This site preserves the last valid publication while the collector is offline.</div>' : '') + (failed.length ? `<div class="notice">${failed.map(s=>e(names[s.id])).join(', ')}: source unavailable. Previously validated data is retained where available. <a href="#sources">View source status ↗</a></div>` : '');
-}
-function heading(index, title, right='') {return `<div class="section-heading"><h2><span>${index}</span> ${e(title)}</h2>${right}</div>`;}
-function overview() {
-  const m = metrics(data, new Date().toISOString());
-  const latest = data.reports[0];
-  const kev = data.records.filter(r=>r.source === 'cisa-kev').slice(0,3);
-  main.innerHTML = `${edition()}<div class="masthead"><h1>The threat landscape.<br><em>In perspective.</em></h1><p>A daily lens on emerging cyber risk.<br>Public signals, source-grounded briefings,<br>and the evidence behind them.</p></div>${notice()}
-    <section class="metrics" aria-label="Collected intelligence metrics">${[
-      ['Tracked KEV entries',m.kev,'Catalog additions · last 90 days','↗'],
-      ['Unique public IOCs',m.iocs,`${number(m.newIocs)} first collected in last 24h`,'◎'],
-      ['Advisories / 24h',m.news24,'By source publication time','▤'],
-      ['Archived briefs',m.briefs,'Validated, source-linked editions','↗'],
-      ['Recent advisories',m.advisories,'Up to 18 · last 30 days','⌁'],
-    ].map(([label,value,note,icon])=>`<div class="metric"><div class="metric-label">${e(label)}<span aria-hidden="true">${icon}</span></div><div class="metric-value">${number(value)}</div><small>${e(note)}</small></div>`).join('')}</section>
-    <section aria-label="Daily intelligence brief">${heading('01','THE INTELLIGENCE BRIEF','<a href="#briefings">All editions ↗</a>')}
-    <div class="brief-grid"><div class="brief-main"><div class="eyebrow">DAILY INTELLIGENCE <span class="chip">${latest?.mode === 'ollama-extractive' ? 'LLM-ASSISTED' : 'EVIDENCE-LED'}</span></div>
-      ${latest ? `<h2>${e(latest.items[0]?.title || 'The daily intelligence brief')}</h2><p>${e(latest.items[0]?.excerpt || 'No new or changed observations in the bounded local report batch. This does not imply an absence of threats; continue reviewing the current public feeds below.')}</p><div class="brief-meta"><span>${e(date(latest.generated_at))}</span><span>•</span><span>${latest.evidence_count} source observations</span><a class="text-link" href="#briefings">Read the full briefing ↗</a></div>` : '<h2>Evidence before analysis.</h2><p>No validated public brief is available yet. Original public-source intelligence remains available below; the next accepted local report will appear here automatically.</p><div class="brief-meta"><a class="text-link" href="#sources">How the briefing works ↗</a></div>'}
-      </div><aside class="brief-aside"><div class="kicker">ON THE RADAR / RECENT KEV ADDITIONS</div>${kev.length ? kev.map(r=>`<button class="watch-item" data-detail="${e(r.id)}"><span>${e(r.value)} <i aria-hidden="true">↗</i></span><p>${e(r.title)}</p></button>`).join('') : '<p class="muted">No recent KEV records available.</p>'}</aside></div></section>
-    <section aria-label="Intelligence analytics"><div class="analytics-grid"><div class="panel"><div class="panel-head"><div><h2 class="panel-title">The exploitation watch</h2><p class="panel-subtitle">CISA KEV catalog additions / UTC</p></div><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div><div id="trend"></div></div>
-      <div class="panel"><div class="panel-head"><div><h2 class="panel-title">Inside the collection</h2><p class="panel-subtitle">Unique values by evidence type</p></div><span class="muted" aria-hidden="true">◫</span></div><div class="type-list">${types()}</div><p class="chart-note">Source observations, deduplicated by type and value. KEV inclusion means known exploitation; it is not a CVSS severity score.</p></div></div></section>
-    <section class="news-section" aria-label="Latest intelligence reports">${heading('02','FROM THE INTELLIGENCE DESK',`<div class="news-tools" aria-label="News category">${[['all','All stories'],['Exploitation watch','Exploitation'],['Security advisory','Advisories']].map(([v,l])=>`<button data-news-category="${v}" aria-pressed="${newsCategory===v}">${l}</button>`).join('')}</div>`)}<div id="news-content"></div></section>`;
-  document.querySelectorAll("[data-width]").forEach(el=>el.style.width=`${el.dataset.width}%`);
-  trend(); news();
-}
-function types() {
-  const counts = kindCounts(data.records); const max = Math.max(...counts.map(r=>r[1]),1);
-  return counts.length ? counts.map(([kind,count])=>`<div class="type-row"><header><span>${e(kinds[kind]||kind)}</span><b>${number(count)}</b></header><div class="type-track" role="img" aria-label="${e(kinds[kind]||kind)}: ${count}"><span class="type-bar" data-width="${count/max*100}"></span></div></div>`).join('') : '<p class="muted">No observations available.</p>';
-}
-function trend() {
-  const rows = dailyKev(data.records, period, new Date().toISOString()); const total = rows.reduce((s,r)=>s+r.count,0); const max = Math.max(...rows.map(r=>r.count),1);
-  document.querySelector('#trend').innerHTML = `<div class="chart-total">${number(total)}<small>entries added in ${period} days</small></div><div class="bar-chart" role="group" aria-label="Daily KEV additions"><span class="axis-max">${max}</span>${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details><summary>View chart data & methodology</summary><p>Daily unique CVEs by catalog dateAdded, not vulnerability disclosure or exploitation date. Source failures may leave cached coverage incomplete.</p><table class="data-table"><thead><tr><th scope="col">UTC date</th><th scope="col">Catalog additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table></details>`;
-  document.querySelectorAll("[data-height]").forEach(el=>el.style.height=`${el.dataset.height}%`);
-}
-function news() {
-  const rows = data.news.filter(r=>newsCategory==='all'||r.category===newsCategory);
-  document.querySelector('#news-content').innerHTML = rows.length ? `<div class="news-grid">${rows.slice(0,newsLimit).map(r=>`<article class="story"><img src="./assets/${r.artwork==='exploitation.svg'?'exploitation.svg':'advisory.svg'}" alt="" loading="lazy" width="900" height="560"><div class="eyebrow">${e(r.category)}</div><h3>${link(r.source_url,r.title)}</h3><p>${e(r.excerpt)}</p><div class="story-meta"><span>CISA · ${e(date(r.published_at))}</span>${link(r.source_url,'Read source')}</div></article>`).join('')}</div>${rows.length>newsLimit?'<button class="load-more" data-more>MORE FROM THE DESK ↓</button>':''}<p class="chart-note">Short excerpts from original CISA advisories. Illustrations: original EMBER editorial artwork; not source photographs. Headlines are source-reported.</p>` : empty('The desk is quiet.', 'No recent advisories match this filter. Try another category or check source status.');
-}
+
 function reportMarkup(report) {
-  return `<div class="eyebrow">DAILY INTELLIGENCE / ${e(date(report.generated_at))}</div><h2>The daily intelligence brief</h2><p class="context">${report.evidence_count} source observations · ${report.mode==='ollama-extractive'?'Ollama selected, validated source excerpts':'Deterministic evidence selection'}. This bounded briefing highlights source assertions. Local exposure and independent attribution have not been assessed.</p>${report.mode==='quiet-day'?'<div class="evidence"><h3>No new findings in this report batch.</h3><p>The collector reported no new or changed observations in its configured window. This does not imply an absence of threats. Continue routine monitoring and review source health.</p></div>':''}${report.items.map((r,i)=>`<article class="evidence"><div class="eyebrow">FINDING ${String(i+1).padStart(2,'0')} / ${e(names[r.source])}</div><h3>${e(r.title)}</h3><p>${e(r.excerpt)}</p><div class="detail-value">${e(r.value)}</div><div class="action"><b>Defensive consideration</b><br>${e(r.action)}</div><p class="evidence-source">${link(r.source_url,'Original evidence')} · ${e(date(r.published_at))}${r.source==='cisa-kev'?' (catalog added)':''}</p></article>`).join('')}<p class="chart-note">The model selects complete source excerpts; it does not generate statistics, invent relationships, or assess your environment. Public briefs exclude private platform context. Only reports whose complete evidence batch passes the publication gate appear here.</p>`;
+  return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.mode==='ollama-extractive'?'Selected source excerpts':report.mode==='quiet-day'?'No new findings':'Source excerpts'}</div>${report.items.length?report.items.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])} · ${e(date(row.published_at))}${row.source==='cisa-kev'?' · catalog added':''}</div><h3>${e(row.title)}</h3><p>${e(row.excerpt)}</p><div class="indicator">${e(row.value)}</div><p class="action">${e(row.action)}</p>${link(row.source_url,'Source','link')}</article>`).join(''):empty('No new or changed observations in this report batch. This does not imply an absence of threats.')}`;
 }
-function briefings() {
-  if(!selectedReport || !data.reports.some(r=>r.id===selectedReport)) selectedReport = data.reports[0]?.id;
-  const selected = data.reports.find(r=>r.id===selectedReport);
-  main.innerHTML = `${edition()}<h1 class="page-title">The briefing room.</h1><p class="page-description">Daily intelligence, with the evidence attached. Explore up to 90 validated public editions from the local reporting pipeline.</p>${notice()}${selected ? `<div class="archive"><div class="archive-list" aria-label="Briefing editions">${data.reports.map(r=>`<button class="archive-button" data-report="${e(r.id)}" aria-pressed="${r.id===selectedReport}"><time>${e(time(r.generated_at))}</time><strong>${e(r.items[0]?.title || 'Daily intelligence brief')}</strong><small>${r.evidence_count} observations · ${r.mode==='ollama-extractive'?'LLM-assisted':'Deterministic'}</small></button>`).join('')}</div><article class="report-body" id="selected-brief">${reportMarkup(selected)}</article></div>` : empty('Awaiting a public edition.', 'The original-source collection can operate independently of MISP, OpenCTI, and Ollama. A validated local brief will be added after its source evidence passes the public export gate.')}`;
-}
-function vulnerabilities() {
-  main.innerHTML = `${edition()}<h1 class="page-title">The exploitation register.</h1><p class="page-description">Known exploited vulnerabilities added to CISA's catalog within the last 90 days. Catalog inclusion signals exploitation in the wild; it does not establish local exposure or a CVSS score.</p>${notice()}<div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input type="search" id="cve-search" placeholder="Filter by CVE, vendor, or vulnerability…" value="${e(cveQuery)}"><span id="cve-count"></span></div><div id="cve-results"></div>`;
-  cveRows();
-}
-function cveRows() {
-  const rows = data.records.filter(r=>r.source==='cisa-kev' && matches(r,cveQuery));
-  cvePage = Math.min(cvePage,Math.max(0,Math.ceil(rows.length/20)-1));
-  document.querySelector('#cve-count').textContent = `${number(rows.length)} entries`;
-  document.querySelector('#cve-results').innerHTML = rows.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th scope="col">CVE / DETAIL</th><th scope="col">VULNERABILITY</th><th scope="col">CATALOG ADDED</th><th scope="col">STATUS</th></tr></thead><tbody>${rows.slice(cvePage*20,cvePage*20+20).map(r=>`<tr><td><button class="cve-button" data-detail="${e(r.id)}">${e(r.value)} ↗</button></td><td class="table-title">${e(r.title)}</td><td>${e(date(r.published_at))}</td><td><span class="badge">KNOWN EXPLOITED</span></td></tr>`).join('')}</tbody></table></div><div class="pagination"><button data-page="-1" ${cvePage===0?'disabled':''}>← Previous</button><span>Page ${cvePage+1} of ${Math.ceil(rows.length/20)}</span><button data-page="1" ${(cvePage+1)*20>=rows.length?'disabled':''}>Next →</button></div>` : empty('No matching vulnerabilities.', 'Try a different CVE, vendor, or keyword.');
-}
-function sources() {
-  main.innerHTML = `${edition()}<h1 class="page-title">Follow the evidence.</h1><p class="page-description">A transparent view of the collection, publication boundary, and timestamps behind this observatory.</p>${notice()}<div class="health-grid">${Object.entries(names).map(([id,name])=>{
-    const source = data.sources.find(s=>s.id===id); return `<section class="health-card"><h2>${name}</h2><div class="health ${e(source?.status||'unavailable')}"><span class="status-dot"></span>${e(source?.status==='ok'?'Last fetch successful':source?.status||'Not collected')}</div><p>LAST ATTEMPT<br>${e(time(source?.attempted_at))}</p><p>LAST SUCCESS<br>${e(time(source?.last_success_at))}</p>${link(sourceURLs[id],'Visit original source')}</section>`;
-  }).join('')}</div><div class="method-grid"><section class="panel"><h2>Three clocks. One publication.</h2><dl class="timestamps"><div><dt>Latest successful source collection</dt><dd>${e(time(data.collected_at))}</dd></div><div><dt>Latest public brief generated</dt><dd>${e(time(data.reports[0]?.generated_at))}</dd></div><div><dt>Sanitized export created</dt><dd>${e(time(data.exported_at))}</dd></div><div><dt>This website build</dt><dd>${e(time(build.built_at))}</dd></div></dl><p>Build time precedes publication. The exact deployment result and completion time are recorded in the <a class="text-link" href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/workflows/pages.yml" target="_blank" rel="noopener noreferrer">public deployment log ↗</a>. The website stays online while the local collector is offline.</p></section><section class="panel"><h2>Public by construction.</h2><p>Original allowlisted public sources → normalized evidence → optional local MISP / OpenCTI context → Ollama excerpt selection → validated public JSON → GitHub Actions → this static website.</p><p>The publisher recollects original public evidence. It never copies the local database, raw reports, private events, credentials, or platform context. CIRCL events require explicit CLEAR / WHITE markings; conflicting restrictions and nonpublic indicators are withheld.</p><p>Counts use deterministic code. No severity, malware, actor, or ATT&CK relationships are inferred. IOC values are defanged and never linked. First-collected metrics begin with this publication's initial collection, not historic source discovery.</p></section></div>`;
-}
-function search() {
-  const query = new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'';
-  const hits = [...data.news,...data.records].filter(r=>matches(r,query)).slice(0,80);
-  main.innerHTML = `${edition()}<h1 class="page-title query-text">Search: ${e(query)}</h1><p class="page-description">${hits.length===80?'First 80':hits.length} results across collected records and source advisories.</p><div class="search-results">${hits.length ? hits.map(r=>`<article class="search-hit"><div class="eyebrow">${e(names[r.source])} / ${e(date(r.published_at))}</div><h2>${r.kind ? `<button class="cve-button" data-detail="${e(r.id)}">${e(r.title)} ↗</button>` : link(r.source_url,r.title)}</h2><p>${e(r.value||r.excerpt||'')}</p></article>`).join('') : empty('No matching intelligence.', 'Try a CVE, indicator, vendor, or a keyword from a source headline.')}</div>`;
-}
-function detail(id) {
-  const row = data.records.find(r=>r.id===id); if(!row) return;
-  document.querySelector('#dialog-content').innerHTML = `<div class="eyebrow">${e(names[row.source])} / EVIDENCE DETAIL</div><h2 class="dialog-title" id="dialog-title">${e(row.title)}</h2><div class="detail-value">${e(row.value)}</div><div class="detail-content"><p>${e(row.description)}</p><h3>Defensive consideration</h3><p>${e(row.action)}</p><h3>Source & chronology</h3><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(time(row.published_at))}</dd><dt>First collected by this publication</dt><dd>${e(time(row.first_seen))}</dd><dt>Last collected</dt><dd>${e(time(row.last_seen))}</dd></dl><p>${link(row.source_url,'Open original evidence')}</p><p class="chart-note">Source assertions are not independent verification. No local exposure, actor attribution, or relationships are inferred. Indicators are defanged for safe reading.</p></div>`;
-  dialog.showModal();
-}
+
 function render() {
-  const view = location.hash.slice(1).split('?')[0] || 'overview';
-  document.querySelectorAll('[data-view]').forEach(a=>a.setAttribute('aria-current',a.dataset.view===view?'page':'false'));
-  document.querySelector('#view-label').textContent = ({overview:'OVERVIEW',briefings:'DAILY BRIEFS',vulnerabilities:'VULNERABILITIES',sources:'SOURCES & STATUS',search:'SEARCH'})[view]||'OVERVIEW';
-  ({overview,briefings,vulnerabilities,sources,search}[view]||overview)();
-  document.title = `EMBER — ${document.querySelector('#view-label').textContent}`;
+  const report=data.reports[0];
+  const digest=briefDigest(report);
+  const m=metrics(data,new Date().toISOString());
+  const week=dailyKev(data.records,7,new Date().toISOString()).reduce((sum,row)=>sum+row.count,0);
+  const headline=!report?'Awaiting the next brief':report.mode==='quiet-day'?'No new findings in the latest batch':`${report.evidence_count} source observations for review`;
+  main.innerHTML=`${warnings()}<section id="search-results" class="search-results" hidden></section>
+    <section class="brief" id="brief"><div class="section-head"><h2>Daily Brief</h2><time>${e(date(report?.generated_at))}</time></div>
+      <div class="brief-intro"><h1>${e(headline)}</h1>${report&&report.items.length?'<p>Source excerpts</p>':''}</div>
+      ${digest.length?`<div class="brief-findings">${digest.map(row=>`<article class="finding"><div class="source-line">${e(names[row.source])}</div><button class="link" data-evidence="${e(row.id)}">${e(row.value)} ↗</button><p>${e(row.excerpt)}</p></article>`).join('')}</div>`:empty(report?'No new or changed observations in the report batch.':'No accepted public brief is available yet. Current source reports appear below.')}
+      ${report?`<details class="full-brief"><summary>Read full brief</summary><div class="report-body">${reportMarkup(report)}</div></details>`:''}</section>
+    <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Selected advisories'],[m.briefs,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
+    <section id="trends"><div class="section-head"><h2>Trends</h2><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div>
+      <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
+      <div><div class="chart-head"><h3>Unique values by type</h3></div><div id="types" class="type-list"></div></div></div>
+      <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${data.stix.objects.length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
+        <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
+        <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details></section>
+    <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2><div class="news-filters" aria-label="News category">${[['all','All'],['Security advisory','Advisories'],['Exploitation watch','KEV']].map(([v,l])=>`<button data-news-filter="${v}" aria-pressed="${v===newsFilter}">${l}</button>`).join('')}</div></div><div id="news-content"></div></section>
+    <details class="register" id="vulnerabilities"><summary>Vulnerabilities <small>${m.kev} KEV entries</small></summary><div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input id="cve-search" type="search" placeholder="CVE, vendor, or keyword…"><small id="cve-count"></small></div><div id="cve-results"></div></details>
+    <details class="archive" id="archive"><summary>Archive <small>${data.reports.length} editions</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${data.reports.map(row=>`<option value="${e(row.id)}">${e(time(row.generated_at))}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${report?reportMarkup(report):empty('No accepted public editions yet.')}</div></details>`;
+  document.querySelector('#last-updated').textContent=data.collected_at?`Updated ${time(data.collected_at)}`:'No collection yet';
+  document.querySelector('#attribution').innerHTML=data.stix.objects.length?`MITRE ATT&CK® data © 2015–2026 The MITRE Corporation. ${link(data.stix.license,'Terms of use')}`:'';
+  trend();typeChart();news();cveRows();catalog();
 }
-main.addEventListener('click',event=>{
-  const button = event.target.closest('button'); if(!button) return;
-  if(button.dataset.detail) detail(button.dataset.detail);
-  if(button.dataset.period) {period=Number(button.dataset.period); document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period)); trend();}
-  if(button.dataset.newsCategory) {newsCategory=button.dataset.newsCategory; newsLimit=5; document.querySelectorAll('[data-news-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.newsCategory===newsCategory)); news();}
-  if(button.hasAttribute('data-more')) {const previous=newsLimit; newsLimit+=6; news(); document.querySelectorAll('.story')[previous]?.querySelector('a')?.focus();}
-  if(button.dataset.report) {selectedReport=button.dataset.report; briefings(); const article=document.querySelector('#selected-brief'); article.tabIndex=-1; article.focus(); article.scrollIntoView({block:'start'});}
-  if(button.dataset.page) {const direction=button.dataset.page; cvePage+=Number(direction); cveRows(); const buttons=[...document.querySelectorAll('[data-page]:not(:disabled)')]; (buttons.find(b=>b.dataset.page===direction)||buttons[0])?.focus();}
+
+function trend() {
+  const rows=dailyKev(data.records,period,new Date().toISOString());
+  const max=Math.max(...rows.map(r=>r.count),1);
+  document.querySelector('#chart-total').textContent=`${rows.reduce((sum,r)=>sum+r.count,0)} / ${period} days`;
+  document.querySelector('#trend').innerHTML=`<div class="bar-chart" role="group" aria-label="Daily KEV catalog additions">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details class="chart-data"><summary>Chart data</summary><table class="data-table"><caption class="sr-only">KEV additions by catalog date, UTC</caption><thead><tr><th scope="col">Date (UTC)</th><th scope="col">Additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table></details>`;
+  document.querySelectorAll('[data-height]').forEach(el=>el.style.height=`${el.dataset.height}%`);
+}
+
+function typeChart() {
+  const rows=kindCounts(data.records);const max=Math.max(...rows.map(r=>r[1]),1);
+  document.querySelector('#types').innerHTML=rows.length?rows.map(([kind,count])=>`<div class="type-row"><span>${e(kinds[kind]||kind)}</span><div class="type-track" role="img" aria-label="${e(kinds[kind]||kind)}: ${count}"><span class="type-bar" data-width="${count/max*100}"></span></div><b>${count}</b></div>`).join(''):empty('No observations available.');
+  document.querySelectorAll('[data-width]').forEach(el=>el.style.width=`${el.dataset.width}%`);
+}
+
+function news() {
+  const stories=groupStories(data.news).filter(r=>newsFilter==='all'||r.category===newsFilter);
+  let illustrated=false;
+  document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map(row=>{
+    const image=row.category==='Security advisory'&&!illustrated; if(image)illustrated=true;
+    return `<article class="story"><div class="source-line">CISA · ${e(date(row.published_at))}</div>${image?'<img src="./assets/advisory.svg" alt="" width="112" height="75" loading="lazy">':''}<h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><p>${e(row.excerpt)}</p>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
+  }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No recent source reports match this filter.');
+}
+
+function cveRows() {
+  const rows=data.records.filter(r=>r.source==='cisa-kev'&&matches(r,cveQuery));
+  cvePage=Math.min(cvePage,Math.max(0,Math.ceil(rows.length/10)-1));
+  document.querySelector('#cve-count').textContent=`${rows.length} matching entries`;
+  document.querySelector('#cve-results').innerHTML=rows.length?`<div class="table-wrap"><table class="data-table"><thead><tr><th scope="col">CVE</th><th scope="col">Vulnerability</th><th scope="col">Catalog added</th></tr></thead><tbody>${rows.slice(cvePage*10,cvePage*10+10).map(row=>`<tr><td><button class="link" data-evidence="${e(row.id)}">${e(row.value)} ↗</button></td><td class="table-title">${e(row.title)}</td><td>${e(date(row.published_at))}</td></tr>`).join('')}</tbody></table></div><div class="pagination"><button data-page="-1" ${cvePage===0?'disabled':''}>← Previous</button><span>${cvePage+1} / ${Math.ceil(rows.length/10)}</span><button data-page="1" ${(cvePage+1)*10>=rows.length?'disabled':''}>Next →</button></div>`:empty('No matching vulnerabilities.');
+}
+
+function catalog() {
+  const rows=data.stix.objects.filter(row=>(catalogType==='all'||row.type===catalogType)&&matches(row,catalogQuery));
+  document.querySelector('#catalog-results').innerHTML=rows.length?`<div class="catalog-grid">${rows.slice(0,catalogLimit).map(row=>`<button class="catalog-item" data-stix="${e(row.id)}"><span>${e(row.external_id)} · ${e(types[row.type]||row.type)}</span><strong>${e(row.name)}</strong></button>`).join('')}</div>${rows.length>catalogLimit?'<button class="more" data-more-catalog>More catalog context ↓</button>':''}`:empty('No matching catalog objects.');
+}
+
+function evidence(id) {
+  const row=data.records.find(r=>r.id===id)||data.reports.flatMap(r=>r.items).find(r=>r.id===id);if(!row)return;
+  document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2><div class="indicator">${e(row.value)}</div><p>${e(row.description||row.excerpt)}</p><h3>Defensive consideration</h3><p>${e(row.action)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}`;
+  if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
+}
+
+function stixDetail(id) {
+  const row=data.stix.objects.find(r=>r.id===id);if(!row)return;
+  const lookup=new Map(data.stix.objects.map(o=>[o.id,o]));
+  const edges=data.stix.relationships.filter(r=>r.source_ref===id||r.target_ref===id);
+  document.querySelector('#dialog-content').innerHTML=`<div class="source-line">MITRE ATT&CK® · ${e(types[row.type]||row.type)} · ${e(row.external_id)}</div><h2 id="dialog-title">${e(row.name)}</h2>${row.tactics.length?`<p>Tactics: ${row.tactics.map(e).join(', ')}</p>`:''}<p class="source-line">Catalog modified ${e(date(row.modified))}</p>${link(row.url,'ATT&CK reference','link')}<h3>Source relationships</h3>${edges.length?`<ul class="relationship-list">${edges.map(edge=>{
+    const source=lookup.get(edge.source_ref),target=lookup.get(edge.target_ref);
+    return `<li><button class="link" data-stix="${e(source.id)}">${e(source.name)}</button> ${e(edge.relationship_type.replaceAll('-',' '))} <button class="link" data-stix="${e(target.id)}">${e(target.name)}</button><small>${e(edge.id)} · ${e(date(edge.modified))}</small></li>`;
+  }).join('')}</ul>`:empty('No resolved source relationships in this bounded sample.')}<p class="source-line">Knowledge-base context; not a claim of recent activity.</p>`;
+  if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
+}
+
+function search() {
+  const query=document.querySelector('#global-search').value.trim();
+  const region=document.querySelector('#search-results');if(!region)return;
+  if(!query){region.hidden=true;return;}
+  const hits=[...groupStories(data.news),...data.records,...data.stix.objects].filter(row=>matches(row,query));
+  region.hidden=false;
+  region.innerHTML=`<div class="section-head"><h2>${hits.length} search results</h2><button class="link" data-clear-search>Clear search</button></div>${hits.length?`<ul>${hits.slice(0,40).map(row=>`<li><small>${e(row.type?'MITRE ATT&CK®':names[row.source])} ${e(row.external_id||row.value||date(row.published_at))}</small>${row.type?`<button class="link" data-stix="${e(row.id)}">${e(row.name)} ↗</button>`:row.kind?`<button class="link" data-evidence="${e(row.id)}">${e(row.title)} ↗</button>`:link(row.source_url,row.title)}</li>`).join('')}</ul>${hits.length>40?'<p class="source-line">First 40 results. Refine your search to narrow the list.</p>':''}`:empty('No matching intelligence.')}`;
+}
+
+function anchor() {
+  const legacy={overview:'brief',briefings:'archive',sources:'brief'};
+  const raw=location.hash.slice(1).split('?')[0];const id=legacy[raw]||raw;
+  if(raw==='search'){
+    document.querySelector('#global-search').value=new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'';search();return;
+  }
+  const target=document.getElementById(id);if(!target)return;
+  if(target.tagName==='DETAILS')target.open=true;
+  target.scrollIntoView({block:'start'});
+}
+
+function click(event) {
+  const button=event.target.closest('button');if(!button||!data)return;
+  if(button.dataset.evidence)evidence(button.dataset.evidence);
+  if(button.dataset.stix)stixDetail(button.dataset.stix);
+  if(button.dataset.period){period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
+  if(button.dataset.newsFilter){newsFilter=button.dataset.newsFilter;newsLimit=6;document.querySelectorAll('[data-news-filter]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.newsFilter===newsFilter));news();}
+  if(button.hasAttribute('data-more-news')){const before=newsLimit;newsLimit+=6;news();document.querySelectorAll('.story')[before]?.querySelector('a')?.focus();}
+  if(button.hasAttribute('data-more-catalog')){const before=catalogLimit;catalogLimit+=12;catalog();document.querySelectorAll('.catalog-item')[before]?.focus();}
+  if(button.dataset.page){cvePage+=Number(button.dataset.page);cveRows();document.querySelector('[data-page]:not(:disabled)')?.focus();}
+  if(button.hasAttribute('data-clear-search')){document.querySelector('#global-search').value='';search();document.querySelector('#global-search').focus();}
+}
+main.addEventListener('click',click);dialog.addEventListener('click',click);
+main.addEventListener('input',event=>{
+  if(event.target.id==='cve-search'){cveQuery=event.target.value;cvePage=0;cveRows();}
+  if(event.target.id==='catalog-search'){catalogQuery=event.target.value;catalogLimit=12;catalog();}
 });
-main.addEventListener('input',event=>{if(event.target.id==='cve-search'){cveQuery=event.target.value; cvePage=0; cveRows();}});
-document.querySelector('#search-form').addEventListener('submit',event=>{event.preventDefault(); const q=document.querySelector('#global-search').value.trim(); if(q) location.hash=`search?q=${encodeURIComponent(q)}`;});
+main.addEventListener('change',event=>{
+  if(event.target.id==='catalog-type'){catalogType=event.target.value;catalogLimit=12;catalog();}
+  if(event.target.id==='archive-select'){const report=data.reports.find(r=>r.id===event.target.value);if(report)document.querySelector('#archived-report').innerHTML=reportMarkup(report);}
+});
+document.querySelector('#search-form').addEventListener('submit',event=>{event.preventDefault();if(data){search();document.querySelector('#search-results')?.scrollIntoView({block:'start'});}});
+document.querySelector('#global-search').addEventListener('input',event=>{if(data&&!event.target.value)search();});
 document.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
-dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect(); if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom) dialog.close();}});
-window.addEventListener('hashchange',()=>{if(!data)return;render();window.scrollTo(0,0);main.focus({preventScroll:true});});
+window.addEventListener('hashchange',()=>{if(data)anchor();});
+document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
-  const response = await fetch('./snapshot.json',{cache:'no-cache'}); if(!response.ok) throw new Error('Data unavailable');
-  data = await response.json();
-  if(data.schema_version!==1 || typeof data.synthetic!=='boolean' || !['records','reports','news','sources'].every(k=>Array.isArray(data[k]))) throw new Error('Invalid publication');
-  try {const r=await fetch('./build.json',{cache:'no-cache'});if(r.ok) build=await r.json();} catch {}
-  render();
+  const response=await fetch('./snapshot.json',{cache:'no-cache'});if(!response.ok)throw new Error();data=await response.json();
+  if(![1,2].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
+  data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
+  render();if(location.hash)anchor();
 } catch {
-  main.innerHTML = empty('The observatory is temporarily unavailable.', 'The public data file could not be loaded. Refresh to retry, or visit the project repository for deployment status. No live connection to the local lab is required.');
+  data=null;document.querySelector('#last-updated').textContent='Data unavailable';main.innerHTML='<h1>Intelligence unavailable</h1><p class="empty">The public data file could not be loaded. Refresh to retry.</p>';
 }
