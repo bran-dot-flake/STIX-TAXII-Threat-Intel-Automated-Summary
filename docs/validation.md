@@ -50,7 +50,7 @@ On 2026-11-11, a read-only check showed all 12 containers still up after approxi
 
 ## Automated checks and remaining acceptance
 
-The current 28-test suite passes locally. It covers normalization, stale feeds, bounded CIRCL parsing, deduplication, priority/backlog handling, nondestructive migration, MISP HTTP contracts, CVE upserts, exact OpenCTI provenance, model validation, secrets, snapshot expiry, locks and failed-run checkpoints. CI checks Python 3.11/3.13/3.14, Compose consistency, image locks, Compose syntax and the offline demo. An earlier 23-test commit passed [all jobs](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/42893100816). Consult current-commit checks for the expanded suite.
+At backend acceptance, the 28-test suite passed locally. It covers normalization, stale feeds, bounded CIRCL parsing, deduplication, priority/backlog handling, nondestructive migration, MISP HTTP contracts, CVE upserts, exact OpenCTI provenance, model validation, secrets, snapshot expiry, locks and failed-run checkpoints. CI checks Python 3.11/3.13/3.14, Compose consistency, image locks, Compose syntax and the offline demo. An earlier 23-test commit passed [all jobs](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/42893100816). Consult current-commit checks for the expanded suite.
 
 ## Daily system service accepted on 2026-11-11
 
@@ -59,3 +59,19 @@ The owner explicitly approved and installed the reviewed system service/timer. T
 The timer is enabled for daily 08:00 UTC with up to five minutes of jitter, independent of interactive logins. The next observed activation was 2026-11-12 at 08:04:05 UTC (03:04:05 US Eastern). Missed executions are persistent; failures retry after 15 minutes, bounded to three starts in six hours.
 
 Backup restoration, larger datasets, TAXII support and broader threat-entity feeds remain extensions. This is a functional small-data lab below OpenCTI's published production memory recommendations.
+
+## Public observatory accepted on 2026-11-11
+
+[PR #2](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/pull/2) adds EMBER over the working backend. The source branch and merged main passed the expanded CI matrix: 39 Python tests on Python 3.11/3.13/3.14, four Node calculation tests, the infrastructure validator, Compose configuration, isolated synthetic reporting, and empty/synthetic static builds. [Main CI evidence](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/43042036332).
+
+The independently collected live snapshot contains 159 public observations (114 KEV entries and 45 unique IOCs), eighteen CISA advisories, and two validated local brief editions. Each source fetched successfully. Exact selection/version validation preserved the existing LLM output without another inference call. A comparison against the VM's actual secret values reported zero matches; no private platform context was present in the export.
+
+The publisher created the isolated `intel-data` branch with exactly one sanitized `snapshot.json`. A subsequent real CLI publication succeeded with DBus and SSH-agent environment removed and Linux no-new-privileges enabled, demonstrating that this flow does not depend on an interactive desktop or SSH agent. It dispatched the workflow and reached a successful Pages deployment. [Publication deployment evidence](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/43042142517).
+
+GitHub Pages inherits the owner's existing domain. Both the standard Pages project URL and [the HTTPS custom-domain project URL](https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/) returned the EMBER website successfully; the standard URL redirects to the existing domain. HTTPS enforcement is enabled for this repository. The domain itself was not changed.
+
+Headless Chrome exercised all four primary views at widths 390, 768, and 1440, including the deployed project URL. Checks covered exact metric agreement with JSON, 7/30-day charts, category filters, report selection, CVE search, global search, dialog Escape, and no horizontal overflow or browser/CSP errors. Separate local checks covered empty, synthetic, stale/cached, and unavailable-data states. Screenshots in `docs/images` contain only public data. Original SVG editorial illustrations need no third-party image service.
+
+The collector checkout was fast-forwarded to the merged source, and `TI_PUBLICATION_ENABLED=true` was added to its private environment without changing platform/model settings. No new administrative service or model was installed. The previously approved timer remains active; the observed next activation is November 12 at 08:04:05 UTC. It will run the public hook after its existing staged reporting workflow. Full automatic daily execution after this change awaits that scheduled activation; the publisher itself has been verified directly under the service's relevant authentication/privilege constraints.
+
+The static site stays accessible while the VM is offline, with collection age shown explicitly. It cannot collect new data during that outage. Only complete publicly eligible report batches appear in public history; private or restricted evidence remains local. See the [publication contract](publication.md) for schema, coverage, failure behavior, and operating commands.
