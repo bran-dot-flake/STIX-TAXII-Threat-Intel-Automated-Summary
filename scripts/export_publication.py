@@ -9,6 +9,7 @@ from ti_brief.http import Http
 from ti_brief.publication import attach_briefs, collect_public, empty_snapshot, save_snapshot, validate_snapshot
 from ti_brief.publish import DEFAULT_REPOSITORY, publish, read_remote
 from ti_brief.stix_publication import empty_context, project_context
+from ti_brief.briefing_public import enrich_snapshot
 
 
 def main():
@@ -28,6 +29,7 @@ def main():
                 previous = read_remote(repo)
             snapshot, originals = collect_public(Http(), previous or empty_snapshot())
             attach_briefs(snapshot, originals, args.reports_dir)
+            enrich_snapshot(snapshot,Path('data/narrative'))
             try:
                 snapshot['stix']=project_context(Path('data/stix/intelligence.sqlite3'),snapshot.get('stix'))
             except Exception as exc:

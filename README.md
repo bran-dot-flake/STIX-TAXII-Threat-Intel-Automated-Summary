@@ -27,7 +27,7 @@
 
 EMBER is an automated threat intelligence publication backed by a private Ubuntu lab. It brings together exploited-vulnerability catalog entries, public indicators, security advisories, and structured MITRE ATT&CK® knowledge. Readers get a compact daily brief, source-linked stories, useful trends, searchable CVEs, and historical editions on one static page.
 
-The lab uses MISP to organize source-attributed observations, OpenCTI to represent intelligence entities and relationships, and an existing local Ollama model to select relevant source excerpts. A separate exporter publishes only validated public-source data. GitHub Pages remains available while the collector or model is offline.
+The lab uses MISP to organize source-attributed observations, OpenCTI to represent intelligence entities and relationships, and an existing local Ollama model for exact evidence selection and a separate fact-cited narrative composition. A separate exporter publishes only validated public-source data. GitHub Pages remains available while the collector or model is offline.
 
 ## Objectives
 
@@ -92,9 +92,13 @@ The OpenCTI catalog bridge supports attack patterns, intrusion sets, malware, to
 
 ### Briefing and publication
 
-Ollama chooses and orders complete source excerpts tied to evidence IDs. JSON-schema constraints and independent local validation reject unsupported text, IDs, duplicates, and extra fields. Free-form synthesis cannot be checked by the existing exact-evidence validator, so the website uses a deterministic multi-finding overview with clearly identified source excerpts. No additional model call is needed for publication.
+Related observations become topics before selection: distinct CVEs stay separate; CIRCL indicators share a topic only when they cite the same original event URL. Matching actor names or a shared CSV feed never establishes a relationship. A bounded scan reserves room for up to four topics before filling their technical evidence, with at most eight observations per run.
 
-Up to eight observations are briefed per run. Failed inference produces a marked fallback, exits 2, and retains the retry queue. Successful reports exit 0; other core failures exit 1. Quiet days are explicit. The resource-aware orchestrator prepares verified evidence with the platforms running, stops only this project's containers for CPU inference, then restores the selected resident profile. [Synthetic report](examples/daily-brief.synthetic.md).
+Ollama first selects exact, independently validated source excerpts. A separate call composes a short overview, topic summaries, and significance from a typed fact ledger. The model chooses and orders source-derived factual formulations; each claim/text pair, headline, topic, evidence reference, reporting window, and input digest is checked locally. A valid ID or JSON schema alone does not authorize prose. Unsupported text is rejected, and conflicting/instruction-like source topics are withheld from narrative. This deliberately limits synthesis: it is source-grounded bulletin composition, not unrestricted or independently verified analysis. Source recommendations are deduplicated and never invented. [Grounding and chronology contract](docs/briefing.md).
+
+Source publication/catalog dates, substantive content changes, and first collection are tracked separately. Timestamp-only republication does not requeue an already reported story; platform synchronization still receives the source version. Older material is explicitly historical context or newly collected history. Catalog changes never become new attacks. The reporting window begins at the previous UTC midnight and ends at generation; quiet editions do not claim an absence of threats.
+
+Failed excerpt inference retains the retry queue and exits 2. A failed narrative call uses the checked deterministic narrative fallback without discarding accepted evidence. No new model, service, or runtime dependency is needed. The resource-aware orchestrator prepares verified evidence with platforms running, stops only this project's containers for the two bounded CPU inference calls, then restores the selected resident profile. [Synthetic report](examples/daily-brief.synthetic.md).
 
 Public brief promotion requires exact independently recollected record versions and the batch digest. CIRCL event/object/attribute restrictions are checked and indicators defanged. STIX publication is limited to the reviewed original MITRE source and resolved permissive markings/license; local bundles and private TAXII feeds remain private. Only resolved, active source relationships enter the small public catalog. No actor/technique relationship is inferred from a headline or by the model.
 
@@ -104,7 +108,7 @@ The publisher writes one validated JSON file to `intel-data`, never stages the w
 
 [Open EMBER](https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/).
 
-![Compact EMBER daily brief, statistics, trends, and editorial intelligence](docs/images/dashboard-desktop.png)
+![EMBER grouped narrative daily brief, intelligence index, and compact trends](docs/images/dashboard-desktop.png)
 
 <details>
 <summary>Phone layout</summary>
@@ -113,13 +117,13 @@ The publisher writes one validated JSON file to `intel-data`, never stages the w
 
 </details>
 
-The current frontend removes the permanent sidebar, introductory masthead, standalone status view, and separate report/CVE pages. Brief, trends, grouped stories, vulnerabilities, and archive share one page. The first brief shows up to three distinct findings; complete reports, catalog context, CVEs, and archived editions expand in place. Images are limited to one optional original illustration in the visible story grid.
+The current frontend removes the permanent sidebar, introductory masthead, standalone status view, and separate report/CVE pages. The reading order is Daily Brief → Latest Intelligence → Trends/statistics → Vulnerabilities → Archive. The first brief shows up to four source-backed topics, with a concise overview and expandable grouped evidence; catalog context, CVEs, and historical editions expand in place. Article previews show up to three lines, with complete excerpts and original sources accessible. Images are limited to one optional original illustration in the visible story grid.
 
 The November 11, 2026 live TAXII acceptance stored **220 original STIX objects** across bounded/resumed requests. The accepted public projection contained **61 catalog objects and five resolved source relationships**. A real OpenCTI pilot read back catalog entities and relationships; an isolated three-object import repeated with **zero additional writes**. These are bounded acceptance samples, not complete Enterprise ATT&CK coverage.
 
 The public feed snapshot also contained **114 KEV entries, 45 unique public IOCs, eighteen selected advisories, and two accepted briefs**. Those figures are dated evidence, not throughput or comprehensive coverage claims. The existing lab previously verified forty-one observations against MISP/OpenCTI and completed a real systemd-managed reporting run. [Validation evidence](docs/validation.md).
 
-The expanded checks cover parsing, relationships, lifecycle/version handling, pagination, resumable and incremental cursors, expired tokens, rate limits, marking restrictions, public filtering, platform read-back, frontend calculations, and the existing reporting path. Browser checks exercise the single-page interactions at phone, tablet, and desktop widths. Synthetic and unavailable-data states remain explicit.
+The expanded checks cover topic provenance, duplicate/conflicting evidence, narrative claim rejection, prompt injection, quiet days, unavailable Ollama, chronology and timestamp-only republication, parsing, relationships, lifecycle/version handling, pagination, resumable and incremental cursors, expired tokens, rate limits, marking restrictions, public filtering, platform read-back, frontend calculations, and the existing reporting path. Browser checks exercise the single-page interactions at phone, tablet, and desktop widths. Synthetic and unavailable-data states remain explicit.
 
 ## Setup
 
@@ -168,6 +172,8 @@ PYTHONPATH=src python3 scripts/export_publication.py --publish
 ```
 
 Publishing needs existing `gh` authentication with repository/workflow access and **Pages → Source: GitHub Actions**. The data branch is isolated; relative assets and section anchors support project URLs. For a fork, update repository links and `TI_PUBLICATION_REPOSITORY`.
+
+`TI_NARRATIVE_ENABLED=true` (default) enables the separate narrative call. Set it to `false` to retain deterministic fact-cited composition with the existing excerpt layer. To retrofit just the latest already public edition, run `PYTHONPATH=src python3 scripts/compose_brief.py`, then export/publish; the cache is bound to its evidence digest and original generation time.
 
 The approved timer runs daily at 08:00 UTC with up to five minutes of jitter. `TI_TAXII_ENABLED=true` adds bounded collection before reporting; `TI_STIX_OPENCTI_ENABLED=true` adds the optional bridge after platform restoration. `TI_PUBLICATION_ENABLED=true` exports/publishes afterward. No additional daemon, model download, firewall opening, or administrative unit is required. [Environment example](.env.example).
 

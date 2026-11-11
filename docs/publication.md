@@ -2,18 +2,22 @@
 
 `scripts/export_publication.py` independently recollects original public sources and optionally publishes through existing `gh` authentication. It does not call platform APIs or Ollama. The staged scheduler invokes it when `TI_PUBLICATION_ENABLED=true`, including after backend failures. All existing private reporting paths remain available.
 
-## Schema version 2 (version 1 remains readable)
+## Schema version 3 (versions 1 and 2 remain readable)
 
 `src/ti_brief/publication.py:validate_snapshot` is the executable contract. Unknown object keys are rejected. The live validator rejects synthetic data; only explicit `build_dashboard.py --demo` permits the labeled fixture.
 
 | Object | Exact fields |
 | --- | --- |
-| Snapshot | `schema_version` (2), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix` |
+| Snapshot | `schema_version` (3), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix` |
 | Source health | `id`, `status` (`ok`, `cached`, `unavailable`), `attempted_at`, `last_success_at` |
 | Observation | `id`, `source`, `source_url`, `kind`, `value`, `title`, `description`, `action`, `published_at`, `first_seen`, `last_seen` |
 | News | `id`, `source`, `source_url`, `title`, `excerpt`, `published_at`, `category`, `artwork` |
-| Brief | `id`, `generated_at`, `mode` (`ollama-extractive`, `deterministic`, `quiet-day`), `evidence_count`, `items` |
+| Brief | `id`, `generated_at`, `mode` (`ollama-extractive`, `deterministic`, `quiet-day`), `evidence_count`, `items`, `observations`, `narrative` |
 | Brief item | `id`, `excerpt`, `title`, `source`, `source_url`, `value`, `kind`, `action`, `published_at` |
+
+Brief `observations` retain all independently matched source records, even those omitted by the excerpt selector. They contain the brief-item fields plus `modified_at`, `first_seen`, `last_seen`, `content_changed_at`, and `known_content_change`. Collection/change metadata is typed and bounded by generation time; all source fields are rederived from original records. Legacy editions retain unknown chronology rather than assigning today’s collection dates.
+
+`narrative` contains exactly `version`, `mode` (`ollama-grounded` or `deterministic-fallback`), `composed_at`, `input_digest`, `window_start`, `window_end`, and `plan`. The plan contains overview claims and up to four topics with claim/text pairs, headline, freshness, significance, and supporting evidence IDs. Its complete content is independently checked against the recomputed fact ledger, not trusted because the model supplied IDs. [Exact narrative contract](briefing.md).
 
 Limits: 5,000 observations, eighteen selected news items, ninety accepted editions, eight source observations per brief, 240 characters per validated brief excerpt, and forty-five words per news excerpt. Evidence IDs are 24-character hashes. Indicator values are canonicalized and defanged. Source IDs are `cisa-kev`, `circl-osint`, and `cisa-advisories`. Legacy artwork metadata remains accepted; the frontend uses at most one original advisory illustration in the visible grid.
 
@@ -31,7 +35,7 @@ Only CIRCL titles and normalized observations are exported; arbitrary event fiel
 
 Indicators are checked for public hosts/addresses. Common internal suffixes, reserved/private address literals, embedded URL credentials, suspicious key assignments, and contact addresses in text are rejected. Allowlisted public sources and explicit projection are the primary boundary; text heuristics are additional checks, not a universal data-loss prevention claim.
 
-Private sidecars provide candidate selections and fingerprints only. Every original record version and the batch digest must match independently recollected public evidence; selection validation runs again. An inadmissible batch is withheld as a whole. No platform context, private event UUID, model address, or run ID is copied. Prior accepted editions remain. Failed/degraded reports are not promoted. Complete zero-record runs become explicit quiet-day editions, without claiming no threats exist.
+Private sidecars provide candidate selections, typed chronology, fingerprints, and a candidate narrative only. Every original record version and the batch digest must match independently recollected public evidence; selection validation runs again. An inadmissible batch is withheld as a whole. No platform context, private event UUID, model address, or run ID is copied. Prior accepted editions remain. Failed/degraded reports are not promoted. Complete zero-record runs become explicit quiet-day editions, without claiming no threats exist.
 
 The backend creates private MISP events even for public intelligence. Those events are not exported. Public CIRCL event URLs identify upstream public evidence and are intentional citations. All source assertions still require analyst review.
 
@@ -59,6 +63,6 @@ Export/publish failure returns nonzero to the service journal and retry mechanis
 
 `website/analytics.js` deterministically deduplicates KEV CVE values and IOC type/value pairs. New IOCs use the earliest collection time across all matching observations. Advisories/24h use source publication time and exclude future dates. Charts zero-fill UTC days and count unique catalog additions over seven or thirty days. No chart number or relationship is model-generated. Catalog inclusion is not relabeled as CVSS severity.
 
-The frontend is one page: a multi-finding daily brief, compact statistics/trends, grouped editorial stories, expandable CVEs/archive, and optional catalog context. The former source/status page and sidebar were removed; operational details remain here. Global search includes STIX names/IDs. Dialogs show original evidence and resolved catalog relationships. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Charts include accessible labels and data tables.
+The frontend is one page: a topic-based narrative daily brief, grouped editorial stories, compact statistics/trends, expandable CVEs/archive, and optional catalog context. The former source/status page and sidebar were removed; operational details remain here. Global search includes STIX names/IDs. Dialogs show original evidence and resolved catalog relationships. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Charts include accessible labels and data tables.
 
 Run Python tests, Node calculation tests, the infrastructure validator, synthetic private reporting, and empty/demo builds. Browser acceptance uses real public data and prior validated briefs at widths 390, 768, and 1440: four primary views, no horizontal overflow or browser/CSP errors, metric agreement, chart/category filters, report selection, CVE filtering, search, and dialog Escape handling. Screenshots contain only public data. Browser tooling is a development aid, not a runtime dependency.

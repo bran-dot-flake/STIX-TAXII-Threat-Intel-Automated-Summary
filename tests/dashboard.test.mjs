@@ -39,3 +39,11 @@ test('daily digest selects distinct supported observations and catalog search in
   assert.deepEqual(briefDigest({mode:'quiet-day',items:[]}),[]);
   assert(matches({name:'Command and Scripting Interpreter',external_id:'T1059',type:'attack-pattern'},'t1059'));
 });
+
+test('campaign digest groups by original event and keeps unrelated CVEs separate',()=>{
+  const event='https://www.circl.lu/doc/misp/feed-osint/00000000-0000-4000-8000-000000000001.json';
+  const items=[...Array.from({length:3},(_,i)=>({id:`c${i}`,kind:'vulnerability',value:`CVE-2026-${i}`,source_url:'https://www.cisa.gov/catalog'})),...Array.from({length:5},(_,i)=>({id:`i${i}`,kind:'sha256',value:`hash${i}`,source_url:event,title:'Campaign'}))];
+  const topics=briefDigest({items});assert.equal(topics.length,4);assert.equal(topics.at(-1).records.length,5);
+  items.at(-1).source_url=event.replace('000001.json','000002.json');
+  assert.equal(briefDigest({items:items.slice(3)}).length,2);
+});

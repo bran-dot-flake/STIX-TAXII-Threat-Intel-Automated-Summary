@@ -82,7 +82,9 @@ def safe(text):
     return re.sub(r"([\\`*_{}\[\]()#+.!|>~-])", r"\\\1", html.escape(text, quote=False))
 
 
-def render(records, selection, store, mode, contexts, synthetic=False):
+def render(records, selection, store, mode, contexts, synthetic=False, briefing=None):
+    if briefing is not None:
+        return render_grouped(records, selection, store, mode, contexts, synthetic, briefing)
     lookup = {r.key: r for r in records}
     queued = max(0, store.pending_count("reported_version") - len(records))
     lines = ["# Daily intelligence brief", "", f"Generated: {utcnow()}", "",
@@ -144,6 +146,57 @@ def atomic_write(path: Path, content):
         handle.flush()
         os.fsync(handle.fileno())
     temporary.replace(path)
+
+
+def render_grouped(records, selection, store, mode, contexts, synthetic, briefing):
+    from .narrative import ledger, validate_narrative
+    from .topics import group_topics
+    narrative=validate_narrative(briefing['narrative'],briefing)
+    book=ledger(briefing)
+    plan=narrative['plan']
+    lookup={r.key:r for r in records}
+    excerpts={item['record_id']:item['excerpt'] for item in selection}
+    topics={t['id']:t for t in group_topics(briefing['observations'],briefing['generated_at'])}
+    lines=['# Daily intelligence brief','',f"Generated: {briefing['generated_at']}",'',
+           '**SYNTHETIC DEMONSTRATION — not operational intelligence.**' if synthetic else '**Private lab intelligence — review before operational use.**','',
+           f'Report mode: {mode}. Records: {len(records)}.',
+           f"Narrative: {narrative['mode']}. Window: {narrative['window_start']} to {narrative['window_end']}.",'',
+           '## Executive overview','', ' '.join(safe(c['text']) for c in plan['overview']),'']
+    descriptions={t['id']:t for t in book['topics']}
+    rendered=set()
+    for topic in plan['topics']:
+        key=topic['topic_id']; rendered.add(key)
+        lines += [f"## {safe(topic['headline'])}",'',
+                  ' '.join(safe(c['text']) for c in topic['summary']), '']
+        if topic['why_it_matters']:lines += [safe(topic['why_it_matters']['text']),'']
+        lines += [safe(book['facts'][descriptions[key]['timing_fact']]['texts'][0]),'']
+        lines += technical_evidence(topics[key],lookup,excerpts,store,contexts)
+    for key,topic in topics.items():
+        if key not in rendered:
+            lines += ['## Source metadata requires review','',*technical_evidence(topic,lookup,excerpts,store,contexts)]
+    actions=sorted({k for t in book['topics'] if not t['withheld'] for k in t['action_facts']})
+    if actions:
+        lines += ['## Source defensive considerations','']
+        for key in actions:
+            fact=book['facts'][key]
+            lines += [f"- {safe(fact['texts'][0])} [Evidence {', '.join(fact['evidence_ids'])}]"]
+    lines += ['', 'Claim formulations are checked against source-derived facts; source assertions still require analyst judgment.', '']
+    return '\n'.join(lines)
+
+
+def technical_evidence(topic,lookup,excerpts,store,contexts):
+    lines=['<details><summary>Technical evidence</summary>','']
+    for key in topic['evidence_ids']:
+        r=lookup[key]; first,last=store.seen(r); context=contexts.get(key,{})
+        value=r.value.replace('https://','hxxps://').replace('http://','hxxp://').replace('.','[.]')
+        lines += [f'### Evidence {key}','',f'- {safe(r.kind)}: {safe(value)}',
+                  f'- Source excerpt: {safe(excerpts.get(key,r.title))}',
+                  f'- Source description: {safe(r.description)}',
+                  f'- Published / catalog-added: {safe(r.published_at or "unknown")}; source modified: {safe(r.modified_at or "unknown")}',
+                  f'- First collected: {safe(first)}; last observed: {safe(last)}',
+                  f'- Source: [{safe(r.source)}]({quote(r.source_url,safe="/:?=&%")})',
+                  f"- MISP read-back: {bool(context.get('misp',{}).get('verified'))}; OpenCTI exact match with MISP provenance: {bool(context.get('opencti',{}).get('verified_sync_ids'))}",'']
+    return lines+['</details>','']
 
 
 def evidence_digest(records):

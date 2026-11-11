@@ -11,6 +11,9 @@ from .http import Http
 from .platforms import Misp, OpenCti
 from .report import atomic_write, evidence_digest, llm_select, render
 from .store import Store
+from .model import utcnow
+from .topics import observation, select_records
+from .narrative import compose, make_narrative
 
 
 def load_env(path):
@@ -108,7 +111,7 @@ def execute(args):
                 store.finish_run(run_id, "misp-synchronized", details)
                 print(json.dumps(details))
                 return 0
-            selected = store.pending("reported_version", args.max_records)
+            selected = select_records(store.pending("reported_version", 500), store, utcnow(), args.max_records)
             contexts = {}
             prepared_path = root / "prepared.json"
             if args.render_prepared:
@@ -116,6 +119,8 @@ def execute(args):
                 age = datetime.now(timezone.utc) - datetime.fromisoformat(prepared["prepared_at"])
                 if not 0 <= age.total_seconds() <= 86400:
                     raise ValueError("Prepared evidence has expired")
+                pending = {r.key:r for r in store.pending("reported_version", 500)}
+                selected = [pending[meta['id']] for meta in prepared['records']]
                 if prepared["records"] != [{"id": r.key, "version": r.version} for r in selected]:
                     raise ValueError("Prepared evidence changed; prepare a new snapshot")
                 contexts = prepared["platform_context"]
@@ -172,12 +177,23 @@ def execute(args):
                     status, report_mode = "degraded", "DEGRADED: Ollama failed validation or inference; deterministic evidence fallback"
                     details["llm_error_type"] = type(exc).__name__
             stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S.%fZ")
+            briefing = {'generated_at':utcnow(), 'items':[],
+                        'observations':[observation(r,store.chronology(r)) for r in selected]}
+            briefing['narrative'] = make_narrative(briefing)
+            if status=='complete' and not args.demo and not args.no_llm and selected and os.environ.get('TI_NARRATIVE_ENABLED','true').lower()=='true':
+                try:
+                    briefing['narrative'] = compose(Http(timeout=600,retries=0),os.environ.get('OLLAMA_URL','http://127.0.0.1:11434'),required('OLLAMA_MODEL'),briefing)
+                except (RuntimeError,ValueError,KeyError,TypeError) as exc:
+                    # Invalid prose is never published. The independently derived
+                    # fact-cited fallback still accompanies the exact evidence layer.
+                    details['narrative_error_type'] = type(exc).__name__
             output = args.reports_dir / mode / f"{stamp}-run-{run_id}.md"
-            atomic_write(output, render(selected, selection, store, report_mode, contexts, args.demo))
+            atomic_write(output, render(selected, selection, store, report_mode, contexts, args.demo, briefing))
             # Sidecar allows independent verification and never includes API credentials.
             atomic_write(output.with_suffix(".json"), json.dumps({"run_id": run_id, "status": status,
                 "evidence_digest": evidence_digest(selected), "records": [{"id": r.key, "version": r.version} for r in selected],
-                "selection": selection, "platform_context": contexts}, indent=2))
+                "selection": selection, "platform_context": contexts,
+                'observations':briefing['observations'], 'narrative':briefing['narrative']}, indent=2))
             # Failed LLM runs keep records pending so the next run retries the brief.
             if status == "complete":
                 for r in selected:
