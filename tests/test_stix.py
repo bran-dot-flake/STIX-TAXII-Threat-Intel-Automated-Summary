@@ -423,11 +423,27 @@ class StixTests(unittest.TestCase):
             ) as invoke,
             patch("builtins.print"),
         ):
-            self.assertEqual(daily_staged.main(), 0)
+            self.assertEqual(daily_staged.main(["--manage-project"]), 0)
             self.assertEqual(invoke.call_count, 3)
             self.assertEqual(
                 invoke.call_args.args[0][1:], ["scripts/export_publication.py", "--publish"]
             )
+
+    def test_scheduler_help_has_no_collection_or_environment_side_effects(self):
+        import io
+        from contextlib import redirect_stdout
+        from scripts import daily_staged
+
+        with (
+            patch.object(daily_staged, "invoke") as invoke,
+            patch.object(daily_staged, "load_env") as load_env,
+            redirect_stdout(io.StringIO()),
+        ):
+            with self.assertRaises(SystemExit) as result:
+                daily_staged.main(["--help"])
+            self.assertEqual(result.exception.code, 0)
+            invoke.assert_not_called()
+            load_env.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -27,12 +27,17 @@ def verify_ownership():
             raise RuntimeError("Project-name conflict: found a container not owned by ti-brief")
 
 
-def orchestrate():
+def parse_args(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--manage-project", action="store_true", help="Explicit consent to start/stop only ti-lab containers")
-    args = p.parse_args()
+    args = p.parse_args(argv)
     if not args.manage_project:
         p.error("Requires explicit --manage-project after lab deployment approval")
+    return args
+
+
+def orchestrate(args=None):
+    args = args or parse_args()
     load_env(Path(".env"))
     for key in ("MISP_API_KEY", "OPENCTI_TOKEN", "OLLAMA_MODEL"):
         required(key)
@@ -59,7 +64,8 @@ def orchestrate():
     return 0
 
 
-def main():
+def main(argv=None):
+    args = parse_args(argv)
     load_env(Path('.env'))
     if os.environ.get('TI_TAXII_ENABLED')=='true':
         try:
@@ -69,7 +75,7 @@ def main():
     # Public collection is independent: preserve the website even if a local
     # integration fails. The existing report exit status remains visible.
     try:
-        return orchestrate()
+        return orchestrate(args)
     finally:
         if os.environ.get('TI_STIX_OPENCTI_ENABLED')=='true':
             try:
