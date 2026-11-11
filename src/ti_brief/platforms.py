@@ -51,17 +51,50 @@ class OpenCti:
     def __init__(self, http, url, token):
         self.http, self.url, self.headers = http, url.rstrip("/"), {"Authorization": "Bearer " + token}
 
+    def sync_vulnerability(self, record, misp_reference_url):
+        """The v7 MISP connector does not convert standalone CVE attributes.
+
+        Use the supported API for this entity type only; IOC ingestion stays with
+        the connector. OpenCTI's native add/upsert operations provide stable IDs.
+        """
+        if record.kind != "vulnerability":
+            raise ValueError("The CVE bridge accepts vulnerability records only")
+
+        def add(field, input_type, value):
+            query = f"mutation Add($input: {input_type}!) {{ {field}(input: $input) {{ id }} }}"
+            result = self.http.json(self.url + "/graphql", {"query": query, "variables": {"input": value}}, self.headers)
+            node = result.get("data", {}).get(field)
+            if result.get("errors") or not isinstance(node, dict) or not node.get("id"):
+                raise RemoteError("OpenCTI CVE bridge mutation failed")
+            return node["id"]
+
+        refs = []
+        for source, external_id, url in (
+            ("MISP", event_uuid(record), misp_reference_url.rstrip("/") + "/events/view/" + event_uuid(record)),
+            (record.source, record.value, record.source_url),
+        ):
+            refs.append(add("externalReferenceAdd", "ExternalReferenceAddInput", {
+                "source_name": source, "external_id": external_id, "url": url, "update": True}))
+        value = {"name": record.value, "description": record.title + "\n\n" + record.description +
+                 f"\n\nSource published/catalog-added: {record.published_at or 'unknown'}. Source modified: {record.modified_at or 'unknown'}.",
+                 "confidence": 50, "externalReferences": refs, "update": True}
+        if record.source == "CISA KEV":
+            value["x_opencti_cisa_kev"] = True
+        return add("vulnerabilityAdd", "VulnerabilityAddInput", value)
+
     def context(self, record):
         # Search candidates are operational context, never asserted as relationships.
-        query = """query BriefContext($search: String!) {
-          stixDomainObjects(first: 5, search: $search) {
+        query = """query BriefContext($filters: FilterGroup, $types: [String]) {
+          stixDomainObjects(first: 5, filters: $filters, types: $types) {
             edges { node { id entity_type ... on Vulnerability { name }
               ... on Indicator { name pattern } ... on Report { name }
               externalReferences(first: 10) { edges { node { source_name external_id url } } }
             } }
           }
         }"""
-        result = self.http.json(self.url + "/graphql", {"query": query, "variables": {"search": record.value}}, self.headers)
+        filters = {"mode": "and", "filters": [{"key": ["name"], "values": [record.value], "operator": "eq", "mode": "or"}], "filterGroups": []}
+        variables = {"filters": filters, "types": ["Vulnerability" if record.kind == "vulnerability" else "Indicator"]}
+        result = self.http.json(self.url + "/graphql", {"query": query, "variables": variables}, self.headers)
         if result.get("errors") or not isinstance(result.get("data", {}).get("stixDomainObjects", {}).get("edges"), list):
             raise RemoteError("OpenCTI context query failed")
         nodes = [edge["node"] for edge in result["data"]["stixDomainObjects"]["edges"]]
@@ -69,7 +102,10 @@ class OpenCti:
                  "domain": "domain-name:value", "url": "url:value", "md5": "file:hashes.'MD5'",
                  "sha1": "file:hashes.'SHA-1'", "sha256": "file:hashes.'SHA-256'"}
         value = record.value.replace("\\", "\\\\").replace("'", "\\'")
-        expected = rf"\[\s*{re.escape(paths.get(record.kind, ''))}\s*=\s*'{re.escape(value)}'\s*\]"
+        path_pattern = re.escape(paths.get(record.kind, ""))
+        if record.kind == "md5":
+            path_pattern = r"file:hashes\.(?:MD5|'MD5')"
+        expected = rf"\[\s*{path_pattern}\s*=\s*'{re.escape(value)}'\s*\]"
         verified = []
         for node in nodes:
             exact = (record.kind == "vulnerability" and node.get("entity_type") == "Vulnerability" and node.get("name") == record.value) or (

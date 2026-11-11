@@ -4,7 +4,7 @@ All commands run from the repository root in `/home/vboxuser/Threat-Intelligence
 
 ## Approval boundary
 
-The user's instruction explicitly requires approval before administrative changes. None have been performed. The proposed first administrative step is to install Ubuntu's `docker.io` and `docker-compose-v2` packages and enable/start Docker. Review `apt-get --simulate install --no-install-recommends docker.io docker-compose-v2` first; do not accept removals or unrelated upgrades. No third-party apt repository or shell-piped installer is needed.
+The user's instruction explicitly requires approval before administrative changes. The owner approved installation of Ubuntu's `docker.io`, `docker-compose-v2`, `containerd` and `runc`, then Docker startup, and separately approved `vboxuser` joining the Docker group. These steps are complete. Installing the daily system timer is a separate administrative action. For a fresh deployment, review `apt-get --simulate install --no-install-recommends docker.io docker-compose-v2` first; do not accept removals or unrelated upgrades. No third-party apt repository or shell-piped installer is needed.
 
 After explicit approval, an operator can use:
 
@@ -14,7 +14,7 @@ sudo apt-get install --no-install-recommends docker.io docker-compose-v2
 sudo systemctl enable --now docker
 ```
 
-Adding `vboxuser` to the `docker` group would grant root-equivalent daemon access and is a separate administrative choice. Do not silently add the group membership. Until that is approved, run manual Docker commands with authorized `sudo`; leave the user timer disabled. The staged scheduler requires noninteractive Docker access and must be enabled only after that choice is settled. Do not alter firewall rules, VirtualBox networking, kernel settings, swap or Ollama bindings as part of package installation.
+Docker-group membership grants root-equivalent daemon access; obtain explicit approval before adding it on another machine. In this deployment, new SSH sessions have the approved access. The existing user service manager retained its old group list, so scheduling uses a system unit with `User=vboxuser` and `SupplementaryGroups=docker`; no desktop-session restart or user lingering is needed. Do not alter firewall rules, VirtualBox networking, kernel settings, swap or Ollama bindings as part of package installation.
 
 ## Configuration and inspection
 
@@ -43,7 +43,14 @@ From Windows, open a separate terminal with:
 ssh -N -L 8081:127.0.0.1:8081 -L 8080:127.0.0.1:8080 spare
 ```
 
-Visit MISP at `http://localhost:8081`; credentials remain in the private VM `.env`. Verify login, API `/servers/getVersion`, event creation and read-back using an isolated synthetic test event before a live import. Container TCP health alone is insufficient. Confirm named-volume persistence across a stop/start. Review `docker inspect` for `OOMKilled` and restart counts without dumping container environment variables. Measure resources using the read-only monitor. Stop MISP if needed with the same Compose file/profile and `stop`; never use `down -v`.
+Visit MISP at `http://localhost:8081`; credentials remain in the private VM `.env`. Verify API access, a private synthetic event and then a bounded live batch:
+
+```sh
+PYTHONPATH=src python3 scripts/verify_platforms.py --misp --write-synthetic
+PYTHONPATH=src python3 -m ti_brief.cli --sync-misp-only --max-records 2 --max-sync 8
+```
+
+These checks passed on the target VM. Container TCP health alone is insufficient. Confirm named-volume persistence across a stop/start. Review `docker inspect` for `OOMKilled` and restart counts without dumping container environment variables; `PYTHONPATH=src python3 scripts/container_diagnostics.py CONTAINER` redacts configured secrets from owned-container diagnostics. Measure resources using the read-only monitor. Stop MISP if needed with the same Compose file/profile and `stop`; never use `down -v`.
 
 ## Second pilot: OpenCTI only
 
@@ -55,7 +62,7 @@ docker compose --env-file .env -f deploy/compose.json --profile opencti pull
 docker compose --env-file .env -f deploy/compose.json --profile opencti up -d --no-build --wait --wait-timeout 900
 ```
 
-Verify web login at `http://localhost:8080`, authenticated GraphQL `{ me { id } }`, search health and persistent storage. Confirm the installed GraphQL schema accepts the context query in `src/ti_brief/platforms.py`; the mock API tests do not validate a live schema. One worker is deployed. No optional XTM manager, Docker socket mount, ATT&CK bulk seed, enrichment connectors or mail relay is started.
+Verify the UI at `http://localhost:8080`, authenticated GraphQL `{ me { id } }`, search health and persistent storage. `PYTHONPATH=src python3 scripts/verify_platforms.py --opencti` passed against the live platform, including its context query. Context lookup uses exact name/type filters, not broad search candidates. One worker is deployed. No optional XTM manager, Docker socket mount, ATT&CK bulk seed, enrichment connectors or mail relay is started.
 
 ## Combined integration pilot
 
@@ -68,9 +75,9 @@ docker compose --env-file .env -f deploy/compose.json --profile misp --profile o
 PYTHONPATH=src python3 -m ti_brief.cli --prepare-only --max-records 2 --sync-timeout 900
 ```
 
-The default feeds are CISA KEV and a small CIRCL OSINT sample. Events have deterministic UUIDs, organization-only distribution, `published=false` and `to_ids=false`; no blocking or external event sharing occurs. The MISP connector is deliberately configured to import unpublished private events, without attachments or guessed threats. It is the sole MISP-to-OpenCTI writer; there is no circular synchronization.
+The default feeds are CISA KEV and a small CIRCL OSINT sample. Events have deterministic UUIDs, organization-only distribution, `published=false` and `to_ids=false`; no blocking or external event sharing occurs. The MISP connector imports unpublished private events, without attachments or guessed threats. Its search batch is 100, above the pipeline's default 50-event write bound. Strict preparation can requeue a missed IOC through its existing MISP UUID. The deployed connector omits standalone vulnerability attributes, so the pipeline's CVE-only API bridge upserts those entities with MISP and original-source references after MISP read-back. Each entity type has a single writer; there is no circular synchronization.
 
-The prepare command writes at most 50 pending MISP records, reads back expected attributes, retrieves OpenCTI search candidates, and in strict mode requires an exact CVE/indicator match with an external reference containing the MISP event UUID. Verify this matches the actual connector's provenance representation. A search candidate or a running connector is not successful synchronization. If actual connector output uses another documented reference shape, update the verifier with a representative captured fixture and tests before enabling scheduling. Verify a repeated run creates no duplicates, a source change updates the existing event, and objects are queryable in the UI. The initial adapters do not invent actor/campaign relationships or ATT&CK techniques.
+The prepare command writes at most 50 pending MISP records, reads back expected attributes, upserts pending CVEs, and in strict mode requires an exact CVE/indicator match with an external reference containing the MISP event UUID. This passed for all 41 initial observations across CVEs, IPs, domains, URLs and hashes. A search candidate or a running connector is insufficient. The native MD5 pattern can omit quotes around its algorithm name; this verified form is covered by a regression test. Repeated writes preserve UUIDs and native upsert identities. The initial adapters do not invent actor/campaign relationships or ATT&CK techniques.
 
 After a successful snapshot, stop the owned platform containers before inference, then:
 
@@ -80,23 +87,29 @@ PYTHONPATH=src python3 -m ti_brief.cli --render-prepared --max-records 2
 
 The same `--max-records` bound must be used for prepare and render. Inspect the Markdown and JSON provenance, verify each cited source and timestamp, confirm no unsupported claims, and ensure Ollama `/api/ps` no longer lists the model after completion. A marked fallback is a degraded run, not acceptance. `scripts/smoke_ollama.py` independently tests real CISA + Ollama without claiming platform integration; it writes only `data/smoke` and `reports/smoke`.
 
-## Daily scheduling, after acceptance
+## Daily scheduling, after acceptance and administrative approval
 
-Once Docker access, real integration and staged inference are validated, an authorized user can install the reviewed user units:
+First run the complete staged job manually:
 
 ```sh
-mkdir -p ~/.config/systemd/user
-cp deploy/ti-brief.service deploy/ti-brief.timer ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user start ti-brief.service
-systemctl --user enable --now ti-brief.timer
-systemctl --user list-timers ti-brief.timer
-journalctl --user -u ti-brief.service --since today
+PYTHONPATH=src python3 scripts/daily_staged.py --manage-project
+systemd-analyze verify deploy/ti-brief.service deploy/ti-brief.timer
 ```
 
-The unit references the inspected project directory. It invokes the explicit opt-in staged orchestrator, not an all-services-plus-LLM run. Containers must have the managed ownership label. The timer runs daily at 08:00 UTC, adds up to five minutes of jitter and catches up missed executions. A user service normally requires an active login; `loginctl enable-linger vboxuser` is an additional administrative change needing approval for unattended operation after logout/boot. The timer is not enabled by repository checkout or CI.
+After explicit approval, install the reviewed **system** units. The service executes as `vboxuser`, with the approved Docker group. Its fixed working directory matches this inspected deployment; change `User`, `Group`, and `WorkingDirectory` intentionally for another machine.
 
-Exit 0 means a completed report, 1 means a feed/platform/operational failure, and 2 means degraded LLM reporting. Private SQLite `runs` records hold status, counts and elapsed time; monitor JSONL holds host/guest/container resource observations. Review failures in the journal. A hard interruption can leave a historical `running` row; the OS lock releases automatically and the next run can reconcile unfinished work. Preserve failed runs for diagnosis. `--no-llm` is an explicit deterministic fallback, not an LLM success.
+```sh
+sudo install -m 0644 deploy/ti-brief.service deploy/ti-brief.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now ti-brief.timer
+sudo systemctl start --no-block ti-brief.service
+systemctl list-timers ti-brief.timer
+journalctl -u ti-brief.service --since today
+```
+
+The unit invokes the opt-in staged orchestrator. Containers must have the managed ownership label. The timer runs daily at 08:00 UTC, adds up to five minutes of jitter and catches up missed executions independently of interactive logins. Failures retry after 15 minutes, bounded to three starts in six hours. `TI_RESIDENT_PROFILE=misp` restores only MISP after successful inference; `all` restores both UIs when the combined resource gate passes. The recovered target uses `all` following its measured combined pilot. The timer is not enabled by checkout or CI.
+
+Exit 0 means a completed report, 1 means a feed/platform/operational failure, and 2 means degraded LLM reporting. Private SQLite `runs` records hold status, counts, elapsed time, guest memory/swap/load observations and a redacted model error type on failure. Monitor JSONL records guest/container resource samples. Review failures in the journal. A hard interruption can leave a historical `running` row; the OS lock releases automatically and the next run can reconcile unfinished work. Preserve failed runs for diagnosis. `--no-llm` is an explicit deterministic fallback, not an LLM success.
 
 ## Backup and recovery
 

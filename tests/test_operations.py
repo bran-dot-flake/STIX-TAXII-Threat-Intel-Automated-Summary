@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -35,7 +36,7 @@ class OperationTests(unittest.TestCase):
 
     def test_preflight_refuses_low_memory_missing_profiles_and_ports(self):
         self.assertFalse(check(["misp"], 4000, 30, 1048576)["errors"])
-        self.assertEqual(check(["misp", "opencti", "integration"], 8000, 30, 1048576)["container_caps_mib"], 6208)
+        self.assertEqual(check(["misp", "opencti", "integration"], 8000, 30, 1048576)["container_caps_mib"], 6464)
         for profiles, memory, disk, maps, ports in [(["misp"], 2000, 30, 1048576, ()),
             (["integration"], 8000, 30, 1048576, ()), (["opencti"], 8000, 20, 1048576, ()),
             (["opencti"], 8000, 30, 1000, ()), (["misp"], 8000, 30, 1048576, (8081,))]:
@@ -57,6 +58,18 @@ class OperationTests(unittest.TestCase):
             self.assertEqual(OpenCti(Http(), "http://localhost", "token").context(r)["verified_sync_ids"], ["verified"])
             node["name"] = "Different CVE"
             self.assertEqual(OpenCti(Http(), "http://localhost", "token").context(r)["verified_sync_ids"], [])
+
+    def test_actual_connector_md5_pattern_and_exact_query(self):
+        r = replace(demo_records()[0], kind="md5", value="a" * 32)
+        node = {"id": "verified-md5", "entity_type": "Indicator", "name": r.value,
+                "pattern": "[file:hashes.MD5 = '" + r.value + "']",
+                "externalReferences": {"edges": [{"node": {"external_id": event_uuid(r)}}]}}
+        result = {"data": {"stixDomainObjects": {"edges": [{"node": node}]}}}
+        with patch.object(Http, "json", return_value=result) as request:
+            self.assertEqual(OpenCti(Http(), "http://localhost", "token").context(r)["verified_sync_ids"], ["verified-md5"])
+            variables = request.call_args.args[1]["variables"]
+            self.assertEqual(variables["types"], ["Indicator"])
+            self.assertEqual(variables["filters"]["filters"][0]["values"], [r.value])
 
     def test_prepare_render_is_offline_and_changed_snapshot_fails(self):
         with tempfile.TemporaryDirectory() as d:

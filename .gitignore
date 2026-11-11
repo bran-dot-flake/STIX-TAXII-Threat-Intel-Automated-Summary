@@ -4,6 +4,8 @@
 .venv/
 .test-tmp/
 source.tar.gz
+source-*.tar.gz
+/work/
 __pycache__/
 *.py[cod]
 *.egg-info/

@@ -1,10 +1,11 @@
 import importlib.util
 import json
 import os
+import sqlite3
 import tempfile
 import threading
 import unittest
-from dataclasses import replace
+from dataclasses import asdict, replace
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -43,6 +44,7 @@ class StateTests(unittest.TestCase):
         chosen = self.store.pending("reported_version", 1)
         self.assertEqual(len(chosen), 1)
         self.assertEqual(len(self.store.pending("reported_version", 10)), 2)
+        self.assertEqual(self.store.pending_count("reported_version"), 2)
         self.store.checkpoint(chosen[0], "reported_version")
         self.assertEqual(len(self.store.pending("reported_version", 10)), 1)
 
@@ -65,6 +67,23 @@ class StateTests(unittest.TestCase):
                 with run_lock(Path(self.tmp.name) / "run.lock"):
                     pass
 
+    def test_legacy_state_migration_preserves_existing_checkpoints(self):
+        path = Path(self.tmp.name) / "legacy.sqlite3"
+        old = sqlite3.connect(path)
+        old.execute("CREATE TABLE records (key TEXT PRIMARY KEY,version TEXT,payload TEXT,first_seen TEXT,last_seen TEXT,misp_version TEXT,misp_uuid TEXT,reported_version TEXT)")
+        r = self.record
+        old.execute("INSERT INTO records VALUES(?,?,?,?,?,?,?,?)", (r.key, r.version, json.dumps(asdict(r)), "first", "last", r.version, event_uuid(r), r.version))
+        old.commit()
+        old.close()
+        migrated = Store(path)
+        try:
+            self.assertEqual(migrated.pending("misp_version", 8), [])
+            self.assertEqual(migrated.pending("reported_version", 8), [])
+            self.assertEqual(migrated.pending("opencti_version", 8), [r])
+            self.assertEqual(migrated.pending_count("reported_version"), 0)
+        finally:
+            migrated.close()
+
 
 class ValidationTests(unittest.TestCase):
     def test_normalization(self):
@@ -85,6 +104,8 @@ class ValidationTests(unittest.TestCase):
                       {"items": [good["items"][0]] * 2}, {"items": [], "system": "override"}):
             with self.assertRaises(ValueError):
                 validate_selection(value, {r.key: r})
+        with self.assertRaises(ValueError):
+            validate_selection({"items": []}, {r.key: r})
 
     def test_kev_dates_are_not_exploitation_dates(self):
         rows = {"vulnerabilities": [{"cveID": "CVE-2026-1234", "dateAdded": "2026-11-09", "vulnerabilityName": "Example", "shortDescription": "Evidence", "requiredAction": "Apply updates"},
@@ -160,7 +181,12 @@ class ApiTests(unittest.TestCase):
                     cls.events[value["Event"]["uuid"]] = value
                     result = value
                 elif self.path == "/graphql":
-                    result = {"data": {"stixDomainObjects": {"edges": [{"node": {"id": "known", "entity_type": "Vulnerability", "name": record.value}}]}}}
+                    if "externalReferenceAdd" in value["query"]:
+                        result = {"data": {"externalReferenceAdd": {"id": "reference-id"}}}
+                    elif "vulnerabilityAdd" in value["query"]:
+                        result = {"data": {"vulnerabilityAdd": {"id": "vulnerability-id"}}}
+                    else:
+                        result = {"data": {"stixDomainObjects": {"edges": [{"node": {"id": "known", "entity_type": "Vulnerability", "name": record.value}}]}}}
                 elif self.path == "/api/chat":
                     result = {"done": True, "message": {"content": json.dumps({"items": [{"record_id": record.key, "excerpt": record.title}]})}}
                 else:
@@ -198,6 +224,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(request["keep_alive"], 0)
         self.assertNotIn("tools", request)
 
+    def test_cve_bridge_uses_native_upsert_and_two_evidence_references(self):
+        r = demo_records()[0]
+        cti = OpenCti(Http(), self.url, "token")
+        self.assertEqual(cti.sync_vulnerability(r, "http://localhost:8081"), "vulnerability-id")
+        self.assertEqual(len(self.requests[-1][1]["variables"]["input"]["externalReferences"]), 2)
+        self.assertTrue(self.requests[-1][1]["variables"]["input"]["update"])
+        with self.assertRaises(ValueError):
+            cti.sync_vulnerability(demo_records()[1], "http://localhost:8081")
+
     def test_http_blocks_redirects_oversize_and_secret_errors(self):
         for path, size in [("/redirect", 1000), ("/large", 100), ("/denied?token=SECRET", 1000)]:
             with self.assertRaises(RemoteError) as captured:
@@ -226,6 +261,16 @@ class ApiTests(unittest.TestCase):
             "OPENCTI_TOKEN": "private", "OLLAMA_MODEL": "local"}):
             self.assertEqual(main(["--data-dir", d, "--reports-dir", d + "/reports", "--env", d + "/absent"]), 2)
             store = Store(Path(d) / "live/state.sqlite3")
+            self.assertEqual(len(store.pending("reported_version", 8)), 1)
+            store.close()
+
+    def test_misp_only_stage_keeps_reporting_queue_without_opencti(self):
+        r = demo_records()[0]
+        with tempfile.TemporaryDirectory() as d, patch("ti_brief.cli.collect", return_value=[r]), patch.dict(os.environ, {
+            "MISP_URL": self.url, "MISP_API_KEY": "private"}), patch("ti_brief.cli.OpenCti", side_effect=AssertionError("No OpenCTI in this stage")):
+            self.assertEqual(main(["--sync-misp-only", "--data-dir", d, "--env", d + "/absent"]), 0)
+            store = Store(Path(d) / "live/state.sqlite3")
+            self.assertEqual(store.pending("misp_version", 8), [])
             self.assertEqual(len(store.pending("reported_version", 8)), 1)
             store.close()
 

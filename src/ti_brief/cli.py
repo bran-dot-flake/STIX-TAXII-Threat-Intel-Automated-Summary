@@ -72,6 +72,15 @@ def resource_observation():
             "load_1_5_15": os.getloadavg()}
 
 
+def synchronize_misp(store, misp, limit):
+    pending = store.pending("misp_version", limit)
+    for record in pending:
+        uid = misp.sync(record)
+        misp.read(record)
+        store.checkpoint(record, "misp_version", uid)
+    return len(pending)
+
+
 def execute(args):
     if not args.demo:
         load_env(args.env)
@@ -92,6 +101,13 @@ def execute(args):
                 store.finish_run(run_id, "collected", details)
                 print(json.dumps(details))
                 return 0
+            if args.sync_misp_only:
+                misp = Misp(http, os.environ.get("MISP_URL", "http://127.0.0.1:8081"), required("MISP_API_KEY"))
+                details.update(status="misp-synchronized", synchronized=synchronize_misp(store, misp, args.max_sync),
+                    elapsed_seconds=round(time.monotonic() - started, 2), resources_at_end=resource_observation())
+                store.finish_run(run_id, "misp-synchronized", details)
+                print(json.dumps(details))
+                return 0
             selected = store.pending("reported_version", args.max_records)
             contexts = {}
             prepared_path = root / "prepared.json"
@@ -106,18 +122,28 @@ def execute(args):
             if not args.demo and not args.render_prepared:
                 misp = Misp(http, os.environ.get("MISP_URL", "http://127.0.0.1:8081"), required("MISP_API_KEY"))
                 opencti = OpenCti(http, os.environ.get("OPENCTI_URL", "http://127.0.0.1:8080"), required("OPENCTI_TOKEN"))
-                for record in store.pending("misp_version", args.max_sync):
-                    uid = misp.sync(record)
-                    misp.read(record)
-                    store.checkpoint(record, "misp_version", uid)
+                synchronize_misp(store, misp, args.max_sync)
+                bridged = 0
+                for record in store.pending("opencti_version", args.max_sync):
+                    if record.kind == "vulnerability":
+                        misp.read(record)
+                        opencti.sync_vulnerability(record, os.environ.get("BASE_URL", "http://localhost:8081"))
+                        store.checkpoint(record, "opencti_version")
+                        bridged += 1
+                details["cves_bridged"] = bridged
                 sync_deadline = time.monotonic() + args.sync_timeout
                 for record in selected:
                     misp_context = misp.read(record)
                     deadline = sync_deadline
+                    requeued = False
                     while True:
                         cti_context = opencti.context(record)
                         if not args.sync_timeout or cti_context["verified_sync_ids"]:
                             break
+                        if record.kind != "vulnerability" and not requeued:
+                            # Reconcile a timestamp-pagination miss with the same UUID.
+                            misp.sync(record)
+                            requeued = True
                         if time.monotonic() >= deadline:
                             raise RuntimeError("OpenCTI synchronization not verified within deadline")
                         time.sleep(min(10, max(0, deadline - time.monotonic())))
@@ -142,8 +168,9 @@ def execute(args):
                 try:
                     selection = llm_select(Http(timeout=600, retries=0), os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434"), required("OLLAMA_MODEL"), selected)
                     report_mode = "Ollama selected, validated source excerpts"
-                except (RuntimeError, ValueError, KeyError, TypeError):
+                except (RuntimeError, ValueError, KeyError, TypeError) as exc:
                     status, report_mode = "degraded", "DEGRADED: Ollama failed validation or inference; deterministic evidence fallback"
+                    details["llm_error_type"] = type(exc).__name__
             stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S.%fZ")
             output = args.reports_dir / mode / f"{stamp}-run-{run_id}.md"
             atomic_write(output, render(selected, selection, store, report_mode, contexts, args.demo))
@@ -156,7 +183,7 @@ def execute(args):
                 for r in selected:
                     store.checkpoint(r, "reported_version")
             details.update(report=str(output), status=status, reported=len(selected),
-                           remaining=len(store.pending("reported_version", 1_000_000)),
+                           remaining=store.pending_count("reported_version"),
                            elapsed_seconds=round(time.monotonic() - started, 2))
             details["resources_at_end"] = resource_observation()
             store.finish_run(run_id, status, details)
@@ -179,6 +206,7 @@ def main(argv=None):
     p = argparse.ArgumentParser(description="Bounded threat-intelligence ingestion and evidence briefs")
     p.add_argument("--demo", action="store_true", help="Offline synthetic fixtures; isolated state and reports")
     p.add_argument("--collect-only", action="store_true", help="Fetch and normalize feeds without platform writes or LLM")
+    p.add_argument("--sync-misp-only", action="store_true", help="Collect and synchronize MISP without OpenCTI or inference")
     p.add_argument("--no-llm", action="store_true", help="Explicitly select deterministic reporting")
     stages = p.add_mutually_exclusive_group()
     stages.add_argument("--prepare-only", action="store_true", help="Fetch, synchronize, and save platform context; defer inference")
@@ -194,6 +222,8 @@ def main(argv=None):
     args = p.parse_args(argv)
     if args.collect_only and (args.prepare_only or args.render_prepared):
         p.error("Collection-only cannot be combined with staged reporting")
+    if args.sync_misp_only and (args.collect_only or args.prepare_only or args.render_prepared or args.demo):
+        p.error("MISP-only synchronization is a separate live ingestion stage")
     if not 0 <= args.sync_timeout <= 900:
         p.error("Synchronization timeout must be 0..900 seconds")
     if not 1 <= args.max_records <= 8 or not args.max_records <= args.max_sync <= 500 or not 1 <= args.lookback_days <= 90:

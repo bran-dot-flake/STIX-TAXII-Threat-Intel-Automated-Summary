@@ -28,10 +28,10 @@ These are **hard maximums for a small lab, below OpenCTI's supported published s
 | --- | ---: | --- |
 | MISP core | 1,024 | Two PHP FPM children; 256M per PHP process |
 | MariaDB | 384 | 128M buffer pool, 40 connections |
-| MISP modules | 256 | Only required service, no extra enrichment connectors |
+| MISP modules | 512 | Measured at about 399 MiB; 256 MiB caused container OOMs |
 | MISP Valkey | 128 | 64M dataset, no eviction |
 | MISP nginx | 64 | Loopback HTTP through SSH |
-| **MISP subtotal** | **1,856** | **1.81 GiB** |
+| **MISP subtotal** | **2,112** | **2.06 GiB** |
 | Elasticsearch | 1,536 | 768M fixed heap, one node, no replicas/ML |
 | OpenCTI | 1,536 | 1,024M Node heap |
 | OpenCTI Redis | 256 | 128M dataset, no eviction |
@@ -40,9 +40,9 @@ These are **hard maximums for a small lab, below OpenCTI's supported published s
 | OpenCTI worker | 192 | One process |
 | **OpenCTI subtotal** | **4,096** | **4.00 GiB** |
 | MISP connector | 256 | One-way, five-minute interval, small searches |
-| **Combined cap** | **6,208** | **6.06 GiB, excluding OS and Ollama** |
+| **Combined cap** | **6,464** | **6.31 GiB, excluding OS and Ollama** |
 
-The combined cap plus a 1,024 MiB free-memory margin requires at least 7,232 MiB **available at startup**. The initial 7,325 MiB measurement leaves only 93 MiB beyond that gate. A changing desktop workload can therefore make the gate fail. The first deployment should start MISP alone, measure it, then OpenCTI alone, and attempt a combined pilot only when headroom permits. Do not shrink caps blindly to pass the gate. Redis will refuse writes at its dataset limit rather than evicting OpenCTI state; investigate backlog and retention if this happens.
+The revised combined cap plus a 1,024 MiB free-memory margin requires at least 7,488 MiB **available at startup**. This exceeds the original 7,325 MiB baseline but fits the recovered VM's approximately 9,067 MiB. The first deployment starts MISP alone, measures it, then OpenCTI alone, and attempts a combined pilot only when headroom permits. Do not shrink caps blindly to pass the gate. Redis will refuse writes at its dataset limit rather than evicting OpenCTI state; investigate backlog and retention if this happens.
 
 CPU limits are per-container ceilings and do not add CPU capacity. Multiple components may contend for three guest threads. Docker swap allowances equal the RAM limit because there is no guest swap. The preflight requires at least 25 GiB free initially; monitor indexes and images because 34 GiB is a narrow starting disk budget. Do not prune unrelated Docker images or existing datasets.
 
@@ -56,12 +56,22 @@ After manual application acceptance, `scripts/daily_staged.py --manage-project` 
 4. Collect, synchronize MISP, read it back, and wait up to 900 seconds for exact OpenCTI matches carrying the MISP event UUID.
 5. Save an evidence snapshot and stop this project's containers before inference.
 6. Render with the existing Ollama model, requesting immediate unload (`keep_alive: 0`).
-7. On success, restart MISP alone for access during the day. OpenCTI remains stopped until requested.
+7. On success, restore MISP by default, or both platforms when `TI_RESIDENT_PROFILE=all` follows a measured combined pilot. The recovered target uses `all`.
 
-Any preparation failure still stops the owned platform containers. A failed model leaves reports queued and does not restart MISP, so the failure is visible. There is no volume deletion, package installation, sudo, network change or model download in the orchestrator. Only enable it once real connector provenance and actual memory use have passed manual acceptance.
+Any preparation failure still stops the owned platform containers. A failed model leaves reports queued and does not restore the platforms, so the failure is visible. There is no volume deletion, package installation, sudo, network change or model download in the orchestrator. The complete staged job has passed live acceptance, including provenance and restoration of both UIs.
 
 Run `python3 scripts/monitor.py --samples 20` during each pilot stage and save its private JSONL. Correlate available RAM, host physical headroom, Docker RSS/caps, swap, CPU pressure, OOM counts and API latency. The orchestrator's memory check does not measure the Windows host: check host headroom separately.
 
 ## Inference uncertainty
 
-SSH stopped responding after the first real-model smoke test began, and the user confirmed that the VM crashed. **The cause is unconfirmed**; guest/host memory pressure is a hypothesis requiring logs and measurements. The inference result and subsequent VM state could not be retrieved. Do not treat this as a successful LLM test. The repository subsequently reduced context to 4,096 tokens, limited inference to two threads, and bounded input/output; that revised configuration still needs a real VM retest. No reboot, process kill, Ollama service change or VirtualBox setting change was attempted. Further SSH attempts are paused at the user's request until they confirm recovery.
+SSH stopped responding after the first model test and the user confirmed a VM crash. **Its cause is unconfirmed.** That test did not pass. After recovery, context was reduced to 4,096 tokens, inference limited to two threads and a 64-token prompt batch, and exact source choices enforced by schema and validation. Real two-record and eight-record staged reports then passed in approximately 22 and 46 seconds, with platform containers stopped and automatic model unload. No reboot, Ollama service change or VirtualBox setting change was performed by the agent.
+
+## Recovery reassessment
+
+The user expanded guest RAM/disk and closed the other VMs. Read-only checks after recovery on 2026-11-10 observed **10,260 MiB total RAM, 9,067 MiB available, three CPU threads, and 135 GiB free on the expanded 158 GiB root filesystem**. Swap remains absent. The revised 6,464 MiB container cap plus 1,024 MiB margin passes preflight with approximately 1,579 MiB beyond that gate at sampling time. This still does not establish simultaneous model/platform reliability.
+
+The recovered host had approximately 2.83 GiB physical RAM available. The guest journal from the interrupted boot contained no retrieved OOM/panic evidence near the failure; logs ended without a conclusive cause. All 23 automated tests passed on the recovered guest. The user explicitly approved Docker package installation/service startup and separately approved Docker-group membership for `vboxuser`. Docker 29.1.3 and Compose 2.40.3 were subsequently observed installed and active; container acceptance remains a separate validation step.
+
+The first MISP pilot recorded Docker OOM events in the modules container at 256 MiB. Raising that single limit to 512 MiB produced a stable approximately 399 MiB process with zero restarts in the new container. After bootstrap, the core used about 187 MiB, MariaDB 261 MiB, Valkey 4 MiB and nginx 5 MiB. Eight live CISA observations were imported and read back successfully. The initial nginx probe used an unavailable `wget`; it was corrected to the image's installed `curl`, and all five services became healthy. These are small-batch measurements, not long-term capacity benchmarks.
+
+The combined pilot verified all 41 observations and completed the entire staged job. On 2026-11-11 all 12 containers were still up after about 16 hours, with approximately 6 GiB guest memory available. See [validation](validation.md) for detailed evidence and remaining acceptance.

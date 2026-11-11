@@ -1,37 +1,55 @@
 # Validation record
 
-This file separates observed results from deployment candidates. No administrative installation, VM reset, existing-service reconfiguration or prompt-injection project edit was performed.
+This record separates application acceptance from container startup and records failures as well as passing checks. Existing prompt-injection repositories and their uncommitted artifacts were preserved. The agent did not reboot the VM or modify its networking, swap, or Ollama service configuration.
 
-## Completed on 2026-11-10
+## Assessment and recovery
 
-- GitHub access verified for the provided public repository; initial content was a single README commit.
-- SSH key authentication verified through the existing Windows `spare` alias as `vboxuser`.
-- Read-only guest inspection verified Ubuntu, RAM/CPU/disk/swap, running services, loopback Ollama, installed model, lack of Docker, apt candidates and kernel setting.
-- Windows memory inspection observed approximately 15.86 GiB physical RAM and 2.89 GiB available; no change to VirtualBox allocation.
-- Reused the empty `~/Threat-Intelligence-Platform` checkout. Existing prompt-injection repositories, including uncommitted artifacts, were inspected only through Git status and preserved.
-- Sixteen initial Python tests passed on the guest's Python 3.14.4. The suite subsequently expanded on Windows Python 3.13.15; final CI is authoritative for the current commit.
-- Real collection of CISA KEV and bounded CIRCL OSINT completed on the VM: **41 source observations ingested into private SQLite**, without MISP/OpenCTI writes.
-- Twelve container manifests resolved from public registries, Linux amd64 presence checked, and immutable digests recorded. No image layers or containers were installed on the VM.
-- Offline synthetic report generation passed, with a clearly synthetic example committed under `examples/`.
-- Tests exercise a local HTTP server for MISP create/update/read-back, OpenCTI GraphQL request shape, Ollama structured output, HTTP limits/redirect rejection, and complete report/checkpoint flow. These mocks are not live application acceptance.
+On 2026-11-10, read-only checks found an Ubuntu 26.04 guest with 9,481 MiB RAM, three CPU threads, no swap, 34 GiB free disk, native Ollama 0.40.16 and an existing 2 GB llama3.2 model. Docker was absent. The first model test coincided with a user-confirmed VM crash; its cause remains unconfirmed, with no retrieved OOM/panic evidence.
 
-The Feodo endpoint originally proposed did not exist. Its real CSV uses `dst_ip`, `dst_port` and `c2_status` fields. The source returned a March 2026 freshness timestamp during November assessment, so it remains **disabled by default** and an explicit freshness gate rejects stale data. It is not presented as current threat intelligence. CIRCL's source event dates can be historical even when records were recently modified; modification timestamps are kept distinct.
+The user expanded guest RAM/disk and closed other VMs. Recovery checks observed 10,260 MiB RAM, about 9,067 MiB available and 135 GiB free disk. After explicit approval, Docker 29.1.3 and Compose 2.40.3 were installed and the Docker group granted to vboxuser. No unrelated packages were upgraded or removed in the reviewed installation plan.
 
-## Real-model test unresolved
+## Live acceptance on 2026-11-10
 
-A smoke test began using the existing local `llama3.2` model and current CISA records. New SSH connections subsequently timed out, and the user confirmed a VM crash. The cause is unconfirmed; no OOM diagnosis is established. No completed model result could be retrieved, so this is not passing inference. The revised smaller context/two-thread configuration still needs retesting after recovery. The agent did not kill processes, reboot the VM or modify host networking, and paused further SSH attempts at the user's request.
-
-## Required acceptance before calling this operational
-
-| Requirement | Current evidence / next validation |
+| Check | Observed result |
 | --- | --- |
-| MISP collecting real intelligence | Python feed collection passed; Docker install and MISP API import/read-back pending |
-| OpenCTI receiving MISP data | Official connector configured; real entity/provenance read-back pending |
-| Investigable objects/relationships | UI/API verification pending; source-supported relationships only |
-| Local LLM validated excerpts | Mock contract passed; real inference unresolved |
-| Daily unattended operation | Reviewed user units and staged orchestrator prepared; not installed/enabled |
-| Reliable within hardware | Baseline measured; live container/model peak/OOM/latency measurements pending |
-| Reproducible configurations | Image lock and generated Compose validation implemented; live service compatibility pending |
-| Secrets isolation | Ignore rules, exclusive 0600 initialization and redacted errors implemented; no actual lab secrets committed |
+| MISP API | Authenticated version 2.5.51 returned |
+| Idempotent MISP write | A private synthetic event was created, updated with the same UUID and read back with the expected attribute |
+| Live ingestion | 41 observations from CISA KEV and a bounded CIRCL OSINT sample persisted in SQLite and MISP |
+| OpenCTI API | Authenticated health and the production context query succeeded on 7.261109.0 |
+| Exact synchronization | All 41 observations passed exact entity/pattern plus MISP event reference checks |
+| Verified entity mix | 21 CVEs, 5 MD5, 5 SHA1, 5 SHA256, 3 URLs, 1 domain and 1 IP |
+| Native relationships | The connector created indicator/observable based-on relationships and source-referenced reports; no actor/technique links were guessed |
+| Local model | Existing llama3.2:latest, digest prefix a80c4f17acd5, 3.2B Q4_K_M, CPU-only |
+| Validated real brief | Two-record brief completed in 21.78 seconds with platform containers stopped |
+| Full staged job | Eight-record preparation: 6.88 seconds; inference/reporting: 45.83 seconds; both UIs restored; orchestrator exit 0 |
+| Model unloading | Ollama /api/ps returned an empty model list after completion |
+| Persistence | Named volumes retained across stops/restarts; records remained queryable and checkpoints preserved |
+| Secret isolation | Actual reports, state, logs and .env remain private and ignored by Git |
 
-GitHub CI tests Python 3.11, 3.13 and 3.14, validates generated config against image locks, runs `docker compose config --quiet`, and exercises the offline demo. All three Python jobs passed for initial implementation commit `edaca9d` with 23 tests: [CI run](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/42893100816). It does not start the full stack, access the private VM, ingest production data or validate real Ollama inference. Once a live stage is completed, append its measured evidence and any limitations here without turning startup checks into functional claims.
+Private report evidence: reports/live/2026-11-10T212333.929775Z-run-8.md and reports/live/2026-11-10T212745.077425Z-run-10.md. Ten observations were acknowledged across those completed runs; 31 remained queued afterward. Bounded reports do not imply that unselected records were assessed.
+
+## Failures found and corrected
+
+- MISP modules exceeded a 256 MiB cap and generated Docker OOM events. A 512 MiB cap produced a stable approximately 399 MiB process.
+- The nginx image includes curl rather than wget. Its probe now checks the login page with the installed tool.
+- The deployed MISP connector omitted standalone vulnerability attributes. A CVE-only native GraphQL bridge now follows MISP read-back and attaches MISP and original-source references. The connector remains the IOC writer.
+- Broad search candidates were insufficient for identity verification. Context now uses exact type/name filters plus independent pattern/value and MISP-reference checks.
+- The connector's native MD5 pattern omits algorithm-name quotes. The equivalent valid STIX form is accepted and covered by a regression test.
+- One IP was missed by small timestamp-based batches. The search batch was increased to 100, above the default 50-write bound, and the existing event reconciled without changing its UUID. Strict preparation can requeue an unverified IOC once.
+- The initial post-recovery model output paraphrased evidence and was rejected. It produced a marked fallback without acknowledging records. Schema alternatives now bind each ID to exact source choices; real inference subsequently passed. No execution tools are supplied to the model.
+- The existing user service manager retained its old Docker group list. The reviewed system unit executes as vboxuser with the approved Docker group, avoiding a desktop-session restart or user lingering.
+- Feodo returned a March 2026 freshness timestamp during November assessment. It remains disabled by default and is rejected by the freshness gate. Its CSV URL/schema were corrected.
+
+## Resource observations
+
+The configured combined container cap is 6,464 MiB, excluding the OS and native Ollama. Preflight reserves another 1,024 MiB of available guest memory. Representative combined measurements: about 1.2 GiB search, 0.4-0.6 GiB OpenCTI, 399 MiB MISP modules, 0.2 GiB MISP core, with smaller database/worker/broker/cache processes. Approximately 6 GiB guest memory remained available with both platforms resident.
+
+The two-record inference measured 8,878 MiB available before and 6,567 MiB at completion; the eight-record run measured 8,527 MiB before and 6,744 MiB at completion. These are samples, not exact peaks. Platforms were stopped during inference, the model unloaded afterward, and no swap was configured or used.
+
+On 2026-11-11, a read-only check showed all 12 containers still up after approximately 16 hours, with dependency/application health checks passing and 6,171 MiB guest memory available. This supports overnight idle stability for this small dataset, not production-scale throughput or upstream-supported sizing.
+
+## Automated checks and remaining acceptance
+
+The current 27-test suite passes locally. It covers normalization, stale feeds, bounded CIRCL parsing, deduplication, priority/backlog handling, nondestructive migration, MISP HTTP contracts, CVE upserts, exact OpenCTI provenance, model validation, secrets, snapshot expiry, locks and failed-run checkpoints. CI checks Python 3.11/3.13/3.14, Compose consistency, image locks, Compose syntax and the offline demo. An earlier 23-test commit passed [all jobs](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/runs/42893100816). Consult current-commit checks for the expanded suite.
+
+The daily system timer is prepared but still needs administrative installation/enablement and real system-unit execution verification. Scheduled execution is not claimed until observed. Windows-tunnel UI login, backup restoration, larger datasets, TAXII support and broader threat-entity feeds remain separate acceptance/extension work. This is a functional small-data lab below OpenCTI's published production memory recommendations.

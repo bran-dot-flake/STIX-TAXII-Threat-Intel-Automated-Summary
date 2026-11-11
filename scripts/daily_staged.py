@@ -36,6 +36,9 @@ def main():
     load_env(Path(".env"))
     for key in ("MISP_API_KEY", "OPENCTI_TOKEN", "OLLAMA_MODEL"):
         required(key)
+    resident = os.environ.get("TI_RESIDENT_PROFILE", "misp")
+    if resident not in {"misp", "all"}:
+        raise ValueError("TI_RESIDENT_PROFILE must be misp or all")
     with run_lock(Path("data/live/orchestrator.lock")):
         verify_ownership()
         # A prior interrupted project run may have left only some containers up.
@@ -48,9 +51,11 @@ def main():
             # Never delete volumes; release platform memory before CPU inference.
             invoke(COMPOSE + ["stop", "--timeout", "60"])
         invoke([sys.executable, "-m", "ti_brief.cli", "--render-prepared"])
-        # Leave MISP accessible after a successful run; OpenCTI can be started on demand.
-        invoke([sys.executable, "scripts/preflight.py", "misp"])
-        invoke(COMPOSE + ["up", "-d", "--no-build", "--wait", "--wait-timeout", "900", "misp-nginx"])
+        # Restore both UIs only when the operator selected the measured all profile.
+        profiles = ["misp", "opencti", "integration"] if resident == "all" else ["misp"]
+        invoke([sys.executable, "scripts/preflight.py", *profiles])
+        targets = [] if resident == "all" else ["misp-nginx"]
+        invoke(COMPOSE + ["up", "-d", "--no-build", "--wait", "--wait-timeout", "900", *targets])
     return 0
 
 
