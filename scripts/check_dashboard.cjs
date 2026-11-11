@@ -103,6 +103,15 @@ const output = process.argv[3];
     if (snapshot.reports.length) {
       await page.locator('#archive-select').selectOption(snapshot.reports.at(-1).id);
       assert.equal(await page.locator('#archived-report .evidence').count(), (snapshot.reports.at(-1).observations||snapshot.reports.at(-1).items).length);
+      const groupedReport=snapshot.reports.find(r=>analytics.briefDigest(r).some(t=>t.records.length>1&&t.records[0]?.kind!=='vulnerability'));
+      if(groupedReport)await page.locator('#archive-select').selectOption(groupedReport.id);
+      const legacySupport=page.locator('#archived-report [data-supporting]').first();
+      if(await legacySupport.count()){
+        await legacySupport.click();
+        assert(await legacySupport.locator('xpath=ancestor::article[1]').locator('.topic-evidence').getAttribute('open')!==null);
+        assert.equal(await page.locator('#brief > .supporting-evidence[open]').count(),0);
+      }
+
     }
     if (snapshot.stix?.objects.length) {
       await page.locator('#context > summary').click();

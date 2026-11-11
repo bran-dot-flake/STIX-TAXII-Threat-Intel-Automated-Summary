@@ -188,7 +188,12 @@ function anchor() {
 function click(event) {
   const button=event.target.closest('button');if(!button||!data)return;
   if(button.dataset.evidence){const scope=button.closest('#archived-report')?archives().find(r=>r.id===document.querySelector('#archive-select').value):button.closest('#brief')?data.editions?.[0]||data.reports[0]:null;evidence(button.dataset.evidence,scope);}
-  if(button.hasAttribute('data-supporting')){const supporting=document.querySelector('#brief > .supporting-evidence');if(supporting){supporting.open=true;const record=[...supporting.querySelectorAll('[data-record]')].find(r=>r.dataset.record===button.dataset.supporting);const target=record?.closest('.evidence-group')||supporting;if(target!==supporting)target.open=true;target.querySelector('summary').focus();target.scrollIntoView({block:'nearest'});}}
+  if(button.hasAttribute('data-supporting')){
+    const archived=button.closest('#archived-report');
+    const existing=archived?button.closest('.report-topic')?.querySelector('.topic-evidence'):null;
+    const supporting=existing||(!archived?document.querySelector('#brief > .supporting-evidence'):null);
+    if(supporting){supporting.open=true;const record=[...supporting.querySelectorAll('[data-record]')].find(r=>r.dataset.record===button.dataset.supporting);const target=record?.closest('.evidence-group')||supporting;if(target!==supporting)target.open=true;target.querySelector('summary').focus();target.scrollIntoView({block:'nearest'});}
+  }
   if(button.dataset.stix)stixDetail(button.dataset.stix);
   if(button.dataset.period){period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
 
