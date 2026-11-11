@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories} from '../website/analytics.js';
+import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt} from '../website/analytics.js';
 
 const records=[
   {source:'cisa-kev',kind:'vulnerability',value:'CVE-2026-0001',published_at:'2026-11-10',first_seen:'2026-11-11T10:00:00Z'},
@@ -56,4 +56,75 @@ test('front-page ranking prioritizes current source evidence over historical bul
   ];
   const ranked=editorialStories(rows,'2026-11-11T18:00:00Z',['significant']);
   assert.deepEqual(ranked.map(r=>r.id),['significant','new','old']);
+});
+
+const articleURL='https://www.cisa.gov/news-events/alerts/2026/11/10/cisa-adds-six-known-exploited-vulnerabilities-catalog';
+const machineURL='https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json';
+function readerFixture(){
+  const cves=Array.from({length:6},(_,i)=>({id:`c${i}`,source:'cisa-kev',source_url:machineURL,kind:'vulnerability',value:`CVE-2026-${10000+i}`,title:`Product ${i}`}));
+  const article={id:'lead',source:'cisa-advisories',source_url:articleURL,title:'Catalog additions',excerpt:'CISA reports catalog additions.',category:'Exploitation watch',published_at:'2026-11-10T12:00:00Z'};
+  return {input:{records:cves,news:[article],updates:[]},topics:[{id:'catalog',kind:'catalog',headline:'Catalog additions',evidence_ids:[...cves.map(r=>r.id),article.id]},{id:'detail',headline:'Specific product',evidence_ids:['c0'],context_ids:['technique-1']}]};
+}
+test('supporting evidence counts six CVEs and one announcement without repeating topic records',()=>{
+  const edition=readerFixture(),rows=editionEvidence(edition),before=JSON.stringify(edition);
+  const groups=evidenceGroups(rows,edition.topics);
+  assert.deepEqual(groups.map(g=>[g.label,g.records.length,g.unit]),[['CISA KEV additions',6,'CVE'],['CISA announcement',1,'source report']]);
+  assert.equal(groups.flatMap(g=>g.records).length,7);
+  assert.deepEqual(groups[0].context_ids,['technique-1']);
+  assert.equal(JSON.stringify(edition),before);
+});
+test('legacy indicators and ungrouped evidence retain their original records',()=>{
+  const rows=[{id:'ioc1',kind:'sha256',value:'a'.repeat(64)},{id:'ioc2',kind:'url',value:'hxxps://evil[.]com'},{id:'other',kind:'domain',value:'other[.]com'}];
+  const groups=evidenceGroups(rows,[{headline:'Original event',evidence_ids:['ioc1','ioc1','ioc2']}]);
+  assert.equal(groups[0].records.length,2);assert.equal(groups[0].unit,'indicator');
+  assert.deepEqual(groups.flatMap(g=>g.records.map(r=>r.id)),['ioc1','ioc2','other']);
+});
+test('reader destinations use explicit human advisory URLs and local CVE/IOC details',()=>{
+  const edition=readerFixture();
+  assert.deepEqual(readerTarget(edition.input.news[0]),{kind:'article',url:articleURL,id:'lead'});
+  assert.deepEqual(readerTarget(edition.input.records[0]),{kind:'detail',id:'c0'});
+  assert.deepEqual(readerTarget({id:'ioc',source:'circl-osint',source_url:'https://www.circl.lu/doc/misp/feed-osint/00000000-0000-4000-8000-000000000001.json'}),{kind:'detail',id:'ioc'});
+  assert(isRawSource(machineURL));assert(!isRawSource(articleURL));
+});
+test('reader links cannot turn arbitrary URLs, credentials or raw feeds into human destinations',()=>{
+  for(const url of ['javascript:alert(1)','https://www.cisa.gov@evil.com/news-events/x','https://www.cisa.gov:4444/news-events/x','https://www.cisa.gov/news-events/feed.json','https://www.cisa.gov/news-events/x?token=secret'])assert.equal(readerTarget({id:'row',source:'cisa-advisories',source_url:url}).kind,'detail');
+});
+test('homepage suppresses the exact featured article by stable ID or URL without deleting source data',()=>{
+  const edition=readerFixture(),lead=edition.input.news[0];
+  const other={...lead,id:'different',source_url:'https://www.cisa.gov/news-events/alerts/other',title:'Different product advisory',category:'Security advisory'};
+  const news=[lead,{...lead,id:'same-url'},other],before=JSON.stringify(news);
+  const stories=additionalStories(news,'2026-11-11T18:00:00Z',edition);
+  assert.deepEqual(stories.map(r=>r.id),['different']);assert.equal(JSON.stringify(news),before);
+});
+test('related CVEs and older catalog bulletins remain available as distinct source reports',()=>{
+  const edition=readerFixture(),lead=edition.input.news[0];
+  const related={...lead,id:'related',source_url:'https://www.cisa.gov/news-events/alerts/new-guidance',title:'New guidance for CVE-2026-10000',category:'Security advisory'};
+  const older={...lead,id:'older',source_url:'https://www.cisa.gov/news-events/alerts/older-catalog',title:'Earlier catalog additions',published_at:'2026-11-09T12:00:00Z'};
+  const stories=additionalStories([lead,related,older],'2026-11-11T18:00:00Z',edition);
+  assert.deepEqual(stories.map(r=>r.id),['related','older']);
+  assert(stories.every(r=>r.related.every(child=>child.id!=='lead')));
+});
+test('quiet or absent editions do not hide distinct articles and empty evidence stays empty',()=>{
+  const row=readerFixture().input.news[0];
+  assert.equal(additionalStories([row],'2026-11-11T18:00:00Z').length,1);
+  const edition=readerFixture();edition.topics=[];
+  assert.equal(additionalStories([row],'2026-11-11T18:00:00Z',edition).length,1);
+  assert.deepEqual(evidenceGroups([],[]),[]);
+});
+test('meaningful short excerpts survive while empty or placeholder previews are omitted',()=>{
+  for(const excerpt of ['', '  ', 'Source excerpt','No excerpt available.','Not available','Headline'])assert.equal(usefulExcerpt({title:'Headline',excerpt}),'');
+  assert.equal(usefulExcerpt({title:'Headline',excerpt:'Patch available.'}),'Patch available.');
+});
+test('source update dates remain accessible alongside the full original description',()=>{
+  const edition=readerFixture();edition.input.records[0].description='Complete original source description.';
+  edition.input.updates=[{...edition.input.records[0],excerpt:'Short excerpt.',modified_at:'2026-11-11T12:00:00Z',content_changed_at:'2026-11-11T12:30:00Z'}];
+  const row=editionEvidence(edition).find(r=>r.id==='c0');
+  assert.equal(row.description,'Complete original source description.');assert.equal(row.modified_at,'2026-11-11T12:00:00Z');
+  assert.equal(editionEvidence(edition).length,7);
+});
+
+test('category metadata and optional filtering remain available without homepage controls',()=>{
+  const lead=readerFixture().input.news[0],advisory={...lead,id:'advisory',title:'Product advisory',category:'Security advisory'};
+  assert.deepEqual(additionalStories([lead,advisory],'2026-11-11T18:00:00Z',null,'Security advisory').map(r=>r.id),['advisory']);
+  assert.equal(lead.category,'Exploitation watch');
 });
