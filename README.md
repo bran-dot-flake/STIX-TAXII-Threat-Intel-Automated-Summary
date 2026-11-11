@@ -8,7 +8,8 @@
   <img alt="Python 3.11+" src="https://img.shields.io/badge/Python-3.11%2B-ff875a?style=flat-square&amp;labelColor=252522">
   <img alt="Local inference" src="https://img.shields.io/badge/Inference-local_Ollama-ff875a?style=flat-square&amp;labelColor=252522">
   <img alt="GitHub Pages hosting" src="https://img.shields.io/badge/Hosting-GitHub_Pages-ff875a?style=flat-square&amp;labelColor=252522">
-  <img alt="Python standard library runtime" src="https://img.shields.io/badge/Runtime-Python_standard_library-ff875a?style=flat-square&amp;labelColor=252522">
+  <img alt="Core feed and publication runtime" src="https://img.shields.io/badge/Core-Python_standard_library-ff875a?style=flat-square&amp;labelColor=252522">
+  <img alt="STIX 2.1 and TAXII 2.1" src="https://img.shields.io/badge/STIX_%2F_TAXII-2.1-ff875a?style=flat-square&amp;labelColor=252522">
 </p>
 
 <p align="center">Public threat signals become private, correlated evidence and daily source-grounded briefs.<br>A separate publication boundary brings the safe results to a public intelligence dashboard.</p>
