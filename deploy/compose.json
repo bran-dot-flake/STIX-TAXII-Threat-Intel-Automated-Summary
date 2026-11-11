@@ -1,0 +1,604 @@
+{
+  "name": "ti-lab",
+  "services": {
+    "misp-db": {
+      "image": "mariadb@sha256:85c39719200637250bb8abe3ccd239239d6f175156fc1698141409fcf8e01a38",
+      "profiles": [
+        "misp"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "384m",
+      "memswap_limit": "384m",
+      "cpus": 0.75,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "MYSQL_DATABASE": "misp",
+        "MYSQL_USER": "misp",
+        "MYSQL_PASSWORD": "${MYSQL_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "MYSQL_ROOT_PASSWORD": "${MYSQL_ROOT_PASSWORD:?Run python3 scripts/init_env.py first}"
+      },
+      "command": [
+        "--innodb-buffer-pool-size=128M",
+        "--innodb-log-file-size=64M",
+        "--max-connections=40"
+      ],
+      "volumes": [
+        "misp_db:/var/lib/mysql"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "healthcheck.sh",
+          "--connect",
+          "--innodb_initialized"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "misp-redis": {
+      "image": "valkey/valkey@sha256:9d09cdba3c2fc12605404d87b5e4adab15822bdada00bf3a19d9fd9d74c99e01",
+      "profiles": [
+        "misp"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "128m",
+      "memswap_limit": "128m",
+      "cpus": 0.25,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "REDIS_PASSWORD": "${REDIS_PASSWORD:?Run python3 scripts/init_env.py first}"
+      },
+      "command": [
+        "sh",
+        "-c",
+        "exec valkey-server --requirepass \"$$REDIS_PASSWORD\" --maxmemory 64mb --maxmemory-policy noeviction --appendonly yes"
+      ],
+      "volumes": [
+        "misp_cache:/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" valkey-cli ping | grep -q PONG"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "misp-modules": {
+      "image": "ghcr.io/misp/misp-docker/misp-modules@sha256:e0a4905137080383fe34053f98b4e80b8064147ce320b9a0d1a8e185b41a1935",
+      "profiles": [
+        "misp"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "512m",
+      "memswap_limit": "512m",
+      "cpus": 0.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "bash -c '</dev/tcp/localhost/6666'"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "misp-core": {
+      "image": "ghcr.io/misp/misp-docker/misp-core@sha256:c54b6f148db98de5744f854f328bc2e9316816a5c8bc4b478b443d6d60a3a439",
+      "profiles": [
+        "misp"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "1024m",
+      "memswap_limit": "1024m",
+      "cpus": 1.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "ADMIN_PASSWORD": "${ADMIN_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "ADMIN_KEY": "${ADMIN_KEY:?Run python3 scripts/init_env.py first}",
+        "MYSQL_PASSWORD": "${MYSQL_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "REDIS_PASSWORD": "${REDIS_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "GPG_PASSPHRASE": "${GPG_PASSPHRASE:?Run python3 scripts/init_env.py first}",
+        "ENCRYPTION_KEY": "${ENCRYPTION_KEY:?Run python3 scripts/init_env.py first}",
+        "SALT": "${SALT:?Run python3 scripts/init_env.py first}",
+        "BASE_URL": "${BASE_URL:-http://localhost:8081}",
+        "ADMIN_EMAIL": "${ADMIN_EMAIL:-admin@intel.test}",
+        "ADMIN_ORG": "${ADMIN_ORG:-Private Intel Lab}",
+        "MYSQL_HOST": "misp-db",
+        "MYSQL_DATABASE": "misp",
+        "MYSQL_USER": "misp",
+        "REDIS_HOST": "misp-redis",
+        "MISP_MODULES_FQDN": "http://misp-modules",
+        "MISP_MODULES_PORT": "6666",
+        "PHP_MEMORY_LIMIT": "256M",
+        "PHP_FCGI_CHILDREN": "2",
+        "PHP_FCGI_START_SERVERS": "1",
+        "PHP_FCGI_SPARE_SERVERS": "1",
+        "NUM_WORKERS_DEFAULT": "1",
+        "NUM_WORKERS_PRIO": "1",
+        "NUM_WORKERS_EMAIL": "1",
+        "NUM_WORKERS_CACHE": "1",
+        "NUM_WORKERS_UPDATE": "1",
+        "ENABLE_BACKGROUND_UPDATES": "false",
+        "DISABLE_PRINTING_PLAINTEXT_CREDENTIALS": "true",
+        "TZ": "UTC"
+      },
+      "depends_on": {
+        "misp-db": {
+          "condition": "service_healthy"
+        },
+        "misp-redis": {
+          "condition": "service_healthy"
+        },
+        "misp-modules": {
+          "condition": "service_healthy"
+        }
+      },
+      "volumes": [
+        "misp_config:/var/www/MISP/app/Config",
+        "misp_files:/var/www/MISP/app/files",
+        "misp_logs:/var/www/MISP/app/tmp/logs",
+        "misp_gpg:/var/www/MISP/.gnupg"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "bash -c 'echo >/dev/tcp/127.0.0.1/9002'"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "misp-nginx": {
+      "image": "ghcr.io/misp/misp-docker/misp-nginx@sha256:b4486a149babc19767e5c8d241a9ec8d8e3f5dec4c5034a0c775819627ca92cb",
+      "profiles": [
+        "misp"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "64m",
+      "memswap_limit": "64m",
+      "cpus": 0.25,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "BASE_URL": "${BASE_URL:-http://localhost:8081}",
+        "FASTCGI_LISTEN": "misp-core:9002",
+        "FASTCGI_LISTEN_STATUS": "misp-core:9003",
+        "TZ": "UTC"
+      },
+      "depends_on": {
+        "misp-core": {
+          "condition": "service_healthy"
+        }
+      },
+      "ports": [
+        "127.0.0.1:8081:8080"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "curl",
+          "-fsS",
+          "--max-time",
+          "4",
+          "--output",
+          "/dev/null",
+          "http://127.0.0.1:8080/users/login"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      },
+      "user": "nginx",
+      "read_only": true,
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "tmpfs": [
+        "/etc/nginx/conf.d:mode=0755,uid=101,gid=101",
+        "/var/cache/nginx:mode=0755,uid=101,gid=101",
+        "/tmp:mode=1777"
+      ]
+    },
+    "elasticsearch": {
+      "image": "docker.elastic.co/elasticsearch/elasticsearch@sha256:cbf5cd6cfe5532a9c02d510c66d238bf329cd51fe3d57170a2a880aca7d47419",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "1536m",
+      "memswap_limit": "1536m",
+      "cpus": 1.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "discovery.type": "single-node",
+        "xpack.security.enabled": "false",
+        "xpack.ml.enabled": "false",
+        "ES_JAVA_OPTS": "-Xms768m -Xmx768m"
+      },
+      "volumes": [
+        "opencti_es:/usr/share/elasticsearch/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow' >/dev/null"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "redis": {
+      "image": "redis@sha256:0908d9af26bf9b985e984a40a5eb82eed229b07a3317eee6843832c3cc3a9619",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "256m",
+      "memswap_limit": "256m",
+      "cpus": 0.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "command": [
+        "redis-server",
+        "--maxmemory",
+        "128mb",
+        "--maxmemory-policy",
+        "noeviction",
+        "--appendonly",
+        "yes"
+      ],
+      "volumes": [
+        "opencti_redis:/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "redis-cli",
+          "ping"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "rabbitmq": {
+      "image": "rabbitmq@sha256:61fe7962792ad7bbaa3f9454122b366ff4b34fc1c224e528267f4ed3fd845f15",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "384m",
+      "memswap_limit": "384m",
+      "cpus": 0.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "RABBITMQ_DEFAULT_USER": "${RABBITMQ_DEFAULT_USER:?Run python3 scripts/init_env.py first}",
+        "RABBITMQ_DEFAULT_PASS": "${RABBITMQ_DEFAULT_PASS:?Run python3 scripts/init_env.py first}",
+        "RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS": "+S 1:1"
+      },
+      "volumes": [
+        "opencti_rabbit:/var/lib/rabbitmq",
+        "./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "rabbitmq-diagnostics",
+          "-q",
+          "ping"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "minio": {
+      "image": "pgsty/silo@sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "192m",
+      "memswap_limit": "192m",
+      "cpus": 0.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "MINIO_ROOT_USER": "${MINIO_ROOT_USER:?Run python3 scripts/init_env.py first}",
+        "MINIO_ROOT_PASSWORD": "${MINIO_ROOT_PASSWORD:?Run python3 scripts/init_env.py first}"
+      },
+      "command": [
+        "server",
+        "/data"
+      ],
+      "volumes": [
+        "opencti_s3:/data"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "silo",
+          "healthcheck",
+          "ready"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "opencti": {
+      "image": "opencti/platform@sha256:48016df2f1ab7c91adf2a9ecce4df8bea5794c28d48026b8f39de8e274d5081a",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "1536m",
+      "memswap_limit": "1536m",
+      "cpus": 1.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "NODE_OPTIONS": "--max-old-space-size=1024",
+        "APP__PORT": "8080",
+        "APP__BASE_URL": "http://localhost:8080",
+        "APP__ADMIN__EMAIL": "${OPENCTI_ADMIN_EMAIL:-admin@intel.test}",
+        "APP__ADMIN__PASSWORD": "${OPENCTI_ADMIN_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "APP__ADMIN__TOKEN": "${OPENCTI_ADMIN_TOKEN:?Run python3 scripts/init_env.py first}",
+        "APP__ENCRYPTION_KEY": "${OPENCTI_ENCRYPTION_KEY:?Run python3 scripts/init_env.py first}",
+        "APP__HEALTH_ACCESS_KEY": "${OPENCTI_HEALTH_KEY:?Run python3 scripts/init_env.py first}",
+        "REDIS__HOSTNAME": "redis",
+        "REDIS__PORT": "6379",
+        "ELASTICSEARCH__URL": "http://elasticsearch:9200",
+        "ELASTICSEARCH__NUMBER_OF_REPLICAS": "0",
+        "MINIO__ENDPOINT": "minio",
+        "MINIO__PORT": "9000",
+        "MINIO__USE_SSL": "false",
+        "MINIO__ACCESS_KEY": "${MINIO_ROOT_USER:?Run python3 scripts/init_env.py first}",
+        "MINIO__SECRET_KEY": "${MINIO_ROOT_PASSWORD:?Run python3 scripts/init_env.py first}",
+        "RABBITMQ__HOSTNAME": "rabbitmq",
+        "RABBITMQ__PORT": "5672",
+        "RABBITMQ__PORT_MANAGEMENT": "15672",
+        "RABBITMQ__MANAGEMENT_SSL": "false",
+        "RABBITMQ__USERNAME": "${RABBITMQ_DEFAULT_USER:?Run python3 scripts/init_env.py first}",
+        "RABBITMQ__PASSWORD": "${RABBITMQ_DEFAULT_PASS:?Run python3 scripts/init_env.py first}",
+        "PROVIDERS__LOCAL__STRATEGY": "LocalStrategy"
+      },
+      "depends_on": {
+        "elasticsearch": {
+          "condition": "service_healthy"
+        },
+        "redis": {
+          "condition": "service_healthy"
+        },
+        "rabbitmq": {
+          "condition": "service_healthy"
+        },
+        "minio": {
+          "condition": "service_healthy"
+        }
+      },
+      "ports": [
+        "127.0.0.1:8080:8080"
+      ],
+      "healthcheck": {
+        "test": [
+          "CMD-SHELL",
+          "wget -qO- \"http://127.0.0.1:8080/health?health_access_key=$$APP__HEALTH_ACCESS_KEY\" >/dev/null"
+        ],
+        "interval": "15s",
+        "timeout": "5s",
+        "retries": 40,
+        "start_period": "120s"
+      }
+    },
+    "worker": {
+      "image": "opencti/worker@sha256:bdf42fa8a41ab3ea601f5cd740e52b09fb9669c689edf777fb105d03a5cb3783",
+      "profiles": [
+        "opencti"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "192m",
+      "memswap_limit": "192m",
+      "cpus": 0.75,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "OPENCTI_URL": "http://opencti:8080",
+        "OPENCTI_TOKEN": "${OPENCTI_ADMIN_TOKEN:?Run python3 scripts/init_env.py first}"
+      },
+      "depends_on": {
+        "opencti": {
+          "condition": "service_healthy"
+        }
+      }
+    },
+    "connector-misp": {
+      "image": "opencti/connector-misp@sha256:0133b2ce8f2e354c6387be632eefc63b1faf98698a741ffb320c6169940bea3a",
+      "profiles": [
+        "integration"
+      ],
+      "restart": "unless-stopped",
+      "labels": {
+        "org.ti-brief.managed": "true"
+      },
+      "platform": "linux/amd64",
+      "mem_limit": "256m",
+      "memswap_limit": "256m",
+      "cpus": 0.5,
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-size": "10m",
+          "max-file": "3"
+        }
+      },
+      "environment": {
+        "OPENCTI_URL": "http://opencti:8080",
+        "OPENCTI_TOKEN": "${OPENCTI_ADMIN_TOKEN:?Run python3 scripts/init_env.py first}",
+        "CONNECTOR_ID": "${MISP_CONNECTOR_ID:?Run python3 scripts/init_env.py first}",
+        "CONNECTOR_NAME": "MISP private lab",
+        "CONNECTOR_SCOPE": "misp",
+        "CONNECTOR_LOG_LEVEL": "info",
+        "CONNECTOR_DURATION_PERIOD": "PT5M",
+        "MISP_URL": "http://misp-nginx:8080",
+        "MISP_KEY": "${ADMIN_KEY:?Run python3 scripts/init_env.py first}",
+        "MISP_SSL_VERIFY": "true",
+        "MISP_REFERENCE_URL": "http://localhost:8081",
+        "MISP_IMPORT_FROM_DATE": "${MISP_IMPORT_FROM_DATE:-2026-11-01}",
+        "MISP_CREATE_REPORTS": "true",
+        "MISP_CREATE_INDICATORS": "true",
+        "MISP_CREATE_OBSERVABLES": "true",
+        "MISP_IMPORT_ONLY_PUBLISHED": "false",
+        "MISP_IMPORT_WITH_ATTACHMENTS": "false",
+        "MISP_GUESS_THREATS_FROM_TAGS": "false",
+        "MISP_SEARCH_LIMIT": "100",
+        "OPENCTI_TLS_REJECT_UNAUTHORIZED": "true"
+      },
+      "depends_on": {
+        "opencti": {
+          "condition": "service_healthy"
+        },
+        "misp-nginx": {
+          "condition": "service_healthy"
+        }
+      }
+    }
+  },
+  "volumes": {
+    "misp_db": {},
+    "misp_cache": {},
+    "misp_config": {},
+    "misp_files": {},
+    "misp_logs": {},
+    "misp_gpg": {},
+    "opencti_es": {},
+    "opencti_redis": {},
+    "opencti_rabbit": {},
+    "opencti_s3": {}
+  }
+}

@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate a private daily intelligence brief at 08:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+Unit=ti-brief.service
+
+[Install]
+WantedBy=timers.target

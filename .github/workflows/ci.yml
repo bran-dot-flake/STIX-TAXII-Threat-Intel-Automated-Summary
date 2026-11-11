@@ -1,0 +1,30 @@
+name: Validate pipeline
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python: ['3.11', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit and local HTTP integration tests
+        env:
+          PYTHONPATH: src
+        run: python -m unittest discover -s tests -v
+      - name: Validate locked infrastructure
+        run: python scripts/validate.py
+      - name: Validate Compose and synthetic reporting
+        env:
+          PYTHONPATH: src
+        run: |
+          python scripts/init_env.py
+          docker compose --env-file .env -f deploy/compose.json --profile misp --profile opencti --profile integration config --quiet
+          python -m ti_brief.cli --demo

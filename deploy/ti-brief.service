@@ -1,0 +1,25 @@
+[Unit]
+Description=Private daily threat intelligence brief
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=6h
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+Restart=on-failure
+RestartSec=15min
+User=vboxuser
+Group=vboxuser
+SupplementaryGroups=docker
+WorkingDirectory=/home/vboxuser/Threat-Intelligence-Platform
+Environment=PYTHONPATH=src
+ExecStart=/usr/bin/python3 scripts/daily_staged.py --manage-project
+TimeoutStartSec=60min
+Nice=10
+MemoryMax=512M
+CPUQuota=100%
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
