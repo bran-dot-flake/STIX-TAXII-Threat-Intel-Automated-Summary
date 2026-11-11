@@ -1,4 +1,4 @@
-import {metrics, dailyKev, kindCounts, matches, groupStories, briefDigest, editorialStories} from './analytics.js';
+import {metrics, dailyKev, kindCounts, matches, groupStories, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
@@ -11,11 +11,11 @@ const time = value => value ? `${date(value)} · ${new Date(value).toLocaleTimeS
 const num = value => Number(value).toLocaleString('en-US');
 const shortHeadline = title => title.length>105?title.slice(0,102).replace(/\s+\S*$/,'')+'…':title;
 const link = (url,text,cls='') => {
-  try {const p=new URL(url);if(p.protocol!=='https:'||!['www.cisa.gov','www.circl.lu','attack.mitre.org'].includes(p.hostname)||p.username||p.password)return e(text);}
+  try {const p=new URL(url);if(p.protocol!=='https:'||!['www.cisa.gov','www.circl.lu','attack.mitre.org'].includes(p.hostname)||p.username||p.password||!['','443'].includes(p.port))return e(text);}
   catch {return e(text);}
   return `<a class="${e(cls)}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)} ↗</a>`;
 };
-let data, period=30, newsFilter='all', newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
+let data, period=30, newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
 const empty = text => `<p class="empty">${e(text)}</p>`;
 
 function warnings() {
@@ -30,8 +30,7 @@ const freshness = {'catalog-added':'Catalog addition','newly-published':'New pub
 const prose = clauses => (clauses||[]).map(c=>c.text).join(' ');
 function topicMarkup(topic,technical=false) {
   const rows=topic.records;
-  const sources=[...new Map(rows.map(r=>[r.source_url,r])).values()];
-  return `<article class="${technical?'report-topic':'finding'}"><div class="source-line">${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(prose(topic.summary)||rows[0]?.excerpt)}</p>${topic.why_it_matters?`<p class="significance">${e(topic.why_it_matters.text)}</p>`:''}<div class="topic-sources">${sources.map(r=>link(r.source_url,names[r.source])).join(' · ')}</div>${technical?`<details class="topic-evidence"><summary>Technical evidence · ${rows.length}</summary>${rows.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div><p>${e(row.excerpt)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(time(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}</article>`).join('')}</details>`:''}</article>`;
+  return `<article class="${technical?'report-topic':'finding'}"><div class="source-line">${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(prose(topic.summary)||rows[0]?.excerpt)}</p>${topic.why_it_matters?`<p class="significance">${e(topic.why_it_matters.text)}</p>`:''}<div class="topic-sources">${readerLinks(rows)}</div>${technical?`<details class="topic-evidence"><summary>Technical evidence · ${rows.length}</summary>${rows.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div><p>${e(row.excerpt)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(time(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}</details>`:''}</article>`;
 }
 function reportMarkup(report) {
   const topics=briefDigest(report);
@@ -40,12 +39,10 @@ function reportMarkup(report) {
   const defaultAction='Review indicator against local telemetry before taking action.';
   const actions=new Map();
   for(const topic of topics)for(const row of topic.records){if(row.action&&row.action!==defaultAction){if(!actions.has(row.action))actions.set(row.action,new Map());actions.get(row.action).set(row.source_url,row);}}
-  return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.narrative?.mode==='ollama-grounded'?'Ollama fact-cited composition':'Source-grounded fallback'}</div>${report.narrative?`<p class="report-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${topics.map(t=>topicMarkup(t,true)).join('')}${withheld.length?`<details class="topic-evidence"><summary>Source metadata requires review · ${withheld.length}</summary>${withheld.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div>${link(row.source_url,'Original source','link')}</article>`).join('')}</details>`:''}${actions.size?`<div class="source-actions"><h3>Source defensive considerations</h3>${[...actions].map(([action,sources])=>`<p>${e(action)} <span class="topic-sources">${[...sources.values()].map(r=>link(r.source_url,names[r.source])).join(' · ')}</span></p>`).join('')}</div>`:''}`;
+  return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.narrative?.mode==='ollama-grounded'?'Ollama fact-cited composition':'Source-grounded fallback'}</div>${report.narrative?`<p class="report-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${topics.map(t=>topicMarkup(t,true)).join('')}${withheld.length?`<details class="topic-evidence"><summary>Source metadata requires review · ${withheld.length}</summary>${withheld.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div>${sourceLink(row)}</article>`).join('')}</details>`:''}${actions.size?`<div class="source-actions"><h3>Source defensive considerations</h3>${[...actions].map(([action,sources])=>`<p>${e(action)} <span class="topic-sources">${[...sources.values()].map(r=>sourceLink(r)).join(' · ')}</span></p>`).join('')}</div>`:''}`;
 }
 
-function editionRows(edition) {
-  return [...edition.input.records,...edition.input.news,...edition.input.updates].filter((row,index,rows)=>rows.findIndex(r=>r.id===row.id)===index);
-}
+const editionRows = editionEvidence;
 function editorialTopics(edition) {
   const rows=editionRows(edition);
   return edition.topics.map(topic=>({...topic,records:rows.filter(r=>topic.evidence_ids.includes(r.id)),summary:edition.plan.topics.find(t=>t.topic_id===topic.id)?.summary.text||''}));
@@ -53,15 +50,43 @@ function editorialTopics(edition) {
 function editionMarkup(edition) {
   const topics=editorialTopics(edition);
   const actions=[...new Set(topics.flatMap(t=>t.records.map(r=>r.action)).filter(Boolean))];
-  return `<div class="metadata">${e(time(edition.generated_at))} · ${edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(freshness[topic.freshness])} · ${e(date(topic.published_at))}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4><p>${e(row.description||row.excerpt)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
+  return `<div class="metadata">${e(time(edition.generated_at))} · ${edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(freshness[topic.freshness])} · ${e(date(topic.published_at))}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4>${description(row)?`<p>${e(description(row))}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
 }
+const description = row => row.description==='Public CIRCL OSINT observation. Source attribution is not independent verification.'?'':row.description||row.excerpt||'';
+const sourceLink = row => link(row.source_url,isRawSource(row.source_url)?'Raw source data':'Original source','link');
+function readerReference(row,text,cls='') {
+  const target=readerTarget(row);
+  return target.kind==='article'?link(target.url,text,cls):`<button class="link ${e(cls)}" data-evidence="${e(row.id)}">${e(text)} →</button>`;
+}
+
+function readerLinks(rows,{lead=false}={}) {
+  const articles=[...new Map(rows.filter(row=>readerTarget(row).kind==='article').map(row=>[row.source_url,row])).values()];
+  if(articles.length)return articles.slice(0,lead?3:2).map(row=>link(row.source_url,articles.length>1?shortHeadline(row.title):row.category==='Exploitation watch'?'CISA announcement':'CISA advisory')).join(' · ');
+  const cves=[...new Map(rows.filter(r=>r.kind==='vulnerability').map(r=>[r.value,r])).values()];
+  if(cves.length&&!lead)return cves.map(row=>`<button class="link" data-evidence="${e(row.id)}">${e(row.value)} →</button>`).join(' · ');
+  const row=rows[0];
+  if(!row)return '';
+  if(lead||rows.length>1)return `<button class="link" data-supporting="${e(row.id)}">Supporting evidence ↓</button>`;
+  return `<button class="link" data-evidence="${e(row.id)}">Details →</button>`;
+}
+function recordEvidence(row,index) {
+  const title=row.kind==='vulnerability'?row.value:row.source==='cisa-advisories'?row.title:`${kinds[row.kind]||row.kind} · ${index+1}`;
+  return `<details class="evidence" data-record="${e(row.id)}"><summary>${e(title)}${row.kind==='vulnerability'?`<span>${e(row.title)}</span>`:''}</summary><div class="record-detail">${row.kind&&row.kind!=='vulnerability'?`<div class="indicator">${e(row.value)}</div>`:''}${description(row)?`<p>${e(description(row))}</p>`:''}${row.action?`<details class="source-actions"><summary>Source defensive guidance</summary><p>${e(row.action)}</p></details>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.content_changed_at?`<dt>Content change recorded</dt><dd>${e(time(row.content_changed_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</div></details>`;
+}
+function supportingEvidence(source) {
+  const rows=source.input?editionRows(source):(source.observations||source.items);
+  const topics=source.input?source.topics:briefDigest(source);
+  const groups=evidenceGroups(rows,topics);
+  if(!groups.length)return '';
+  return `<details class="supporting-evidence"><summary>Supporting evidence</summary><div class="evidence-groups">${groups.map(group=>`<details class="evidence-group" data-group="${e(group.key)}"><summary>${e(group.label)} <small>${group.records.length} ${e(group.unit)}${group.records.length===1?'':'s'}</small></summary><div class="group-records">${group.records.map(recordEvidence).join('')}${group.context_ids.map(id=>{const node=source.input?.context.find(r=>r.id===id);return node?`<p class="topic-sources">${link(node.url,`${node.external_id} · ${node.name}`)}</p>`:''}).join('')}</div></details>`).join('')}</div></details>`;
+}
+
 const archives = () => [...(data.editions||[]),...data.reports].sort((a,b)=>b.generated_at.localeCompare(a.generated_at));
 function opening(edition,report) {
-  if(!edition){const digest=briefDigest(report);return `<div class="section-head"><h1>Daily Brief</h1><time>${e(date(report?.generated_at))}</time></div>${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:empty('No accepted public edition is available yet.')}${report?`<details class="full-brief"><summary>Full brief and evidence</summary><div class="report-body">${reportMarkup(report)}</div></details>`:''}`;}
+  if(!edition){const digest=briefDigest(report);return `<div class="section-head"><h1>Daily Brief</h1><time>${e(date(report?.generated_at))}</time></div>${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:empty('No accepted public edition is available yet.')}${report?supportingEvidence(report):''}`;}
   const topics=editorialTopics(edition);
   const radar=topics.length>1?topics.slice(1,4):topics;
-  const sources=[...new Map(topics.flatMap(t=>t.records).map(r=>[r.source_url,r])).values()];
-  return `<div class="section-head"><h2>Daily Brief</h2><time>${e(date(edition.generated_at))}</time></div><div class="edition-grid"><div class="editorial-lead"><h1>${e(topics[0]?.headline||'No new source-dated developments')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}<div class="topic-sources">${sources.slice(0,3).map(r=>link(r.source_url,names[r.source])).join(' · ')}</div></div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><div class="topic-sources">${[...new Map(topic.records.map(r=>[r.source_url,r])).values()].map(r=>link(r.source_url,names[r.source])).join(' · ')}</div></article>`).join('')}</aside>`:''}</div><details class="full-brief"><summary>Full brief and evidence</summary><div class="report-body">${editionMarkup(edition)}</div></details>`;
+  return `<div class="section-head"><h2>Daily Brief</h2><time>${e(date(edition.generated_at))}</time></div><div class="edition-grid"><div class="editorial-lead"><h1>${e(topics[0]?.headline||'No new source-dated developments')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}<div class="topic-sources">${readerLinks(topics.flatMap(t=>t.records),{lead:true})}</div></div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</aside>`:''}</div>${supportingEvidence(edition)}`;
 }
 
 function render() {
@@ -72,7 +97,7 @@ function render() {
   const week=dailyKev(data.records,7,new Date().toISOString()).reduce((sum,row)=>sum+row.count,0);
   main.innerHTML=`${warnings()}<section id="search-results" class="search-results" hidden></section>
     <section class="brief" id="brief">${opening(edition,report)}</section>
-    <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2><div class="news-filters" aria-label="News category">${[['all','All'],['Security advisory','Advisories'],['Exploitation watch','KEV']].map(([v,l])=>`<button data-news-filter="${v}" aria-pressed="${v===newsFilter}">${l}</button>`).join('')}</div></div><div id="news-content"></div></section>
+    <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2></div><div id="news-content"></div></section>
     <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Selected advisories'],[history.length,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
     <section id="trends"><div class="section-head"><h2>Trends</h2><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div>
       <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
@@ -103,10 +128,11 @@ function typeChart() {
 }
 
 function news() {
-  const stories=editorialStories(data.news,data.exported_at||new Date().toISOString(),data.editions?.[0]?.topics.flatMap(t=>t.evidence_ids)||[]).filter(r=>newsFilter==='all'||r.category===newsFilter);
+  const stories=additionalStories(data.news,data.exported_at||new Date().toISOString(),data.editions?.[0]);
   document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map((row,index)=>{
-    return `<article class="story ${index===0?'story-featured':index>=3?'story-brief':'story-secondary'}"><div class="source-line">CISA · ${e(date(row.published_at))}</div><h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(row.excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(row.excerpt)}</p></details>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
-  }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No recent source reports match this filter.');
+    const excerpt=usefulExcerpt(row);
+    return `<article data-story-id="${e(row.id)}" class="story ${index===0?'story-featured':index>=3?'story-brief':'story-secondary'}"><div class="source-line">CISA · ${e(date(row.published_at))}</div><h3 title="${e(row.title)}">${readerReference(row,shortHeadline(row.title))}</h3>${excerpt?`<details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(excerpt)}</p></details>`:''}${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${readerReference(r,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${readerReference(row,readerTarget(row).kind==='article'?'Read source':'View details')}</div></article>`;
+  }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No additional source reports are available for this edition.');
 }
 
 function cveRows() {
@@ -121,9 +147,10 @@ function catalog() {
   document.querySelector('#catalog-results').innerHTML=rows.length?`<div class="catalog-grid">${rows.slice(0,catalogLimit).map(row=>`<button class="catalog-item" data-stix="${e(row.id)}"><span>${e(row.external_id)} · ${e(types[row.type]||row.type)}</span><strong>${e(row.name)}</strong></button>`).join('')}</div>${rows.length>catalogLimit?'<button class="more" data-more-catalog>More catalog context ↓</button>':''}`:empty('No matching catalog objects.');
 }
 
-function evidence(id) {
-  const row=data.records.find(r=>r.id===id)||[...data.reports.flatMap(r=>r.observations||r.items),...(data.editions||[]).flatMap(editionRows)].find(r=>r.id===id);if(!row)return;
-  document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2><div class="indicator">${e(row.value)}</div><p>${e(row.description||row.excerpt)}</p><h3>Defensive consideration</h3><p>${e(row.action)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}`;
+function evidence(id,scope=null) {
+  const scoped=scope?(scope.input?editionRows(scope):scope.observations||scope.items).find(r=>r.id===id):null;
+  const row=scoped||data.records.find(r=>r.id===id)||data.news.find(r=>r.id===id)||[...data.reports.flatMap(r=>r.observations||r.items),...(data.editions||[]).flatMap(editionRows)].find(r=>r.id===id);if(!row)return;
+  document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2><div class="indicator">${e(row.value)}</div>${description(row)?`<p>${e(description(row))}</p>`:''}${row.action?`<h3>Defensive consideration</h3><p>${e(row.action)}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${sourceLink(row)}`;
   if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
 }
 
@@ -144,7 +171,7 @@ function search() {
   if(!query){region.hidden=true;return;}
   const hits=[...groupStories(data.news),...data.records,...data.stix.objects].filter(row=>matches(row,query));
   region.hidden=false;
-  region.innerHTML=`<div class="section-head"><h2>${hits.length} search results</h2><button class="link" data-clear-search>Clear search</button></div>${hits.length?`<ul>${hits.slice(0,40).map(row=>`<li><small>${e(row.type?'MITRE ATT&CK®':names[row.source])} ${e(row.external_id||row.value||date(row.published_at))}</small>${row.type?`<button class="link" data-stix="${e(row.id)}">${e(row.name)} ↗</button>`:row.kind?`<button class="link" data-evidence="${e(row.id)}">${e(row.title)} ↗</button>`:link(row.source_url,row.title)}</li>`).join('')}</ul>${hits.length>40?'<p class="source-line">First 40 results. Refine your search to narrow the list.</p>':''}`:empty('No matching intelligence.')}`;
+  region.innerHTML=`<div class="section-head"><h2>${hits.length} search results</h2><button class="link" data-clear-search>Clear search</button></div>${hits.length?`<ul>${hits.slice(0,40).map(row=>`<li><small>${e(row.type?'MITRE ATT&CK®':names[row.source])} ${e(row.external_id||row.value||date(row.published_at))}</small>${row.type?`<button class="link" data-stix="${e(row.id)}">${e(row.name)} ↗</button>`:row.kind?`<button class="link" data-evidence="${e(row.id)}">${e(row.title)} ↗</button>`:readerReference(row,row.title)}</li>`).join('')}</ul>${hits.length>40?'<p class="source-line">First 40 results. Refine your search to narrow the list.</p>':''}`:empty('No matching intelligence.')}`;
 }
 
 function anchor() {
@@ -160,10 +187,11 @@ function anchor() {
 
 function click(event) {
   const button=event.target.closest('button');if(!button||!data)return;
-  if(button.dataset.evidence)evidence(button.dataset.evidence);
+  if(button.dataset.evidence){const scope=button.closest('#archived-report')?archives().find(r=>r.id===document.querySelector('#archive-select').value):button.closest('#brief')?data.editions?.[0]||data.reports[0]:null;evidence(button.dataset.evidence,scope);}
+  if(button.hasAttribute('data-supporting')){const supporting=document.querySelector('#brief > .supporting-evidence');if(supporting){supporting.open=true;const record=[...supporting.querySelectorAll('[data-record]')].find(r=>r.dataset.record===button.dataset.supporting);const target=record?.closest('.evidence-group')||supporting;if(target!==supporting)target.open=true;target.querySelector('summary').focus();target.scrollIntoView({block:'nearest'});}}
   if(button.dataset.stix)stixDetail(button.dataset.stix);
   if(button.dataset.period){period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
-  if(button.dataset.newsFilter){newsFilter=button.dataset.newsFilter;newsLimit=6;document.querySelectorAll('[data-news-filter]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.newsFilter===newsFilter));news();}
+
   if(button.hasAttribute('data-more-news')){const before=newsLimit;newsLimit+=6;news();document.querySelectorAll('.story')[before]?.querySelector('a')?.focus();}
   if(button.hasAttribute('data-more-catalog')){const before=catalogLimit;catalogLimit+=12;catalog();document.querySelectorAll('.catalog-item')[before]?.focus();}
   if(button.dataset.page){cvePage+=Number(button.dataset.page);cveRows();document.querySelector('[data-page]:not(:disabled)')?.focus();}

@@ -73,6 +73,77 @@ export function editorialStories(news, asOf, selectedIds=[]) {
   });
 }
 
+// Reader presentation only. Original URLs, evidence and editorial plans stay intact.
+export function editionEvidence(edition) {
+  const rows=new Map();
+  for(const row of [...edition.input.records,...edition.input.news])rows.set(row.id,{...row});
+  for(const update of edition.input.updates){
+    const original=rows.get(update.id);
+    rows.set(update.id,{...original,...update,...(original?.description?{description:original.description}:{})});
+  }
+  return [...rows.values()];
+}
+
+export function isRawSource(url) {
+  try{return /\.(?:json|csv|xml)$/i.test(new URL(url).pathname);}catch{return true;}
+}
+
+export function readerTarget(row) {
+  try {
+    const url=new URL(row.source_url);
+    if(row.source==='cisa-advisories'&&url.protocol==='https:'&&url.hostname==='www.cisa.gov'&&url.pathname.startsWith('/news-events/')&&!url.username&&!url.password&&!url.search&&!url.hash&&['','443'].includes(url.port)&&!isRawSource(url.href))return {kind:'article',url:row.source_url,id:row.id};
+  }catch{}
+  return {kind:'detail',id:row.id};
+}
+
+export function evidenceGroups(rows,topics=[]) {
+  const lookup=new Map(rows.map(r=>[r.id,r]));const seen=new Set(),contexts=new Set(),groups=[];
+  const append=(label,members)=>{
+    if(!members.length)return;
+    const unit=members.every(r=>r.kind==='vulnerability')?'CVE':members.every(r=>r.source==='cisa-advisories')?'source report':members.every(r=>r.kind&&r.kind!=='vulnerability')?'indicator':'record';
+    groups.push({key:`evidence-${members[0].id}`,label,unit,records:members,context_ids:[]});
+    members.forEach(r=>seen.add(r.id));
+  };
+  for(const topic of topics){
+    const ids=topic.evidence_ids||topic.supporting_evidence_ids||topic.records?.map(r=>r.id)||[];
+    const members=[...new Set(ids)].map(id=>lookup.get(id)).filter(row=>row&&!seen.has(row.id));
+    if(topic.kind==='catalog'){
+      append('CISA KEV additions',members.filter(r=>r.kind==='vulnerability'));
+      const articles=members.filter(r=>r.source==='cisa-advisories');
+      append(articles.length===1?'CISA announcement':'CISA announcements',articles);
+      append(topic.headline,members.filter(r=>!seen.has(r.id)));
+    }else append(topic.headline||'Source evidence',members);
+    const owner=groups.find(g=>g.records.some(r=>ids.includes(r.id)));
+    if(owner)for(const id of topic.context_ids||[]){if(!contexts.has(id)){owner.context_ids.push(id);contexts.add(id);}}
+  }
+  append('Other source records',[...lookup.values()].filter(r=>!seen.has(r.id)));
+  return groups;
+}
+
+export function usefulExcerpt(row) {
+  const text=(row.excerpt||'').trim();
+  if(!text||/^(?:source excerpt|no excerpt(?: available)?|excerpt unavailable|not available|n\/a)[.!]?$/i.test(text)||text.toLowerCase()===row.title?.trim().toLowerCase())return '';
+  return text;
+}
+
+export function additionalStories(news,asOf,edition,category='all') {
+  const categoryRows=news.filter(row=>category==='all'||row.category===category);
+  if(!edition)return editorialStories(categoryRows,asOf);
+  const ids=new Set(edition.topics.flatMap(t=>t.evidence_ids));
+  const featured=editionEvidence(edition).filter(r=>ids.has(r.id));
+  const articles=featured.filter(r=>r.source==='cisa-advisories');
+  const articleIds=new Set(articles.map(r=>r.id)),urls=new Set(articles.map(r=>r.source_url).filter(Boolean));
+  const cves=new Set(featured.filter(r=>r.kind==='vulnerability').map(r=>r.value.toUpperCase()));
+  const catalog=edition.topics.some(t=>t.kind==='catalog');
+  // Filter originals before grouping so a featured bulletin cannot hide distinct
+  // older reports inside its related-updates list. CVE overlap alone never removes a report.
+  const distinct=categoryRows.filter(r=>!articleIds.has(r.id)&&!urls.has(r.source_url));
+  const end=Date.parse(asOf),start=new Date(end);start.setUTCDate(start.getUTCDate()-1);start.setUTCHours(0,0,0,0);
+  const current=row=>Date.parse(row.published_at)>=start.getTime()&&Date.parse(row.published_at)<=end;
+  const related=row=>(catalog&&row.category==='Exploitation watch')||(row.title+' '+row.excerpt).match(/CVE-\d{4}-\d{4,7}/gi)?.some(id=>cves.has(id.toUpperCase()));
+  return editorialStories(distinct,asOf).sort((a,b)=>Number(current(b))-Number(current(a))||Number(Boolean(related(a)))-Number(Boolean(related(b))));
+}
+
 export function briefDigest(report) {
   if (!report || report.mode === 'quiet-day') return [];
   const rows=report.observations||report.items;
