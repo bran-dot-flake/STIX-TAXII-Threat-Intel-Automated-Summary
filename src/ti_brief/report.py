@@ -19,13 +19,18 @@ Do not include any other fields. Include at least one item when records are supp
 
 def excerpt_options(record):
     choices = []
-    for text, limit in ((record.title, 150), (record.description, 240)):
-        excerpt = text[:limit]
-        if len(text) > limit and " " in excerpt:
-            excerpt = excerpt.rsplit(" ", 1)[0]
-        excerpt = excerpt.strip()
-        if excerpt and excerpt not in choices:
-            choices.append(excerpt)
+    title = record.title.strip()
+    if title and len(title) <= 240:
+        choices.append(title)
+    # Never remove a qualifying tail by cutting a sentence at a character limit.
+    description = record.description.strip()
+    if description and len(description) <= 240 and description not in choices:
+        choices.append(description)
+    sentence = re.split(r"(?<=[.!?])\s+", description, maxsplit=1)[0]
+    if sentence and len(sentence) <= 240 and sentence not in choices:
+        choices.append(sentence)
+    if not choices:
+        raise ValueError("No complete source excerpt fits the brief's size bound")
     return choices
 
 

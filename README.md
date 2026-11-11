@@ -2,7 +2,7 @@
 
 Collect public threat intelligence, store private MISP events, import them into OpenCTI with its supported MISP connector, and generate daily evidence-grounded Markdown using an existing local Ollama model. This is a resource-conscious personal lab and portfolio project.
 
-**Current status:** MISP 2.5.51 and OpenCTI 7.261109.0 are deployed on the target Ubuntu VM. All 41 collected observations passed exact entity/provenance checks, and the existing local Ollama model produced a validated real brief with the platform containers stopped. Daily staged-job and timer acceptance are tracked in [validation](docs/validation.md). This is a small-data lab below upstream OpenCTI production sizing.
+**Current status:** MISP 2.5.51 and OpenCTI 7.261109.0 are deployed on the target Ubuntu VM. All 41 collected observations passed exact entity/provenance checks, and the existing local Ollama model produced validated real briefs with platform containers stopped. The approved daily system timer is enabled and its real service run completed successfully. See [validation](docs/validation.md). This is a small-data lab below upstream OpenCTI production sizing.
 
 ```mermaid
 flowchart TB
@@ -56,7 +56,7 @@ After platform deployment and configuration:
 ```sh
 python3 scripts/init_env.py
 # Select an existing model in .env; no model downloads occur automatically.
-PYTHONPATH=src python3 -m ti_brief.cli
+PYTHONPATH=src python3 scripts/daily_staged.py --manage-project
 ```
 
 The LLM edits an **extractive** summary: it chooses and orders source excerpts tied to known evidence IDs. JSON-schema branches bind each ID to a fixed set of exact source choices; local validation independently rejects unsupported IDs/text, duplicates, empty selections on nonempty evidence, or extra fields. It cannot add narrative facts, citations, indicators, commands or relationships. Facts and actions elsewhere in the brief come from deterministic source rendering; quoted source claims still need analyst review. If inference fails, a marked fallback is saved, exit status is 2, and records remain pending for retry. Platform/feed failures exit 1; complete runs exit 0. A no-change day produces an explicit quiet-day report.

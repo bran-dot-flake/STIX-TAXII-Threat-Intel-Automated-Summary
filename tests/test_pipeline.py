@@ -16,7 +16,7 @@ from ti_brief.feeds import circl_records, demo_records, feodo_records, kev_recor
 from ti_brief.http import Http, RemoteError
 from ti_brief.model import Record, canonical
 from ti_brief.platforms import Misp, OpenCti, event_uuid, misp_event
-from ti_brief.report import llm_select, render, validate_selection
+from ti_brief.report import excerpt_options, llm_select, render, validate_selection
 from ti_brief.store import Store
 
 
@@ -106,6 +106,12 @@ class ValidationTests(unittest.TestCase):
                 validate_selection(value, {r.key: r})
         with self.assertRaises(ValueError):
             validate_selection({"items": []}, {r.key: r})
+
+    def test_excerpt_choices_preserve_complete_conditions(self):
+        r = replace(demo_records()[0], title="Complete source title", description="A vulnerability affects " + "one specific configuration " * 15 + "only after authentication.")
+        self.assertEqual(excerpt_options(r), [r.title])
+        short = replace(r, description="Authentication is required. The remaining source details are longer.")
+        self.assertIn("Authentication is required.", excerpt_options(short))
 
     def test_kev_dates_are_not_exploitation_dates(self):
         rows = {"vulnerabilities": [{"cveID": "CVE-2026-1234", "dateAdded": "2026-11-09", "vulnerabilityName": "Example", "shortDescription": "Evidence", "requiredAction": "Apply updates"},
