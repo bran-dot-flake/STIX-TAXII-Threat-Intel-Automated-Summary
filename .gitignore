@@ -18,3 +18,10 @@ assessments/
 *.log
 *.pem
 *.key
+node_modules/
+.DS_Store
+playwright-report/
+test-results/
+*.gguf
+*.safetensors
+.publication/

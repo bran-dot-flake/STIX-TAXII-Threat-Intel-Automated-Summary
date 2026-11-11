@@ -10,6 +10,19 @@ HTTP enforces response/time limits, verifies TLS, rejects redirects and embedded
 
 The LLM receives no API keys, host environment, file access or execution tools. A failed or malformed model response generates a clearly degraded deterministic report, exits 2 and leaves the queue pending. Feed/platform failures exit 1 without acknowledging unfinished reports. A lock prevents overlapping jobs. Report files are written atomically, and private systemd service files use umask 0077.
 
-Do not run intelligence lookup/enrichment against third-party targets without authorization. Nothing in this project probes IOCs, blocks traffic, sends notifications or publishes intelligence automatically.
+Do not run intelligence lookup/enrichment against third-party targets without authorization. Nothing in this project probes IOCs, blocks traffic, or sends notifications. Optional automatic publication is limited to the public boundary below.
 
 Report vulnerabilities privately to the repository owner through GitHub's available private reporting features. Avoid public issues containing secrets, private reports, or infrastructure addresses.
+## Public dashboard boundary
+
+The dashboard publishes a separate original-source projection, not the private
+database or raw report directories. `publication.py` enforces source, marking,
+address, field, and exact-evidence checks. `publish.py` writes one sanitized JSON
+file to an isolated branch using existing GitHub CLI authentication. It never
+uploads the working tree or exports a credential. The static build validates the
+snapshot again and copies only allowlisted frontend files. See
+[publication operations](docs/publication.md) for the contract and failure behavior.
+
+Do not extend the publisher to accept private MISP events or remove marking checks
+to make a missing report appear. Add a source-specific adapter and tests before
+enabling another public source. Public source assertions still need analyst review.

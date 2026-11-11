@@ -1,78 +1,208 @@
-# Automated threat intelligence briefs
+<h1 align="center">EMBER · Threat Intelligence Observatory</h1>
 
-Collect public threat intelligence, store private MISP events, import them into OpenCTI with its supported MISP connector, and generate daily evidence-grounded Markdown using an existing local Ollama model. This is a resource-conscious personal lab and portfolio project.
+<hr>
 
-**Current status:** MISP 2.5.51 and OpenCTI 7.261109.0 are deployed on the target Ubuntu VM. All 41 collected observations passed exact entity/provenance checks, and the existing local Ollama model produced validated real briefs with platform containers stopped. The approved daily system timer is enabled and its real service run completed successfully. See [validation](docs/validation.md). This is a small-data lab below upstream OpenCTI production sizing.
+<p align="center"><strong>MISP · OpenCTI · Ollama · Automated Threat Intelligence</strong></p>
+
+<p align="center">
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/Python-3.11%2B-ff875a?style=flat-square&amp;labelColor=252522">
+  <img alt="Local inference" src="https://img.shields.io/badge/Inference-local_Ollama-ff875a?style=flat-square&amp;labelColor=252522">
+  <img alt="GitHub Pages hosting" src="https://img.shields.io/badge/Hosting-GitHub_Pages-ff875a?style=flat-square&amp;labelColor=252522">
+  <img alt="Python standard library runtime" src="https://img.shields.io/badge/Runtime-Python_standard_library-ff875a?style=flat-square&amp;labelColor=252522">
+</p>
+
+<p align="center">Public threat signals become private, correlated evidence and daily source-grounded briefs.<br>A separate publication boundary brings the safe results to a public intelligence dashboard.</p>
+
+<p align="center">
+  <a href="https://bran-dot-flake.github.io/STIX-TAXII-Threat-Intel-Automated-Summary/">Live Observatory ↗</a> ·
+  <a href="#overview">Overview</a> · <a href="#objectives">Objectives</a> ·
+  <a href="#architecture">Architecture</a> · <a href="#implementation">Implementation</a> ·
+  <a href="#results">Results</a> · <a href="#setup">Setup</a>
+</p>
+
+<hr>
+
+## Overview
+
+Threat intelligence arrives in separate catalogs, indicators, and advisories. EMBER brings those signals together in a daily publication that makes findings traceable to their sources. Its dashboard combines an exploitation watch, indicator statistics, an editorial advisory feed, and archived intelligence briefs.
+
+Behind the website is an Ubuntu lab. MISP organizes source-attributed events and indicators; OpenCTI provides a structured intelligence graph. An existing local Ollama model selects relevant source excerpts for a daily report. Python validates those selections and renders the facts, chronology, and defensive guidance. The model supplies no numerical metrics or speculative relationships.
+
+The website is static. It contains a separate, validated public-source projection and never connects to the lab. Readers can use the last published edition while the VM or model is offline.
+
+## Objectives
+
+- Normalize public intelligence while preserving source attribution and distinct publication, collection, and incident dates.
+- Verify MISP/OpenCTI synchronization with durable checkpoints and bounded resource use.
+- Use local inference for readable, evidence-grounded briefings, with explicit validation and fallback behavior.
+- Make intelligence accessible through useful charts, responsive editorial layouts, and historical reports.
+- Automate outbound publishing without exposing private infrastructure.
+
+## Architecture
 
 ```mermaid
 flowchart TB
-    Host[Windows host: development + GitHub] -->|SSH tunnel| VM
-    subgraph VM[Ubuntu VM: private lab]
-      Feeds[CISA KEV + bounded CIRCL OSINT] --> Pipeline[Python collection + SQLite checkpoints]
-      Pipeline --> MISP[MISP: private source-attributed events]
-      MISP --> Connector[Official one-way MISP connector]
-      Connector --> OpenCTI[OpenCTI: entities + source-supported relationships]
-      MISP --> CVEs[Read-back + idempotent CVE API bridge]
-      CVEs --> OpenCTI
-      MISP --> Evidence[Read-back + evidence snapshot]
-      OpenCTI --> Evidence
-      Evidence --> Ollama[Existing CPU Ollama: validated extractive editing]
-      Ollama --> Brief[Private Markdown + JSON provenance]
-      Timer[Daily systemd user timer] --> Pipeline
-    end
+  Feeds[Public feeds] --> Collect[Python collectors]
+  subgraph Lab[Private Ubuntu lab]
+    Collect --> SQLite[SQLite checkpoints]
+    SQLite --> MISP[MISP]
+    MISP --> Connector[Official MISP connector]
+    Connector --> OpenCTI[OpenCTI]
+    MISP --> Bridge[CVE API bridge]
+    Bridge --> OpenCTI
+    MISP --> Verify[Exact evidence verification]
+    OpenCTI --> Verify
+    Verify --> Ollama[Local Ollama]
+    Ollama --> Brief[Validated private brief]
+    Timer[Daily systemd timer] --> Collect
+  end
+  Feeds --> Public[Independent public collector]
+  Public --> Gate[Public export gate]
+  Brief --> Gate
+  Gate --> JSON[Sanitized JSON / intel-data]
+  JSON --> Actions[GitHub Actions]
+  Frontend[Static frontend] --> Actions
+  Actions --> Pages[GitHub Pages]
 ```
 
-The application has no Python runtime dependencies beyond Python 3.11+. SQLite tracks source observations, content changes, MISP synchronization, the CVE bridge, and reporting independently. Deterministic MISP event/attribute UUIDs and native OpenCTI upserts reconcile retries. Existing SQLite state gains the new bridge checkpoint through a nondestructive column migration. Reports acknowledge only successfully written records; backlog remains queued. Overlapping executions are blocked by an OS lock.
+MISP, OpenCTI, the connector, the CVE bridge, and Ollama have been exercised on the target VM. They remain optional dependencies of the public collector. TAXII ingestion, general STIX bundle ingestion, and broader actor/ATT&CK adapters are future work; the repository's original name does not imply those features are implemented.
 
-## Run without infrastructure
+## Implementation
 
-From the repository root on Ubuntu:
+### Collection and correlation
 
-```sh
-PYTHONPATH=src python3 -m unittest discover -s tests -v
-PYTHONPATH=src python3 -m ti_brief.cli --demo
-PYTHONPATH=src python3 -m ti_brief.cli --collect-only
-python3 scripts/validate.py
-```
+SQLite tracks source observations and independent synchronization/reporting checkpoints. Stable MISP UUIDs and native OpenCTI upserts reconcile retries. The official MISP connector imports indicators and observables. Its deployed version omits standalone vulnerability attributes, so a CVE-only API bridge fills that gap after MISP read-back. Strict reporting verifies exact entity values and MISP provenance; broad search candidates do not count as proof.
 
-The demo is fully offline, uses reserved documentation indicators, and writes isolated `data/demo` and `reports/demo` directories. Collection-only downloads public feeds into `data/live` without platform writes or inference. It is not an end-to-end deployment test. On PowerShell, set `$env:PYTHONPATH='src'` and run `python -m ...` separately.
-
-## Feed scope and evidence
-
-| Adapter | Default | Scope and limits |
+| Source | Private pipeline | Public publication |
 | --- | --- | --- |
-| CISA KEV JSON | Yes | Catalog entries added in the last 14 days; exploit exposure is not inferred |
-| CIRCL MISP OSINT | Yes | At most 3 recently modified events, 20 supported attributes per event; not exhaustive ingestion |
-| Feodo CSV | No | Optional `--feeds cisa-kev,feodo`; rejects missing or >7-day-old source timestamps; stale in assessment |
+| CISA KEV JSON | Catalog additions from the last 14 days | Up to 90 days of catalog additions |
+| CIRCL public MISP OSINT | Three recent events × twenty supported attributes | Same bounded sample, explicit CLEAR/WHITE and address checks |
+| CISA advisory RSS | Independent editorial adapter | Up to eighteen articles from the last 30 days |
+| Feodo CSV | Optional; disabled after stale-source detection | Not published |
 
-CIRCL accepts individual IPs, domains, URLs, MD5/SHA1/SHA256 hashes, and CVEs from event/object attributes. Composite or invalid values are skipped, rather than guessed. Independent sources are preserved separately; a single normalized indicator can therefore have several observations. The supported MISP connector handles indicators, observables and their native relationships. Its deployed version omits standalone vulnerability attributes, so a separate API bridge upserts CVEs after MISP read-back, carrying MISP and original-source references. Each entity type has one writer; there is no circular synchronization. This first release does not implement a TAXII server/client, full STIX bundle ingestion, ATT&CK seeding, or speculative actor/technique mapping.
+These are source assertions. KEV `dateAdded` is a catalog date, not a disclosure or exploitation date. Newly collected infrastructure is not necessarily newly active. The initial adapters do not support reliable CVSS, malware-family, actor, or ATT&CK statistics, so those views are not fabricated.
 
-Daily briefs distinguish source publication/catalog-addition, source modification, source-observed occurrence when available, and local ingestion. Historical records that are newly collected are not described as newly occurring attacks. Ranking is explainable: KEV 90, other source observations 60, then stable evidence ID. Up to 8 records are briefed per run; collection and MISP sync have separate bounds.
+### Local LLM reporting
 
-## Reporting and model boundaries
+Ollama performs **extractive editing**: it chooses and orders complete source excerpts tied to known evidence IDs. Per-record JSON-schema alternatives constrain generation. Independent local validation rejects unknown IDs, invented text, duplicates, extra fields, and empty selections on nonempty evidence. No execution tools are supplied to the model.
 
-After platform deployment and configuration:
+Up to eight observations are briefed per run. The renderer supplies citations, timestamps, and source recommendations. Failed inference writes a marked fallback, exits with status 2, and leaves records pending. Complete runs exit 0; other failures exit 1. Quiet days produce an explicit no-new-findings edition. [Synthetic private report](examples/daily-brief.synthetic.md).
+
+The resource-aware orchestrator prepares verified evidence with the platforms running, stops only this project's containers for CPU inference, then restores the selected resident profile. Images are digest-pinned. The approved system timer runs daily at 08:00 UTC with up to five minutes of jitter, persistent catch-up, and bounded retries. No additional model or server is needed for the website.
+
+### Public publication and presentation
+
+The exporter recollects original allowlisted public sources. It never uploads the local database, raw Markdown, or private JSON sidecars. Brief excerpts are promoted only after the entire evidence batch matches independently recollected public versions and its digest. Private platform context is discarded. CIRCL restrictions are checked at event, object, and attribute level; nonpublic addresses and suspicious text are rejected. Indicators are defanged.
+
+The publisher uses existing `gh` authentication to commit exactly one validated `snapshot.json` to an isolated `intel-data` branch. It never stages the working directory, exports a token, or force-pushes. An explicit dispatch builds `main` with that snapshot, validates it again, and deploys only allowlisted assets. Source failures retain previous validated data and original last-success times; failed deployment leaves the previous site online.
+
+The frontend is plain HTML, CSS, and JavaScript, without a framework, CDN, analytics tracker, or external font service. Charcoal panels, orange emphasis, editorial serif headlines, and technical metadata give it a consistent identity. Original SVG illustrations accompany short attributed CISA excerpts. Charts use deterministic code, UTC dates, and deduplicated values. Keyboard navigation, native detail dialogs, chart data tables, responsive layouts, and explicit empty/stale states support everyday use.
+
+## Results
+
+[Open the live observatory](https://bran-dot-flake.github.io/STIX-TAXII-Threat-Intel-Automated-Summary/).
+
+![EMBER dashboard showing real public intelligence, a daily brief, and exploitation analytics](docs/images/dashboard-desktop.png)
+
+<details>
+<summary>The intelligence desk</summary>
+
+![Source-linked editorial advisory cards with original illustrations](docs/images/intelligence-desk.png)
+
+</details>
+
+<details>
+<summary>Mobile dashboard</summary>
+
+<img src="docs/images/dashboard-mobile.png" alt="EMBER dashboard at phone width" width="320">
+
+</details>
+
+The November 11, 2026 acceptance snapshot contained **159 public observations**: **114 unique KEV entries** and **45 unique public IOCs**, plus **18 CISA advisories** and **two accepted public briefs**. The 30-day chart contained forty catalog additions, calculated from source dates. These are dated validation results, not throughput or comprehensive coverage claims; live figures change with collection.
+
+The private lab previously verified all forty-one collected observations against exact OpenCTI entities and MISP provenance. A real systemd-managed run completed successfully, restored both platform UIs, and unloaded Ollama. Its orchestration process measured a 48.3 MiB peak; platform and model memory are separate. [Backend acceptance evidence](docs/validation.md).
+
+New tests cover public restrictions, source failure caching, exact brief promotion, publication isolation, metric deduplication, UTC windows, and search calculations. Browser acceptance covers the four primary views at phone, tablet, and desktop widths, chart/category filters, source details, CVE search, and report history. [Publication contract and operations](docs/publication.md).
+
+## Setup
+
+Python **3.11+** runs collection, reporting, export, and builds without runtime dependencies. Node 24 is used only for calculation tests. The full lab additionally needs Docker Compose and an existing Ollama installation. Publishing needs authenticated GitHub CLI access to repository contents and workflow dispatch.
+
+### Explore without the platforms
+
+From a fresh checkout on Ubuntu:
 
 ```sh
+export PYTHONPATH=src
+python3 -m unittest discover -s tests -v
+node --test tests/dashboard.test.mjs
+python3 scripts/validate.py
+python3 -m ti_brief.cli --demo
+python3 scripts/build_dashboard.py --demo
+python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
+```
+
+Open `http://127.0.0.1:4173`. The dashboard demo is visibly synthetic and rejected by the live publisher. Omit `--demo` to explore the empty state. In PowerShell, set `$env:PYTHONPATH='src'` before Python commands.
+
+Collect real public data without MISP, OpenCTI, or Ollama:
+
+```sh
+PYTHONPATH=src python3 scripts/export_publication.py
+python3 scripts/build_dashboard.py --snapshot data/publication/snapshot.json
+```
+
+The export populates analytics and news immediately. Public brief history appears when accepted local reports exist; the exporter makes no extra model call.
+
+### Configure the private lab
+
+```sh
+python3 scripts/assess.py
 python3 scripts/init_env.py
-# Select an existing model in .env; no model downloads occur automatically.
+# Edit .env locally; choose an existing OLLAMA_MODEL.
 PYTHONPATH=src python3 scripts/daily_staged.py --manage-project
 ```
 
-The LLM edits an **extractive** summary: it chooses and orders source excerpts tied to known evidence IDs. JSON-schema branches bind each ID to a fixed set of exact source choices; local validation independently rejects unsupported IDs/text, duplicates, empty selections on nonempty evidence, or extra fields. It cannot add narrative facts, citations, indicators, commands or relationships. Facts and actions elsewhere in the brief come from deterministic source rendering; quoted source claims still need analyst review. If inference fails, a marked fallback is saved, exit status is 2, and records remain pending for retry. Platform/feed failures exit 1; complete runs exit 0. A no-change day produces an explicit quiet-day report.
+Review [resource planning](docs/resources.md) and the [incremental deployment guide](docs/deployment.md) before installing or starting services. The measured target has about 10 GiB of guest RAM and CPU-only inference, below OpenCTI production sizing. `TI_RESIDENT_PROFILE=misp` is the default; `all` requires a measured combined pilot. Existing unrelated workloads remain outside this project's scope.
 
-Use `--sync-misp-only` for the first ingestion pilot. Use `--prepare-only --sync-timeout 900` to synchronize/query both platforms and save verified context, then `--render-prepared` with the same `--max-records` bound to infer when platform containers are stopped. Snapshots expire after 24 hours and must exactly match the pending record versions. The staged orchestrator checks container ownership and never stops unrelated workloads. `TI_RESIDENT_PROFILE=misp` leaves MISP running afterward; `all` restores both UIs after a measured combined pilot. See [resource planning](docs/resources.md).
+| Configuration | Purpose |
+| --- | --- |
+| `MISP_URL`, `MISP_API_KEY` | Private MISP API and read-back |
+| `OPENCTI_URL`, `OPENCTI_TOKEN` | Private graph API and provenance verification |
+| `OLLAMA_URL`, `OLLAMA_MODEL` | Existing local inference endpoint and model |
+| `TI_RESIDENT_PROFILE` | `misp` or measured `all` after reporting |
+| `TI_PUBLICATION_ENABLED` | Set `true` to export/publish after daily staged runs |
+| `TI_PUBLICATION_REPOSITORY` | Target repository; update when using a fork |
 
-Reports contain Executive Summary, Emerging Threats, Vulnerabilities, Indicators of Compromise, MITRE ATT&CK, Defensive Recommendations and Sources, plus a private JSON sidecar with evidence fingerprints and API context. [Synthetic example](examples/daily-brief.synthetic.md). Real reports and credentials stay outside version control. Review [security boundaries](SECURITY.md).
+All actual credentials, reports, state, models, and logs stay ignored. See [.env.example](.env.example) and [SECURITY.md](SECURITY.md).
 
-## Deployment and operation
+### Publish to GitHub Pages
 
-- [Environment assessment and memory budget](docs/resources.md)
-- [Incremental deployment, API validation, scheduling and recovery](docs/deployment.md)
-- [Test evidence and remaining acceptance work](docs/validation.md)
+1. Authenticate `gh` as the collector account, with repository/workflow access. Do not export its token into source.
+2. Enable **Settings → Pages → Source: GitHub Actions**.
+3. For a fork, update frontend/README repository links and `TI_PUBLICATION_REPOSITORY` in `.env`.
+4. Run the exporter with `--publish` to create/update `intel-data` and dispatch the workflow on `main`.
+5. Set `TI_PUBLICATION_ENABLED=true` for daily runs through the existing system timer.
 
-Compose provides independent `misp`, `opencti`, and `integration` profiles, persistent named volumes, health checks, bounded logs and explicit memory/CPU limits. Only `127.0.0.1:8081` (MISP) and `127.0.0.1:8080` (OpenCTI) are published. Every image is pinned to a registry-verified immutable digest. `scripts/lock_images.py` intentionally refreshes tags/digests; `scripts/build_compose.py` regenerates plain Compose JSON, which Docker Compose accepts as YAML. These checks do not prove image compatibility at runtime.
+```sh
+PYTHONPATH=src python3 scripts/export_publication.py --publish
+gh run list --workflow pages.yml --limit 5
+```
 
-The reviewed system timer runs the job as `vboxuser` once daily at 08:00 UTC (03:00 US Eastern in standard time; 04:00 in daylight time), with up to five minutes of jitter, persistent catch-up and bounded failure retries. Installing it requires explicit administrative approval. GitHub Actions tests synthetic functionality and Compose syntax; GitHub-hosted runners never receive lab credentials or run the daily live intelligence job.
+The workflow must exist on `main`. If the first automatic deployment begins before the new data branch exists, rerun it after export. GitHub-hosted runners receive no lab credentials. Relative assets and hash navigation support Pages project URLs. Publication is outbound-only and requires no new VM firewall exposure.
 
-Project source: [bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary](https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary).
+### Repository map
+
+| Path | Responsibility |
+| --- | --- |
+| `src/ti_brief/feeds.py`, `model.py`, `store.py` | Normalization and durable ingestion state |
+| `src/ti_brief/platforms.py`, `cli.py` | MISP/OpenCTI integration and staged execution |
+| `src/ti_brief/report.py` | Ollama contract, validation, and private report rendering |
+| `src/ti_brief/publication.py`, `publish.py` | Safe public projection and outbound publishing |
+| `website/` | Static frontend and original editorial artwork |
+| `scripts/` | Assessment, orchestration, export, build, and verification |
+| `deploy/` | Locked Compose configuration and reviewed systemd units |
+| `tests/`, `examples/`, `docs/` | Automated checks, labeled fixtures, and operational evidence |
+
+Source failures appear under **Sources & status**. A missing public brief means no complete evidence batch has passed the gate yet; inspect local reports rather than weakening validation. Export failures are logged by redacted error class. A data-branch commit is separate from deployment success: inspect Actions for publication status.
+
+The site remains accessible during a VM outage but cannot collect fresh intelligence then. Coverage is deliberately bounded. Broader feeds, TAXII/STIX support, richer source-supported relationships, backup restoration, and larger-scale operation remain future work.
