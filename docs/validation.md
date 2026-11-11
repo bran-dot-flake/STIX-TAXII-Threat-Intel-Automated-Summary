@@ -2,6 +2,41 @@
 
 This record separates application acceptance from container startup and records failures as well as passing checks. Existing prompt-injection repositories and their uncommitted artifacts were preserved. The agent did not reboot the VM or modify its networking, swap, or Ollama service configuration.
 
+## Current validation summary
+
+Last reviewed: **2026-11-11**. Historical figures below are acceptance samples, not current collection totals.
+
+| Area | Verified evidence |
+| --- | --- |
+| MISP / OpenCTI | 41 source observations passed exact value/pattern and MISP-provenance read-back; private events and durable checkpoints retained. |
+| STIX / TAXII | 220 original objects in a bounded live pilot; source versions/relationships, resumable pages and incremental replay tested. A three-object OpenCTI bridge replay made zero additional writes. |
+| Reporting | Existing CPU-only Ollama produced a checked 143-word editorial overview. A prior systemd-managed private reporting run completed successfully. |
+| Publication | HTTPS Pages deployment and original-source validation verified; the public dataset remains separate from private platform databases. |
+| Regression checks | 85 Python tests, 26 Node tests, repository-link/SVG checks and Chrome at 390/768/1440 passed locally; the [CI workflow](../.github/workflows/ci.yml) runs the same suites on supported Python versions. |
+| Resources / automation | Approximately 10 GiB guest RAM; two-thread CPU inference. The approved daily 08:00 UTC timer remains active. |
+
+**Limits:** bounded feed/catalog coverage; no inferred actor/technique relationships; no general verifier of unrestricted LLM prose. The newest editorial/publication stages were verified individually, while their complete updated scheduled sequence awaits its next daily activation. A backup restore and production-scale operation have not been demonstrated.
+
+Private run records, reports and journals remain in the lab, outside Git. The dated sections below retain failures, resource observations, acceptance commands and public Actions references. [Resource history](resources.md) · [Current operations](deployment.md).
+
+## Reproduce automated checks
+
+From the repository root, using Python 3.11+ and Node 24:
+
+```sh
+python3 -m venv work/check-venv
+work/check-venv/bin/python -m pip install -r requirements-stix.lock
+PYTHONPATH=src work/check-venv/bin/python -m unittest discover -s tests -v
+node --test tests/dashboard.test.mjs
+python3 scripts/check_repository.py
+python3 scripts/validate.py
+python3 scripts/build_dashboard.py --demo
+```
+
+The optional dependencies enable the STIX/TAXII tests; without them, those cases are explicitly skipped. In PowerShell, set `$env:PYTHONPATH='src'` and use the virtual environment's Windows Python path. Browser acceptance uses the existing [Chrome/Playwright runner](../scripts/check_dashboard.cjs); the [CI workflow](../.github/workflows/ci.yml) shows its pinned development setup. It does not add a browser or service to the deployed website.
+
+## Historical acceptance record
+
 ## Assessment and recovery
 
 On 2026-11-10, read-only checks found an Ubuntu 26.04 guest with 9,481 MiB RAM, three CPU threads, no swap, 34 GiB free disk, native Ollama 0.40.16 and an existing 2 GB llama3.2 model. Docker was absent. The first model test coincided with a user-confirmed VM crash; its cause remains unconfirmed, with no retrieved OOM/panic evidence.
@@ -78,6 +113,8 @@ The static site stays accessible while the VM is offline, with collection age sh
 
 ## Compact frontend and STIX/TAXII acceptance — 2026-11-11
 
+[Earlier news-index screenshot](images/intelligence-desk.png) is retained as a historical UI reference; current screenshots are linked from the README.
+
 The revised frontend consolidates the prior views into a single page. The sidebar, decorative masthead, standalone status section, and repeated story art were removed. A multi-finding brief appears first, followed by four metrics, compact trends, grouped stories, and expandable CVEs/archive. Optional ATT&CK context remains collapsed until requested. Search includes catalog names/IDs and detail dialogs retain original relationship IDs/direction.
 
 Live verification used MITRE's original TAXII 2.1 discovery endpoint, default API root, and Enterprise collection. Bounded requests parsed and stored 220 original STIX objects. Repeated calls resumed later pages, preserved existing versions, and exercised the completed definitions stream's incremental date-added query. The public gate accepted 61 named catalog objects and five resolved relationships; incomplete, inactive, unsupported, and unmarked/restricted context remained local. This is sampled coverage, not a full ATT&CK download or incident activity measure.
@@ -120,3 +157,14 @@ Staged publication now collects once, composes from that fixed sanitized snapsho
 The front-page Supporting evidence section contains independently expandable groups and records, with no copied overview or radar summaries. For the current November 10 briefing, six unique CVEs and one CISA announcement appear once, despite their shared editorial topics. The archive retains full reports. Reader links use the original approved human article or an internal detail view; JSON feeds remain unchanged and explicitly labeled Raw source data in technical views. All eighteen CISA article URLs returned HTTP 200 HTML from the VM; the lead URL returned the expected “CISA Adds Six Known Exploited Vulnerabilities to Catalog” page title at its original URL.
 
 The visible category filters and placeholder excerpt labels are removed. Latest Intelligence filters exact featured IDs/URLs before grouping, keeps distinct related CVE reports and older bulletins, and preserves the complete underlying dataset/search/archive. Tests verify these distinctions, unsafe link rejection, evidence counts/deduplication, context/update metadata, empty excerpts, unchanged overview text, independent disclosures, raw-link labels, and reader detail dialogs. All 85 Python tests and eighteen Node tests pass. Chrome checks at 390/768/1440 pass against real and synthetic data, with additional isolated legacy/quiet/placeholder presentation cases and no page/CSP errors or overflow. The built real publication JSON equals the original payload; backend schemas, model output, platform integrations and checkpoints are unchanged.
+
+
+## Final publication and repository polish — 2026-11-11
+
+Global search now groups CIRCL observations by exact original event URL, deduplicates CVEs/source articles across current and archived datasets, and retains exact hash/domain/IP/URL/ATT&CK lookup. Displayed indicators remain defanged. Matching archived observations open their actual evidence version. Result labels distinguish reports, vulnerabilities, advisories and ATT&CK entity types without adding search filters.
+
+All 160 current public ATT&CK entries had valid names/types/identifiers; 139 lacked resolved relationships in the bounded sample. Their detail dialogs now omit empty relationship sections. Defensive card checks exclude malformed identities without inventing titles; existing source links, tactics and resolved edges remain. The public schema contains no object descriptions, so no new enrichment/export fields were introduced. The KEV bar series and totals are unchanged; chart tables default to nonzero dates and expose the complete series through Show all days.
+
+The existing compact header received serif masthead typography and thin rules; no font download, CDN or new visual panel was added. The README was reduced from 20,396 to approximately 8,700 bytes, preserving its centered title/rule/technology/badges/description/navigation/rule order. The dynamic CI badge references the actual workflow. A 1,280 × 290 SVG diagram separates independent original-source recollection from eligible private-lab context. The detailed Mermaid path is retained in deployment documentation. The diagram was rendered and inspected; current desktop/mobile screenshots were refreshed.
+
+Local checks passed 85 Python and 26 Node tests, the infrastructure validator, real/demo builds, and Chrome acceptance at 390/768/1440, including grouped and exact-identifier search, sparse catalog dialogs, all-days chart tables and the existing controls. Repository checks cover nine Markdown documents, local anchors/paths, four SVGs and exclusion of private/runtime paths. An additional tracked-file audit found no high-confidence private-key/token patterns or duplicate PNGs. The earlier news-index crop remains linked as historical evidence; legacy illustration assets remain referenced by the build/metadata contract. Existing operational/security material was retained in its focused documents, with stale batch-versus-editorial wording corrected. No runtime backend, schema, synchronization or model change was made.

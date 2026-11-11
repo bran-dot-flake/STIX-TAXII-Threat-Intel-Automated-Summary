@@ -43,7 +43,52 @@ export function kindCounts(records) {
   return Object.entries(counts).sort((a,b) => b[1] - a[1]);
 }
 export function matches(item, query) {
-  return [item.title, item.name, item.external_id, item.value, item.kind, item.type, item.description, item.excerpt].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase());
+  // Normalize only for comparison; stored/displayed indicators stay defanged.
+  const normalize=value=>value.toLowerCase().replaceAll('[.]','.').replaceAll('hxxps://','https://').replaceAll('hxxp://','http://');
+  return normalize([item.title, item.name, item.external_id, item.value, item.kind, item.type, item.description, item.excerpt].filter(Boolean).join(' ')).includes(normalize(query.trim()));
+}
+
+export function catalogEntries(objects) {
+  const ids={'attack-pattern':/^T\d{4}(?:\.\d{3})?$/,'intrusion-set':/^G\d{4}$/,malware:/^S\d{4}$/,tool:/^S\d{4}$/};
+  return objects.filter(row=>{
+    if(!row||!(ids[row.type] instanceof RegExp)||!ids[row.type].test(row.external_id)||typeof row.name!=='string'||!row.name.trim()||typeof row.id!=='string'||!new RegExp('^'+row.type+'--[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$').test(row.id))return false;
+    try{const url=new URL(row.url);return url.protocol==='https:'&&url.hostname==='attack.mitre.org'&&!url.username&&!url.password&&['','443'].includes(url.port);}catch{return false;}
+  });
+}
+
+export function chartRows(series,showAll=false) {
+  return showAll?series:series.filter(row=>row.count>0);
+}
+
+export function searchResults(snapshot,query) {
+  if(!query.trim())return [];
+  const observations=[...snapshot.records,...snapshot.reports.flatMap(r=>r.observations||r.items),...(snapshot.editions||[]).flatMap(editionEvidence)];
+  const groups=new Map();
+  const add=(key,row,type,label,title)=>{
+    if(!groups.has(key))groups.set(key,{key,type,label,title,variants:new Map()});
+    const variants=groups.get(key).variants;
+    if(!variants.has(row.id))variants.set(row.id,[]);
+    variants.get(row.id).push(row);
+  };
+  for(const row of observations){
+    if(!row.kind)continue;
+    if(row.kind==='vulnerability')add('cve:'+row.value.toUpperCase(),row,'vulnerability','Vulnerability',row.title);
+    else if(row.source==='circl-osint'&&/^https:\/\/www\.circl\.lu\/doc\/misp\/feed-osint\/[0-9a-f-]{36}\.json$/.test(row.source_url))add('report:'+row.source_url,row,'report','Intelligence report',row.title);
+    else add('indicator:'+row.id,row,'indicator','Indicator',row.title);
+  }
+  for(const row of [...snapshot.news,...(snapshot.editions||[]).flatMap(e=>e.input.news)])add('article:'+row.source_url,row,'advisory','Security advisory',row.title);
+  const labels={'attack-pattern':'ATT&CK technique','intrusion-set':'Threat actor',malware:'Malware',tool:'Tool'};
+  for(const row of catalogEntries(snapshot.stix?.objects||[]))add('stix:'+row.id,row,'stix',labels[row.type],row.name);
+  const results=[];
+  for(const group of groups.values()){
+    const records=[...group.variants.values()].map(versions=>versions[0]);
+    const matching=[...group.variants.values()].map(versions=>versions.find(row=>matches(row,query))).filter(Boolean);
+    if(!matching.length)continue;
+    // Multiple source versions of one CVE remain one result. Exact historical
+    // matches open their actual evidence rather than an unrelated latest value.
+    results.push({key:group.key,type:group.type,label:group.label,title:group.title,record:matching[0],records,matching});
+  }
+  return results;
 }
 
 export function groupStories(news) {

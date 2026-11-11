@@ -54,7 +54,8 @@ The orphan `intel-data` branch intentionally has no code or workflow. An explici
 ```sh
 export PYTHONPATH=src
 python3 scripts/export_publication.py
-python3 scripts/export_publication.py --publish
+python3 scripts/compose_brief.py --editorial
+python3 scripts/export_publication.py --publish-prepared
 python3 scripts/build_dashboard.py --snapshot data/publication/snapshot.json
 gh run list --workflow pages.yml --limit 5
 ```

@@ -68,6 +68,16 @@ const output = process.argv[3];
     assert.equal(await page.locator('.bar').count(), 7);
     await page.getByRole('button', { name: '30D', exact: true }).click();
     assert.equal(await page.locator('.bar').count(), 30);
+    const series=analytics.dailyKev(snapshot.records,30,new Date().toISOString());
+    await page.locator('.chart-data > summary').click();
+    assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
+    await page.locator('#show-all-days').check();
+    assert.equal(await page.locator('#chart-table tbody tr').count(),30);
+    const tableTotal=(await page.locator('#chart-table tbody td:nth-child(2)').allTextContents()).reduce((n,text)=>n+Number(text),0);
+    assert.equal(tableTotal,series.reduce((n,r)=>n+r.count,0));
+    await page.locator('#show-all-days').uncheck();
+    assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
+    await page.locator('.chart-data > summary').click();
     assert.equal(await page.locator('.story-featured').count(),expectedStories.length?1:0);
     assert.deepEqual(await page.locator('.story').evaluateAll(nodes=>nodes.map(n=>n.dataset.storyId)),expectedStories.slice(0,6).map(r=>r.id));
     assert(!(await page.locator('#intelligence').innerText()).includes('Source excerpt'));
@@ -124,14 +134,49 @@ const output = process.argv[3];
         await page.keyboard.press('Escape');
         await page.locator('#catalog-search').fill('');
       }
+      const sparse=snapshot.stix.objects.find(o=>!snapshot.stix.relationships.some(r=>r.source_ref===o.id||r.target_ref===o.id));
+      if(sparse){
+        await page.locator('#catalog-search').fill(sparse.external_id);
+        await page.locator('#catalog-results [data-stix]').first().click();
+        await page.locator('dialog[open]').waitFor();
+        assert.equal(await page.locator('#dialog-title').innerText(),sparse.name);
+        assert.equal(await page.getByRole('heading',{name:'Source relationships',exact:true}).count(),0);
+        assert.equal(await page.locator('#dialog-content .empty').count(),0);
+        assert.equal(await page.locator('#dialog-content a').getAttribute('href'),sparse.url);
+        await page.keyboard.press('Escape');await page.locator('#catalog-search').fill('');
+      }
+
     }
     const query = cve?.value || snapshot.news[0]?.title.split(' ')[0];
     if (query) {
       await page.locator('#global-search').fill(query);
       await page.locator('#global-search').press('Enter');
       await page.locator('#search-results:not([hidden])').waitFor();
-      assert(await page.locator('#search-results li').count() > 0);
+      assert(await page.locator('#search-results .search-hit').count() > 0);
+      if(cve)assert.equal(await page.locator('#search-results .search-hit').count(),1);
       await page.getByRole('button', { name: 'Clear search' }).click();
+    }
+
+    const campaign=snapshot.records.find(r=>r.source==='circl-osint'&&r.title.includes('MoustachedBouncer'))||snapshot.records.find(r=>r.source==='circl-osint');
+    if(campaign){
+      await page.locator('#global-search').fill(campaign.title);await page.locator('#global-search').press('Enter');
+      const expected=analytics.searchResults(snapshot,campaign.title);
+      assert.equal(await page.locator('.search-list > .search-hit').count(),expected.length);
+      assert.equal(await page.locator('.search-report').count(),expected.filter(r=>r.type==='report').length);
+      const sample=snapshot.records.find(r=>r.source_url===campaign.source_url&&['md5','sha256','url','ip-dst'].includes(r.kind));
+      if(sample){
+        const query=sample.value.replaceAll('[.]','.').replace('hxxps://','https://').replace('hxxp://','http://');
+        await page.locator('#global-search').fill(query);await page.locator('#global-search').press('Enter');
+        const hitIndex=analytics.searchResults(snapshot,query).findIndex(hit=>hit.matching.some(r=>r.id===sample.id));
+        const hit=page.locator('.search-list > .search-hit').nth(hitIndex);
+        await hit.locator('summary').click();
+        const exact=hit.locator(`[data-search-record="${sample.id}"]`);
+        assert((await exact.innerText()).includes(sample.value));
+        await exact.click();await page.locator('dialog[open]').waitFor();
+        assert((await page.locator('#dialog-content .indicator').innerText()).includes(sample.value));
+        await page.keyboard.press('Escape');
+      }
+      await page.getByRole('button',{name:'Clear search',exact:true}).click();
     }
     await page.locator('#global-search').blur();
     for (const width of [390, 768, 1440]) {

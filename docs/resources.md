@@ -55,10 +55,12 @@ After manual application acceptance, `scripts/daily_staged.py --manage-project` 
 3. Start MISP, OpenCTI, one worker and the official MISP connector.
 4. Collect, synchronize MISP, read it back, and wait up to 900 seconds for exact OpenCTI matches carrying the MISP event UUID.
 5. Save an evidence snapshot and stop this project's containers before inference.
-6. Render with the existing Ollama model, requesting immediate unload (`keep_alive: 0`).
+6. Render the private exact-excerpt report with the existing Ollama model, requesting immediate unload (`keep_alive: 0`).
 7. On success, restore MISP by default, or both platforms when `TI_RESIDENT_PROFILE=all` follows a measured combined pilot. The recovered target uses `all`.
 
-Any preparation failure still stops the owned platform containers. A failed model leaves reports queued and does not restore the platforms, so the failure is visible. There is no volume deletion, package installation, sudo, network change or model download in the orchestrator. The complete staged job has passed live acceptance, including provenance and restoration of both UIs.
+Any preparation failure still stops the owned platform containers. A failed model leaves reports queued and does not restore the platforms, so the failure is visible. There is no volume deletion, package installation, sudo, network change or model download in the orchestrator. The original core staged job passed live acceptance, including provenance and restoration of both UIs.
+
+With publication enabled, an additional stage independently collects public evidence after restoration, composes the editorial narrative only with at least 3,500 MiB available memory, and publishes the prepared validated snapshot. It replaces the redundant batch narrative call. The source/model/publication components have been verified individually; the complete updated scheduled sequence awaits its next activation. [Current acceptance summary](validation.md#current-validation-summary).
 
 Run `python3 scripts/monitor.py --samples 20` during each pilot stage and save its private JSONL. Correlate available RAM, host physical headroom, Docker RSS/caps, swap, CPU pressure, OOM counts and API latency. The orchestrator's memory check does not measure the Windows host: check host headroom separately.
 
