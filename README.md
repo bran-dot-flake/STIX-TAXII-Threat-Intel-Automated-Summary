@@ -51,27 +51,9 @@ The exporter independently checks original sources and produces a validated publ
 
 ## Results
 
-| Capability | Verified result |
-| --- | --- |
-| Platform integration | **41 observations** passed exact MISP/OpenCTI value and provenance checks in the November 10, 2026 pilot. |
-| Structured ingestion | **220 original STIX objects** stored in a bounded live TAXII acceptance run on November 11, with version-aware replay and source relationships. |
-| Catalog bridge | A real **three-object** OpenCTI import repeated with **zero additional writes**. |
-| Local reporting | Real CPU Ollama output produced a checked **143-word editorial overview**. A separate systemd-managed reporting run completed successfully. |
-| Public delivery | HTTPS GitHub Pages publication, independent source validation, searchable evidence and retained historical editions. |
-| Automated checks | Python 3.11/3.13/3.14, Node calculation/search checks and Chrome acceptance at **390 / 768 / 1440 px**. |
-
-These are dated lab results and bounded samples, not complete ATT&CK coverage or production-scale performance. [Current validation summary and acceptance record](docs/validation.md#current-validation-summary).
-
-[Explore the live publication ↗](https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/)
+[Take a look at EMBER ↗](https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/)
 
 ![EMBER daily intelligence brief, source-linked evidence, additional reports and trends](docs/images/dashboard-desktop.png)
-
-<details>
-<summary>Phone layout</summary>
-
-<img src="docs/images/dashboard-mobile.png" alt="EMBER single-page publication at phone width" width="320">
-
-</details>
 
 ## Documentation
 
