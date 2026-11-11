@@ -26,3 +26,18 @@ snapshot again and copies only allowlisted frontend files. See
 Do not extend the publisher to accept private MISP events or remove marking checks
 to make a missing report appear. Add a source-specific adapter and tests before
 enabling another public source. Public source assertions still need analyst review.
+
+## STIX/TAXII
+
+Raw STIX bundles, TAXII payloads, version history, cursors, and private-feed
+metadata stay in ignored local SQLite state. The public MITRE namespace is reserved
+for its exact original discovery/root/Enterprise collection; bundle imports receive
+a different namespace. Private-feed auth is never sent to the public MITRE origin.
+TAXII requests verify TLS, reject redirects/cross-origin roots, and have persistent
+request, size, and time limits. Indicator URLs are not fetched.
+
+Public STIX data requires resolved permissive markings and the reviewed source
+license. Unknown/granular/restricted markings, inactive objects, and dangling edges
+are withheld. Only original IDs and source-supported relationships are projected;
+no LLM attribution is added. The optional OpenCTI catalog bridge remains private
+and uses read-back before checkpointing. See [STIX operations](docs/stix-taxii.md).

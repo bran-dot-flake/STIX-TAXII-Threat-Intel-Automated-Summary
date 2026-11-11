@@ -9,6 +9,9 @@ description = "Resource-conscious MISP, OpenCTI and local Ollama intelligence br
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+stix = ["stix2==3.0.1", "taxii2-client==2.3.0"]
+
 [project.scripts]
 ti-brief = "ti_brief.cli:main"
 

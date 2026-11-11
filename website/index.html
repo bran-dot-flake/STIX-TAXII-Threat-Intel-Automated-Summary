@@ -3,34 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111110">
-  <meta name="description" content="An independent threat intelligence observatory. Public-source signals, known exploited vulnerabilities, and daily evidence-led intelligence briefs.">
+  <meta name="theme-color" content="#141413">
+  <meta name="description" content="Daily cybersecurity briefs, public-source intelligence, exploited vulnerabilities, and sourced ATT&CK context.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>EMBER — Threat Intelligence Observatory</title>
+  <title>EMBER — Cyber Threat Intelligence</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to intelligence</a>
-  <aside class="sidebar">
-    <a class="brand" href="#overview" aria-label="Ember overview"><span class="brand-mark">E<span>↗</span></span><span>EMBER<small>INTELLIGENCE</small></span></a>
-    <div class="sidebar-caption">THE OBSERVATORY</div>
-    <nav aria-label="Primary navigation">
-      <a href="#overview" data-view="overview"><span aria-hidden="true">◫</span> Overview <b>01</b></a>
-      <a href="#briefings" data-view="briefings"><span aria-hidden="true">▤</span> Daily briefs <b>02</b></a>
-      <a href="#vulnerabilities" data-view="vulnerabilities"><span aria-hidden="true">◎</span> Vulnerabilities <b>03</b></a>
-      <a href="#sources" data-view="sources"><span aria-hidden="true">⌘</span> Sources & status <b>04</b></a>
-    </nav>
-    <div class="sidebar-note"><span class="status-dot"></span> PUBLIC INTELLIGENCE<p>Collected locally.<br>Published openly.</p><a href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary" target="_blank" rel="noopener noreferrer">Explore the project ↗</a></div>
-    <div class="sidebar-foot">MISP · OpenCTI · Ollama<br><span>Independent research project</span></div>
-  </aside>
-  <div class="workspace">
-    <header class="topbar"><div class="breadcrumb">OBSERVATORY <span>/</span> <strong id="view-label">OVERVIEW</strong></div><form role="search" id="search-form"><label class="sr-only" for="global-search">Search intelligence</label><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Search CVEs, indicators, reports…" autocomplete="off"><kbd>↵</kbd></form><a class="repo-link" href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub">SOURCE ↗</a></header>
-    <main id="main" tabindex="-1"><div class="loading" role="status">Opening the observatory…</div></main>
-    <footer><span><b>EMBER</b> / THREAT INTELLIGENCE OBSERVATORY</span><span>Evidence first. Context always.</span><a href="#sources">Methodology & source status ↗</a></footer>
-  </div>
-  <dialog id="detail-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Close intelligence detail">✕</button><div id="dialog-content"></div></dialog>
-  <noscript><p>This dashboard needs JavaScript. The <a href="./snapshot.json">public intelligence JSON</a> remains available.</p></noscript>
+  <a class="skip" href="#brief">Skip to daily brief</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#brief"><img src="./assets/favicon.svg" alt="" width="27" height="27">EMBER</a>
+      <nav aria-label="Sections"><a href="#brief">Brief</a><a href="#intelligence">Intelligence</a><a href="#trends">Trends</a><a href="#vulnerabilities">Vulnerabilities</a><a href="#archive">Archive</a></nav>
+      <form id="search-form" role="search"><label for="global-search" class="sr-only">Search intelligence</label><input id="global-search" type="search" placeholder="Search intelligence…" autocomplete="off"><button aria-label="Search" type="submit">↵</button></form>
+      <span class="last-updated" id="last-updated">Loading…</span>
+    </div>
+  </header>
+  <main id="main"><p class="loading" role="status">Loading intelligence…</p></main>
+  <footer><a href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary" target="_blank" rel="noopener noreferrer">GitHub ↗</a><span id="attribution"></span></footer>
+  <dialog id="detail-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Close detail">✕</button><div id="dialog-content"></div></dialog>
+  <noscript><p>Enable JavaScript to browse, or <a href="./snapshot.json">read the public JSON</a>.</p></noscript>
 </body>
 </html>

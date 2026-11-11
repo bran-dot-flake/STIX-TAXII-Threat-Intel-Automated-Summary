@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metrics,dailyKev,kindCounts,matches} from '../website/analytics.js';
+import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest} from '../website/analytics.js';
 
 const records=[
   {source:'cisa-kev',kind:'vulnerability',value:'CVE-2026-0001',published_at:'2026-11-10',first_seen:'2026-11-11T10:00:00Z'},
@@ -24,4 +24,18 @@ test('empty datasets and case insensitive search',()=>{
   assert.equal(dailyKev([],30,'2026-11-11').length,30);
   assert.equal(matches({title:'Vendor Remote Access',value:'CVE-2026-0001'},' cve-2026 '),true);
   assert.equal(matches({title:'Vendor'},'<script>'),false);
+});
+test('editorial selection groups catalog bulletins without dropping source citations',()=>{
+  const rows=[
+    {id:'1',title:'Catalog update one',category:'Exploitation watch',published_at:'2026-11-10'},
+    {id:'2',title:'Catalog update two',category:'Exploitation watch',published_at:'2026-11-09'},
+    {id:'3',title:'Vendor advisory',category:'Security advisory',published_at:'2026-11-08'},
+  ];
+  const grouped=groupStories(rows);assert.equal(grouped.length,2);assert.equal(grouped[0].id,'1');assert.equal(grouped[0].related[0].id,'2');
+});
+test('daily digest selects distinct supported observations and catalog search includes external IDs',()=>{
+  const row={kind:'vulnerability',value:'CVE-2026-0001'};
+  assert.equal(briefDigest({mode:'ollama-extractive',items:[row,row,{...row,value:'CVE-2026-0002'}]}).length,2);
+  assert.deepEqual(briefDigest({mode:'quiet-day',items:[]}),[]);
+  assert(matches({name:'Command and Scripting Interpreter',external_id:'T1059',type:'attack-pattern'},'t1059'));
 });
