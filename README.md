@@ -1,4 +1,4 @@
-<h1 align="center">EMBER · Threat Intelligence Observatory</h1>
+<h1 align="center">Autonomous Threat Intelligence Pipeline, EMBER</h1>
 
 <hr>
 
