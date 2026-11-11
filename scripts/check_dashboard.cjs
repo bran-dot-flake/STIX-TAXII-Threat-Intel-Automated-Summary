@@ -19,7 +19,7 @@ const output = process.argv[3];
     await page.getByRole('heading', { name: 'Daily Brief', exact: true }).waitFor();
     const snapshot = await (await page.request.get(base + '/snapshot.json')).json();
     assert.equal(await page.locator('.sidebar').count(), 0);
-    assert.equal(await page.locator('.brief-findings .finding').count(), Math.min(3, new Set((snapshot.reports[0]?.items || []).map(r => r.kind + '|' + r.value)).size));
+    assert.equal(await page.locator('.brief-findings .finding').count(), (await import('../website/analytics.js')).briefDigest(snapshot.reports[0]).length);
     const actual = await page.locator('.metric strong').allTextContents();
     assert.equal(Number(actual[1].replaceAll(',', '')), new Set(snapshot.records.filter(r => r.kind !== 'vulnerability').map(r => r.kind + '|' + r.value)).size);
     assert.equal(Number(actual[3]), snapshot.reports.length);
@@ -28,6 +28,18 @@ const output = process.argv[3];
     await page.getByRole('button', { name: '30D', exact: true }).click();
     assert.equal(await page.locator('.bar').count(), 30);
     assert(await page.locator('.story img').count() <= 1);
+    assert.deepEqual(await page.locator('main > section[id], main > details[id]').evaluateAll(nodes=>nodes.map(n=>n.id).filter(id=>id!=='search-results')),['brief','intelligence','trends','vulnerabilities','archive']);
+    if(snapshot.reports[0]?.narrative){
+      const topics=snapshot.reports[0].narrative.plan.topics;
+      for(const topic of topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
+      assert(!(await page.locator('#brief').innerText()).includes('source observations for review'));
+    }
+    const excerpt=page.locator('.story-excerpt').first();
+    if(await excerpt.count()){
+      await excerpt.locator('summary').click();
+      assert(await excerpt.getAttribute('open')!==null);
+      await excerpt.locator('summary').click();
+    }
     await page.getByRole('link', { name: 'Vulnerabilities', exact: true }).click();
     await page.locator('#vulnerabilities[open]').waitFor();
     const cve = snapshot.records.find(r => r.source === 'cisa-kev');
@@ -43,7 +55,7 @@ const output = process.argv[3];
     await page.locator('#archive[open]').waitFor();
     if (snapshot.reports.length) {
       await page.locator('#archive-select').selectOption(snapshot.reports.at(-1).id);
-      assert.equal(await page.locator('#archived-report .evidence').count(), snapshot.reports.at(-1).items.length);
+      assert.equal(await page.locator('#archived-report .evidence').count(), (snapshot.reports.at(-1).observations||snapshot.reports.at(-1).items).length);
     }
     if (snapshot.stix?.objects.length) {
       await page.locator('#context > summary').click();
@@ -65,6 +77,7 @@ const output = process.argv[3];
       assert(await page.locator('#search-results li').count() > 0);
       await page.getByRole('button', { name: 'Clear search' }).click();
     }
+    await page.locator('#global-search').blur();
     for (const width of [390, 768, 1440]) {
       await page.setViewportSize({ width, height: width === 390 ? 900 : 1050 });
       for (const id of ['context', 'archive', 'vulnerabilities']) {

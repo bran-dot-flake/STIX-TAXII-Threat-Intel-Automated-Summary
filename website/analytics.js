@@ -58,10 +58,14 @@ export function groupStories(news) {
 
 export function briefDigest(report) {
   if (!report || report.mode === 'quiet-day') return [];
-  const seen = new Set();
-  return report.items.filter(row=>{
-    const key = `${row.kind}|${row.value}`;
-    if(seen.has(key)) return false;
-    seen.add(key);return true;
-  }).slice(0,3);
+  const rows=report.observations||report.items;
+  if(report.narrative)return report.narrative.plan.topics.map(topic=>({...topic,records:rows.filter(r=>topic.supporting_evidence_ids.includes(r.id))}));
+  const groups=new Map();
+  for(const row of rows){
+    const event=/^https:\/\/www\.circl\.lu\/doc\/misp\/feed-osint\/[0-9a-f-]{36}\.json$/.test(row.source_url||'');
+    const key=row.kind==='vulnerability'?`cve:${row.value}`:event?row.source_url:`observation:${row.id}`;
+    if(!groups.has(key))groups.set(key,{headline:row.title||row.value,summary:[],why_it_matters:null,freshness:'historical-context',records:[]});
+    groups.get(key).records.push(row);
+  }
+  return [...groups.values()].slice(0,4);
 }

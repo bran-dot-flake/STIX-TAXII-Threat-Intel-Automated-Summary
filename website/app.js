@@ -26,8 +26,21 @@ function warnings() {
   return (stale?'<div class="notice">Collection is over 36 hours old. Showing the last valid dataset.</div>':'')+(failed.length?`<div class="notice">${failed.map(s=>e(names[s.id])).join(', ')} unavailable; showing retained data where available.</div>`:'');
 }
 
+const freshness = {'catalog-added':'Catalog addition','newly-published':'New publication','source-updated':'Source updated','newly-collected-history':'Newly collected · historical','historical-context':'Historical context',undated:'Publication date unavailable'};
+const prose = clauses => (clauses||[]).map(c=>c.text).join(' ');
+function topicMarkup(topic,technical=false) {
+  const rows=topic.records;
+  const sources=[...new Map(rows.map(r=>[r.source_url,r])).values()];
+  return `<article class="${technical?'report-topic':'finding'}"><div class="source-line">${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(prose(topic.summary)||rows[0]?.excerpt)}</p>${topic.why_it_matters?`<p class="significance">${e(topic.why_it_matters.text)}</p>`:''}<div class="topic-sources">${sources.map(r=>link(r.source_url,names[r.source])).join(' · ')}</div>${technical?`<details class="topic-evidence"><summary>Technical evidence · ${rows.length}</summary>${rows.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div><p>${e(row.excerpt)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(time(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}</article>`).join('')}</details>`:''}</article>`;
+}
 function reportMarkup(report) {
-  return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.mode==='ollama-extractive'?'Selected source excerpts':report.mode==='quiet-day'?'No new findings':'Source excerpts'}</div>${report.items.length?report.items.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])} · ${e(date(row.published_at))}${row.source==='cisa-kev'?' · catalog added':''}</div><h3>${e(row.title)}</h3><p>${e(row.excerpt)}</p><div class="indicator">${e(row.value)}</div><p class="action">${e(row.action)}</p>${link(row.source_url,'Source','link')}</article>`).join(''):empty('No new or changed observations in this report batch. This does not imply an absence of threats.')}`;
+  const topics=briefDigest(report);
+  const covered=new Set(topics.flatMap(t=>t.records.map(r=>r.id)));
+  const withheld=(report.observations||report.items).filter(r=>!covered.has(r.id));
+  const defaultAction='Review indicator against local telemetry before taking action.';
+  const actions=new Map();
+  for(const topic of topics)for(const row of topic.records){if(row.action&&row.action!==defaultAction){if(!actions.has(row.action))actions.set(row.action,new Map());actions.get(row.action).set(row.source_url,row);}}
+  return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.narrative?.mode==='ollama-grounded'?'Ollama fact-cited composition':'Source-grounded fallback'}</div>${report.narrative?`<p class="report-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${topics.map(t=>topicMarkup(t,true)).join('')}${withheld.length?`<details class="topic-evidence"><summary>Source metadata requires review · ${withheld.length}</summary>${withheld.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div>${link(row.source_url,'Original source','link')}</article>`).join('')}</details>`:''}${actions.size?`<div class="source-actions"><h3>Source defensive considerations</h3>${[...actions].map(([action,sources])=>`<p>${e(action)} <span class="topic-sources">${[...sources.values()].map(r=>link(r.source_url,names[r.source])).join(' · ')}</span></p>`).join('')}</div>`:''}`;
 }
 
 function render() {
@@ -35,12 +48,12 @@ function render() {
   const digest=briefDigest(report);
   const m=metrics(data,new Date().toISOString());
   const week=dailyKev(data.records,7,new Date().toISOString()).reduce((sum,row)=>sum+row.count,0);
-  const headline=!report?'Awaiting the next brief':report.mode==='quiet-day'?'No new findings in the latest batch':`${report.evidence_count} source observations for review`;
   main.innerHTML=`${warnings()}<section id="search-results" class="search-results" hidden></section>
     <section class="brief" id="brief"><div class="section-head"><h2>Daily Brief</h2><time>${e(date(report?.generated_at))}</time></div>
-      <div class="brief-intro"><h1>${e(headline)}</h1>${report&&report.items.length?'<p>Source excerpts</p>':''}</div>
-      ${digest.length?`<div class="brief-findings">${digest.map(row=>`<article class="finding"><div class="source-line">${e(names[row.source])}</div><button class="link" data-evidence="${e(row.id)}">${e(row.value)} ↗</button><p>${e(row.excerpt)}</p></article>`).join('')}</div>`:empty(report?'No new or changed observations in the report batch.':'No accepted public brief is available yet. Current source reports appear below.')}
+      ${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}
+      ${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:(report?.narrative?'':empty(report?'No new supported development was selected.':'No accepted public brief is available yet. Current source reports appear below.'))}
       ${report?`<details class="full-brief"><summary>Read full brief</summary><div class="report-body">${reportMarkup(report)}</div></details>`:''}</section>
+    <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2><div class="news-filters" aria-label="News category">${[['all','All'],['Security advisory','Advisories'],['Exploitation watch','KEV']].map(([v,l])=>`<button data-news-filter="${v}" aria-pressed="${v===newsFilter}">${l}</button>`).join('')}</div></div><div id="news-content"></div></section>
     <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Selected advisories'],[m.briefs,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
     <section id="trends"><div class="section-head"><h2>Trends</h2><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div>
       <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
@@ -48,7 +61,7 @@ function render() {
       <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${data.stix.objects.length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
         <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
         <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details></section>
-    <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2><div class="news-filters" aria-label="News category">${[['all','All'],['Security advisory','Advisories'],['Exploitation watch','KEV']].map(([v,l])=>`<button data-news-filter="${v}" aria-pressed="${v===newsFilter}">${l}</button>`).join('')}</div></div><div id="news-content"></div></section>
+
     <details class="register" id="vulnerabilities"><summary>Vulnerabilities <small>${m.kev} KEV entries</small></summary><div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input id="cve-search" type="search" placeholder="CVE, vendor, or keyword…"><small id="cve-count"></small></div><div id="cve-results"></div></details>
     <details class="archive" id="archive"><summary>Archive <small>${data.reports.length} editions</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${data.reports.map(row=>`<option value="${e(row.id)}">${e(time(row.generated_at))}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${report?reportMarkup(report):empty('No accepted public editions yet.')}</div></details>`;
   document.querySelector('#last-updated').textContent=data.collected_at?`Updated ${time(data.collected_at)}`:'No collection yet';
@@ -75,7 +88,7 @@ function news() {
   let illustrated=false;
   document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map(row=>{
     const image=row.category==='Security advisory'&&!illustrated; if(image)illustrated=true;
-    return `<article class="story"><div class="source-line">CISA · ${e(date(row.published_at))}</div>${image?'<img src="./assets/advisory.svg" alt="" width="112" height="75" loading="lazy">':''}<h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><p>${e(row.excerpt)}</p>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
+    return `<article class="story"><div class="source-line">CISA · ${e(date(row.published_at))}</div>${image?'<img src="./assets/advisory.svg" alt="" width="112" height="75" loading="lazy">':''}<h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(row.excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(row.excerpt)}</p></details>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
   }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No recent source reports match this filter.');
 }
 
@@ -92,7 +105,7 @@ function catalog() {
 }
 
 function evidence(id) {
-  const row=data.records.find(r=>r.id===id)||data.reports.flatMap(r=>r.items).find(r=>r.id===id);if(!row)return;
+  const row=data.records.find(r=>r.id===id)||data.reports.flatMap(r=>r.observations||r.items).find(r=>r.id===id);if(!row)return;
   document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2><div class="indicator">${e(row.value)}</div><p>${e(row.description||row.excerpt)}</p><h3>Defensive consideration</h3><p>${e(row.action)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}`;
   if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
 }
@@ -155,7 +168,7 @@ window.addEventListener('hashchange',()=>{if(data)anchor();});
 document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
   const response=await fetch('./snapshot.json',{cache:'no-cache'});if(!response.ok)throw new Error();data=await response.json();
-  if(![1,2].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
+  if(![1,2,3].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
   data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
   render();if(location.hash)anchor();
 } catch {

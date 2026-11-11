@@ -256,6 +256,11 @@ class ApiTests(unittest.TestCase):
             reports = list(Path(d).glob("reports/live/*.md"))
             self.assertEqual(len(reports), 1)
             self.assertIn("Ollama selected", reports[0].read_text())
+            # This mock serves excerpt JSON for both calls. The narrative gate
+            # rejects that wrong schema but preserves the completed evidence run.
+            sidecar=json.loads(reports[0].with_suffix('.json').read_text())
+            self.assertEqual(sidecar['narrative']['mode'],'deterministic-fallback')
+            self.assertEqual(len(sidecar['observations']),1)
             store = Store(Path(d) / "data/live/state.sqlite3")
             self.assertEqual(store.pending("reported_version", 8), [])
             store.close()

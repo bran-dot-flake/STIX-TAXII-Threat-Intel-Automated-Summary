@@ -255,7 +255,7 @@ def collect_public(http, previous=None, now=None):
         "exported_at": collected, "sources": statuses,
         "records": sorted({r["id"]: r for r in records}.values(), key=lambda r: (r["published_at"] or "", r["id"]), reverse=True),
         "news": news, "reports": previous["reports"], "stix":previous.get("stix",empty_context())}
-    result["schema_version"]=2
+    result["schema_version"]=previous['schema_version'] if previous['schema_version']==3 else 2
     validate_snapshot(result)
     return result, originals
 
@@ -266,6 +266,7 @@ def attach_briefs(snapshot, originals, reports_dir):
     No Markdown, database, platform context, event UUID, model URL or run ID is
     copied. A report with any unpublished evidence is withheld as a whole.
     """
+    from .briefing_public import promote_observations, enrich, enrich_snapshot
     history = {r["id"]: r for r in snapshot["reports"]}
     lookup = {r["id"]: r for r in snapshot["records"]}
     for path in sorted(Path(reports_dir).glob("*.json"))[-90:]:
@@ -294,10 +295,16 @@ def attach_briefs(snapshot, originals, reports_dir):
             report_id = hashlib.sha256((generated + raw["evidence_digest"]).encode()).hexdigest()[:24]
             # The sidecar does not claim LLM mode, so read the trusted renderer's marker.
             mode = "quiet-day" if not matched else "ollama-extractive" if "Report mode: Ollama selected, validated source excerpts." in md else "deterministic"
-            history[report_id] = {"id": report_id, "generated_at": generated, "mode": mode, "evidence_count": len(matched), "items": items}
+            report = {"id": report_id, "generated_at": generated, "mode": mode, "evidence_count": len(matched), "items": items,
+                      'observations':promote_observations(raw,matched,generated)}
+            # Preserve a previously checked model composition when a legacy
+            # sidecar is revalidated during a later publication run.
+            candidate=raw.get('narrative') or history.get(report_id,{}).get('narrative')
+            history[report_id] = enrich(report,candidate)
         except (KeyError, ValueError, TypeError, StopIteration, OSError):
             continue
     snapshot["reports"] = sorted(history.values(), key=lambda r: r["generated_at"], reverse=True)[:90]
+    enrich_snapshot(snapshot)
     validate_snapshot(snapshot)
     return snapshot
 
@@ -335,10 +342,10 @@ def validate_item(row):
 
 def validate_snapshot(value, allow_synthetic=False):
     version=value.get("schema_version")
-    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version==2 else set()))
-    if version not in {1,2} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
+    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3} else set()))
+    if version not in {1,2,3} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
         raise ValueError("Unsupported or synthetic public snapshot")
-    if version==2:validate_context(value["stix"])
+    if version in {2,3}:validate_context(value["stix"])
     for field in ("collected_at", "exported_at"):
         if value[field] is not None:
             stamp(value[field])
@@ -375,7 +382,7 @@ def validate_snapshot(value, allow_synthetic=False):
         if len(row["excerpt"].split()) > 45:
             raise ValueError("Oversized news excerpt")
     for row in value["reports"]:
-        exact_fields(row, REPORT_FIELDS)
+        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version==3 else set()))
         valid_id(row["id"])
         stamp(row["generated_at"])
         quiet = row["mode"] == "quiet-day" and row["evidence_count"] == 0 and row["items"] == []
@@ -385,6 +392,16 @@ def validate_snapshot(value, allow_synthetic=False):
             exact_fields(item, ITEM_FIELDS)
             validate_item(item)
             clean_text(item["excerpt"], 240)
+        if version==3:
+            from .briefing_public import validate_observation
+            from .narrative import validate_narrative
+            observations=row['observations']
+            if not isinstance(observations,list) or not len(row['items'])<=len(observations)<=row['evidence_count']:
+                raise ValueError('Invalid topic evidence coverage')
+            ids=[r['id'] for r in observations]
+            if len(ids)!=len(set(ids)) or any(item['id'] not in ids for item in row['items']):raise ValueError('Invalid topic evidence identifiers')
+            for observation in observations:validate_observation(observation,row['generated_at'])
+            validate_narrative(row['narrative'],row)
     return value
 
 
