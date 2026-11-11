@@ -42,9 +42,10 @@ def public_host(host):
         return False
     host = host.lower().rstrip(".")
     try:
-        return ipaddress.ip_address(host).is_global
+        address = ipaddress.ip_address(host)
+        return address.is_global and not address.is_multicast and not address.is_reserved
     except ValueError:
-        return "." in host and not host.endswith((".local", ".internal", ".localhost", ".lan", ".home", ".test", ".invalid", ".example")) and host not in {"example.com", "example.net", "example.org"}
+        return "." in host and not host.endswith((".local", ".internal", ".localhost", ".lan", ".home", ".home.arpa", ".corp", ".private", ".intranet", ".test", ".invalid", ".example")) and host not in {"example.com", "example.net", "example.org"}
 
 
 def clean_text(value, limit=4000):
@@ -55,7 +56,7 @@ def clean_text(value, limit=4000):
     if re.search(r"(?i)(?:tlp\s*:\s*(?:red|amber|green)|-----BEGIN|(?:api[_ -]?key|password|secret|token)\s*[:=]|\b(?:localhost|[\w-]+\.(?:internal|local|lan))\b|[\w.+-]+@[\w.-]+)", value):
         raise ValueError("Restricted public text")
     # Inspect IPv4 and IPv6 literals in free text, including URLs.
-    for candidate in re.findall(r"(?<![\w])(?:\d{1,3}\.){3}\d{1,3}(?![\w])|[0-9a-fA-F:]*:[0-9a-fA-F:]+", value):
+    for candidate in re.findall(r"(?<![\w])(?:\d{1,3}\.){3}\d{1,3}(?![\w])|[0-9a-fA-F:]*:[0-9a-fA-F:]+", value.replace("[.]", ".")):
         try:
             address = ipaddress.ip_address(candidate.strip("[]"))
         except ValueError:
@@ -82,7 +83,7 @@ def source_url(value, source):
 
 def public_value(kind, value):
     value = canonical(kind, value)
-    if kind == "ip-dst" and not ipaddress.ip_address(value).is_global:
+    if kind == "ip-dst" and not public_host(value):
         raise ValueError("Nonpublic indicator")
     if kind in {"domain", "url"}:
         host = value if kind == "domain" else urlsplit(value).hostname

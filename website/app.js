@@ -41,7 +41,7 @@ function overview() {
       ['Archived briefs',m.briefs,'Validated, source-linked editions','↗'],
       ['Recent advisories',m.advisories,'Up to 18 · last 30 days','⌁'],
     ].map(([label,value,note,icon])=>`<div class="metric"><div class="metric-label">${e(label)}<span aria-hidden="true">${icon}</span></div><div class="metric-value">${number(value)}</div><small>${e(note)}</small></div>`).join('')}</section>
-    <section aria-labelledby="brief-heading">${heading('01','THE INTELLIGENCE BRIEF','<a href="#briefings">All editions ↗</a>')}
+    <section aria-label="Daily intelligence brief">${heading('01','THE INTELLIGENCE BRIEF','<a href="#briefings">All editions ↗</a>')}
     <div class="brief-grid"><div class="brief-main"><div class="eyebrow">DAILY INTELLIGENCE <span class="chip">${latest?.mode === 'ollama-extractive' ? 'LLM-ASSISTED' : 'EVIDENCE-LED'}</span></div>
       ${latest ? `<h2>${e(latest.items[0]?.title || 'The daily intelligence brief')}</h2><p>${e(latest.items[0]?.excerpt || 'No new or changed observations in the bounded local report batch. This does not imply an absence of threats; continue reviewing the current public feeds below.')}</p><div class="brief-meta"><span>${e(date(latest.generated_at))}</span><span>•</span><span>${latest.evidence_count} source observations</span><a class="text-link" href="#briefings">Read the full briefing ↗</a></div>` : '<h2>Evidence before analysis.</h2><p>No validated public brief is available yet. Original public-source intelligence remains available below; the next accepted local report will appear here automatically.</p><div class="brief-meta"><a class="text-link" href="#sources">How the briefing works ↗</a></div>'}
       </div><aside class="brief-aside"><div class="kicker">ON THE RADAR / RECENT KEV ADDITIONS</div>${kev.length ? kev.map(r=>`<button class="watch-item" data-detail="${e(r.id)}"><span>${e(r.value)} <i aria-hidden="true">↗</i></span><p>${e(r.title)}</p></button>`).join('') : '<p class="muted">No recent KEV records available.</p>'}</aside></div></section>
@@ -53,11 +53,11 @@ function overview() {
 }
 function types() {
   const counts = kindCounts(data.records); const max = Math.max(...counts.map(r=>r[1]),1);
-  return counts.length ? counts.map(([kind,count])=>`<div class="type-row"><header><span>${e(kinds[kind]||kind)}</span><b>${number(count)}</b></header><div class="type-track" role="img" aria-label="${e(kinds[kind]||kind)}: ${count}"><span class="type-bar" data-width="${Math.max(2,count/max*100)}"></span></div></div>`).join('') : '<p class="muted">No observations available.</p>';
+  return counts.length ? counts.map(([kind,count])=>`<div class="type-row"><header><span>${e(kinds[kind]||kind)}</span><b>${number(count)}</b></header><div class="type-track" role="img" aria-label="${e(kinds[kind]||kind)}: ${count}"><span class="type-bar" data-width="${count/max*100}"></span></div></div>`).join('') : '<p class="muted">No observations available.</p>';
 }
 function trend() {
   const rows = dailyKev(data.records, period, new Date().toISOString()); const total = rows.reduce((s,r)=>s+r.count,0); const max = Math.max(...rows.map(r=>r.count),1);
-  document.querySelector('#trend').innerHTML = `<div class="chart-total">${number(total)}<small>entries added in ${period} days</small></div><div class="bar-chart" role="group" aria-label="Daily KEV additions"><span class="axis-max">${max}</span>${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${Math.max(1.5,r.count/max*100)}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details><summary>View chart data & methodology</summary><p>Daily unique CVEs by catalog dateAdded, not vulnerability disclosure or exploitation date. Source failures may leave cached coverage incomplete.</p><table class="data-table"><thead><tr><th scope="col">UTC date</th><th scope="col">Catalog additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table></details>`;
+  document.querySelector('#trend').innerHTML = `<div class="chart-total">${number(total)}<small>entries added in ${period} days</small></div><div class="bar-chart" role="group" aria-label="Daily KEV additions"><span class="axis-max">${max}</span>${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details><summary>View chart data & methodology</summary><p>Daily unique CVEs by catalog dateAdded, not vulnerability disclosure or exploitation date. Source failures may leave cached coverage incomplete.</p><table class="data-table"><thead><tr><th scope="col">UTC date</th><th scope="col">Catalog additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table></details>`;
   document.querySelectorAll("[data-height]").forEach(el=>el.style.height=`${el.dataset.height}%`);
 }
 function news() {
@@ -109,15 +109,15 @@ main.addEventListener('click',event=>{
   if(button.dataset.detail) detail(button.dataset.detail);
   if(button.dataset.period) {period=Number(button.dataset.period); document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period)); trend();}
   if(button.dataset.newsCategory) {newsCategory=button.dataset.newsCategory; newsLimit=5; document.querySelectorAll('[data-news-category]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.newsCategory===newsCategory)); news();}
-  if(button.hasAttribute('data-more')) {newsLimit+=6; news();}
-  if(button.dataset.report) {selectedReport=button.dataset.report; briefings(); document.querySelector('#selected-brief').scrollIntoView({block:'start'});}
-  if(button.dataset.page) {cvePage+=Number(button.dataset.page); cveRows();}
+  if(button.hasAttribute('data-more')) {const previous=newsLimit; newsLimit+=6; news(); document.querySelectorAll('.story')[previous]?.querySelector('a')?.focus();}
+  if(button.dataset.report) {selectedReport=button.dataset.report; briefings(); const article=document.querySelector('#selected-brief'); article.tabIndex=-1; article.focus(); article.scrollIntoView({block:'start'});}
+  if(button.dataset.page) {const direction=button.dataset.page; cvePage+=Number(direction); cveRows(); const buttons=[...document.querySelectorAll('[data-page]:not(:disabled)')]; (buttons.find(b=>b.dataset.page===direction)||buttons[0])?.focus();}
 });
 main.addEventListener('input',event=>{if(event.target.id==='cve-search'){cveQuery=event.target.value; cvePage=0; cveRows();}});
 document.querySelector('#search-form').addEventListener('submit',event=>{event.preventDefault(); const q=document.querySelector('#global-search').value.trim(); if(q) location.hash=`search?q=${encodeURIComponent(q)}`;});
 document.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect(); if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom) dialog.close();}});
-window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);main.focus({preventScroll:true});});
+window.addEventListener('hashchange',()=>{if(!data)return;render();window.scrollTo(0,0);main.focus({preventScroll:true});});
 try {
   const response = await fetch('./snapshot.json',{cache:'no-cache'}); if(!response.ok) throw new Error('Data unavailable');
   data = await response.json();

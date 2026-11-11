@@ -41,11 +41,11 @@ class PublicationTests(unittest.TestCase):
 
     def test_internal_addresses_and_credentials_rejected(self):
         for kind,value in [('ip-dst','10.20.0.1'),('ip-dst','127.0.0.1'),('ip-dst','::1'),
-            ('ip-dst','192.0.2.25'),('domain','server.local'),('domain','localhost'),('url','http://10.0.0.1/path'),
+            ('ip-dst','192.0.2.25'),('ip-dst','224.0.0.1'),('ip-dst','ff02::1'),('domain','server.local'),('domain','server.corp'),('domain','localhost'),('url','http://10.0.0.1/path'),
             ('url','https://user:password@evil.example.com'),('url','https://evil.example.com/?api_key=secret')]:
             with self.assertRaises(ValueError, msg=value): public_value(kind,value)
         self.assertEqual(public_value('ip-dst','8.8.8.8'),'8[.]8[.]8[.]8')
-        for text in ['Contact lab 10.0.0.1', 'See fd00::1', 'token=abc', 'TLP:AMBER', 'server.internal', 'x@y.com']:
+        for text in ['Contact lab 10.0.0.1', 'Contact lab 10[.]0[.]0[.]1', 'See fd00::1', 'token=abc', 'TLP:AMBER', 'server.internal', 'x@y.com']:
             with self.assertRaises(ValueError, msg=text): clean_text(text)
 
     def test_circl_adapter_checks_event_object_and_attribute_restrictions(self):
