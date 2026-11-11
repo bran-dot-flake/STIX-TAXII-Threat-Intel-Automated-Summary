@@ -16,14 +16,89 @@ from ti_brief.report import atomic_write
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot", type=Path, default=Path("data/publication/snapshot.json"))
-    parser.add_argument("--cache-dir", type=Path, default=Path("data/narrative"))
+    parser.add_argument("--cache-dir", type=Path)
+    parser.add_argument(
+        "--editorial",
+        action="store_true",
+        help="Compose the publication-wide edition, independent of the private batch",
+    )
     args = parser.parse_args()
+    args.cache_dir = args.cache_dir or Path(
+        "data/editorial" if args.editorial else "data/narrative"
+    )
     load_env(Path(".env"))
     if os.name != "nt":
         os.umask(0o077)
     try:
         with run_lock(args.cache_dir / "compose.lock"):
             snapshot = validate_snapshot(json.loads(args.snapshot.read_text(encoding="utf-8")))
+            if args.editorial:
+                from ti_brief.editorial import (
+                    compose as compose_editorial,
+                    edition,
+                    curate,
+                    DraftRequiresReview,
+                )
+
+                package = curate(snapshot)
+                result = edition(package)
+                try:
+                    if Path("/proc/meminfo").exists():
+                        mem = dict(
+                            line.split(":", 1)
+                            for line in Path("/proc/meminfo").read_text().splitlines()
+                        )
+                        if int(mem["MemAvailable"].split()[0]) < 3500 * 1024:
+                            raise RuntimeError(
+                                "Insufficient available memory for editorial inference"
+                            )
+                    result = compose_editorial(
+                        Http(timeout=900, retries=0),
+                        os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434"),
+                        required("OLLAMA_MODEL"),
+                        package,
+                    )
+                except DraftRequiresReview as exc:
+                    atomic_write(
+                        args.cache_dir
+                        / "review"
+                        / f"{result['id']}-{result['input_digest'][:16]}.json",
+                        json.dumps(
+                            {
+                                "status": "requires-review",
+                                "input_digest": result["input_digest"],
+                                "draft": exc.draft,
+                            },
+                            ensure_ascii=False,
+                            indent=2,
+                        ),
+                    )
+                    if exc.accepted is not None:
+                        result = exc.accepted
+                except (RuntimeError, ValueError, KeyError, TypeError) as exc:
+                    print(
+                        json.dumps(
+                            {
+                                "stage": "editorial",
+                                "status": "source-grounded-fallback",
+                                "error_type": type(exc).__name__,
+                            }
+                        )
+                    )
+                atomic_write(
+                    args.cache_dir / (result["id"] + ".json"),
+                    json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+                )
+                print(
+                    json.dumps(
+                        {
+                            "status": "editorial-composed",
+                            "mode": result["mode"],
+                            "topics": len(result["topics"]),
+                        }
+                    )
+                )
+                return 0
             enrich_snapshot(snapshot)
             if not snapshot["reports"]:
                 raise ValueError("No public edition available")

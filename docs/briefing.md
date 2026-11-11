@@ -1,5 +1,27 @@
 # Briefing, grounding, and chronology
 
+## Publication-wide editorial edition
+
+`editorial.py` builds the front-page edition from the independently collected public snapshot, not the private report queue. It considers source-dated KEV additions and advisories, original CIRCL events, proven substantive updates from accepted evidence, and explicitly cited historical CVEs/ATT&CK identifiers. It never imports arbitrary MISP/OpenCTI content across the public boundary. The configured source mix remains limited; the overview describes available feeds, not all cybersecurity activity.
+
+Curated input is bounded to 24 current observations plus four explicitly referenced historical records/eight proven updates, four source advisories, and eight catalog references. A same-date catalog story retains separate CVEs, while a possible vulnerability chain requires an explicit source `can be chained with CVE-…` statement. An authenticated-administrator/root-execution description does not become an unauthenticated exploit claim. CIRCL indicators group only through their original event URL; conflicting titles and recognized source instructions withhold that story. Historical collection alone does not create an editorial topic.
+
+The model drafts source-cited sentence claims and concise supporting summaries, with a two-paragraph overview targeting roughly 120–170 words. Its JSON text is not an enum of two allowed sentences. The independent publication gate still requires complete source formulations or reviewed source-derived facts: all names, numbers, negation, conditions, uncertainty, and word order must remain supported. Punctuation/case variation and concatenation of complete facts are allowed; similarity scores, valid IDs, or a second model's opinion are not treated as entailment. This is a bounded claim language, not a reliable verifier of arbitrary free-form prose.
+
+Checked sentences are arranged into developments first and supported significance/guidance second. An unsupported overview is withheld in full. An unsupported radar summary is replaced with the independently derived source summary while the checked overview can survive; the complete final plan is validated again. Raw rejected drafts remain in ignored `data/editorial/review/` and never enter the public schema. This permits useful model selection/composition without quietly accepting an unsupported paraphrase.
+
+Public schema 4 retains the original batch reports and adds one self-contained editorial edition per UTC day, up to ninety days. Each edition binds its curated original public evidence, collection cutoff/reporting window, deterministic topics, source references, and final plan by a digest. The current edition must exactly match a fresh curation of the publication; historical editions keep their original accepted evidence. The expanded report exposes all supporting CVEs/IOCs, original descriptions, source/collection dates, recommendations, and explicit catalog references. A rerun replaces that day's edition instead of fabricating another historical date.
+
+Daily staged publication collects/export-validates once, composes from that fixed snapshot, and invokes `--publish-prepared` to publish without recollecting or changing the evidence digest. Prepared snapshots expire after 24 hours. Staged operation skips the redundant private-batch narrative while preserving its exact-excerpt inference. Editorial inference runs after resident-profile restoration, checks at least 3,500 MiB available memory, reuses the existing CPU model/two threads, and requests unload. Low memory or unavailable Ollama publishes the checked fallback; no new service/model/package is needed.
+
+```sh
+PYTHONPATH=src python3 scripts/export_publication.py
+PYTHONPATH=src python3 scripts/compose_brief.py --editorial
+PYTHONPATH=src python3 scripts/export_publication.py --publish-prepared
+```
+
+## Preserved batch evidence contract
+
 The excerpt layer and narrative layer are separate. `report.py` still accepts only complete approved source excerpts bound to the exact record ID. `topics.py` groups evidence before selecting up to four topics/eight observations. Each CVE is a separate topic. Only the exact original CIRCL event URL groups indicators; names, broad categories, and shared feed URLs cannot create a relationship. Conflicting event headlines are withheld from narrative and retain reviewable technical evidence.
 
 `narrative.py` builds a small typed fact ledger from those observations. Facts cover original KEV membership, recognized vulnerability-class descriptions, the source-reported event subject, documented evidence types, chronology, and original recommendations. KEV membership supports CISA's exploitation assessment, not a claim of current attacks or local exposure. Source headlines remain attributed assertions. Unrecognized vulnerability classes receive no invented paraphrase. ATT&CK catalog names never create an incident relationship.

@@ -55,7 +55,11 @@ def orchestrate(args=None):
         finally:
             # Never delete volumes; release platform memory before CPU inference.
             invoke(COMPOSE + ["stop", "--timeout", "60"])
-        invoke([sys.executable, "-m", "ti_brief.cli", "--render-prepared"])
+        # One publication-wide narrative call replaces the redundant private
+        # batch narrative, while retaining exact-excerpt inference and reports.
+        render_env={**os.environ}
+        if os.environ.get('TI_PUBLICATION_ENABLED')=='true':render_env['TI_NARRATIVE_ENABLED']='false'
+        invoke([sys.executable, "-m", "ti_brief.cli", "--render-prepared"],env=render_env)
         # Restore both UIs only when the operator selected the measured all profile.
         profiles = ["misp", "opencti", "integration"] if resident == "all" else ["misp"]
         invoke([sys.executable, "scripts/preflight.py", *profiles])
@@ -83,7 +87,13 @@ def main(argv=None):
             except Exception as exc:
                 print(json.dumps({'stage':'stix-opencti','status':'failed','error_type':type(exc).__name__}))
         if os.environ.get("TI_PUBLICATION_ENABLED") == "true":
-            invoke([sys.executable, "scripts/export_publication.py", "--publish"])
+            invoke([sys.executable, "scripts/export_publication.py"])
+            try:
+                if os.environ.get('TI_NARRATIVE_ENABLED','true').lower()=='true':
+                    invoke([sys.executable,'scripts/compose_brief.py','--editorial','--cache-dir','data/editorial'])
+            except Exception as exc:
+                print(json.dumps({'stage':'editorial','status':'source-grounded-fallback','error_type':type(exc).__name__}))
+            invoke([sys.executable, "scripts/export_publication.py", "--publish-prepared"])
 
 
 if __name__ == "__main__":

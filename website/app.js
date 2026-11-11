@@ -1,4 +1,4 @@
-import {metrics, dailyKev, kindCounts, matches, groupStories, briefDigest} from './analytics.js';
+import {metrics, dailyKev, kindCounts, matches, groupStories, briefDigest, editorialStories} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
@@ -43,27 +43,46 @@ function reportMarkup(report) {
   return `<div class="metadata">${e(time(report.generated_at))} · ${report.evidence_count} source observations · ${report.narrative?.mode==='ollama-grounded'?'Ollama fact-cited composition':'Source-grounded fallback'}</div>${report.narrative?`<p class="report-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${topics.map(t=>topicMarkup(t,true)).join('')}${withheld.length?`<details class="topic-evidence"><summary>Source metadata requires review · ${withheld.length}</summary>${withheld.map(row=>`<article class="evidence"><div class="indicator">${e(row.kind)} · ${e(row.value)}</div>${link(row.source_url,'Original source','link')}</article>`).join('')}</details>`:''}${actions.size?`<div class="source-actions"><h3>Source defensive considerations</h3>${[...actions].map(([action,sources])=>`<p>${e(action)} <span class="topic-sources">${[...sources.values()].map(r=>link(r.source_url,names[r.source])).join(' · ')}</span></p>`).join('')}</div>`:''}`;
 }
 
+function editionRows(edition) {
+  return [...edition.input.records,...edition.input.news,...edition.input.updates].filter((row,index,rows)=>rows.findIndex(r=>r.id===row.id)===index);
+}
+function editorialTopics(edition) {
+  const rows=editionRows(edition);
+  return edition.topics.map(topic=>({...topic,records:rows.filter(r=>topic.evidence_ids.includes(r.id)),summary:edition.plan.topics.find(t=>t.topic_id===topic.id)?.summary.text||''}));
+}
+function editionMarkup(edition) {
+  const topics=editorialTopics(edition);
+  const actions=[...new Set(topics.flatMap(t=>t.records.map(r=>r.action)).filter(Boolean))];
+  return `<div class="metadata">${e(time(edition.generated_at))} · ${edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(freshness[topic.freshness])} · ${e(date(topic.published_at))}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4><p>${e(row.description||row.excerpt)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
+}
+const archives = () => [...(data.editions||[]),...data.reports].sort((a,b)=>b.generated_at.localeCompare(a.generated_at));
+function opening(edition,report) {
+  if(!edition){const digest=briefDigest(report);return `<div class="section-head"><h1>Daily Brief</h1><time>${e(date(report?.generated_at))}</time></div>${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:empty('No accepted public edition is available yet.')}${report?`<details class="full-brief"><summary>Full brief and evidence</summary><div class="report-body">${reportMarkup(report)}</div></details>`:''}`;}
+  const topics=editorialTopics(edition);
+  const radar=topics.length>1?topics.slice(1,4):topics;
+  const sources=[...new Map(topics.flatMap(t=>t.records).map(r=>[r.source_url,r])).values()];
+  return `<div class="section-head"><h2>Daily Brief</h2><time>${e(date(edition.generated_at))}</time></div><div class="edition-grid"><div class="editorial-lead"><h1>${e(topics[0]?.headline||'No new source-dated developments')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}<div class="topic-sources">${sources.slice(0,3).map(r=>link(r.source_url,names[r.source])).join(' · ')}</div></div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><div class="topic-sources">${[...new Map(topic.records.map(r=>[r.source_url,r])).values()].map(r=>link(r.source_url,names[r.source])).join(' · ')}</div></article>`).join('')}</aside>`:''}</div><details class="full-brief"><summary>Full brief and evidence</summary><div class="report-body">${editionMarkup(edition)}</div></details>`;
+}
+
 function render() {
   const report=data.reports[0];
-  const digest=briefDigest(report);
+  const edition=data.editions?.[0];
+  const history=archives();
   const m=metrics(data,new Date().toISOString());
   const week=dailyKev(data.records,7,new Date().toISOString()).reduce((sum,row)=>sum+row.count,0);
   main.innerHTML=`${warnings()}<section id="search-results" class="search-results" hidden></section>
-    <section class="brief" id="brief"><div class="section-head"><h2>Daily Brief</h2><time>${e(date(report?.generated_at))}</time></div>
-      ${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}
-      ${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:(report?.narrative?'':empty(report?'No new supported development was selected.':'No accepted public brief is available yet. Current source reports appear below.'))}
-      ${report?`<details class="full-brief"><summary>Read full brief</summary><div class="report-body">${reportMarkup(report)}</div></details>`:''}</section>
+    <section class="brief" id="brief">${opening(edition,report)}</section>
     <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2><div class="news-filters" aria-label="News category">${[['all','All'],['Security advisory','Advisories'],['Exploitation watch','KEV']].map(([v,l])=>`<button data-news-filter="${v}" aria-pressed="${v===newsFilter}">${l}</button>`).join('')}</div></div><div id="news-content"></div></section>
-    <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Selected advisories'],[m.briefs,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
+    <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Selected advisories'],[history.length,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
     <section id="trends"><div class="section-head"><h2>Trends</h2><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div>
       <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
-      <div><div class="chart-head"><h3>Unique values by type</h3></div><div id="types" class="type-list"></div></div></div>
+      <details class="collection-composition"><summary>Dataset composition · unique values by type</summary><div id="types" class="type-list"></div></details></div></section>
       <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${data.stix.objects.length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
         <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
-        <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details></section>
+        <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details>
 
     <details class="register" id="vulnerabilities"><summary>Vulnerabilities <small>${m.kev} KEV entries</small></summary><div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input id="cve-search" type="search" placeholder="CVE, vendor, or keyword…"><small id="cve-count"></small></div><div id="cve-results"></div></details>
-    <details class="archive" id="archive"><summary>Archive <small>${data.reports.length} editions</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${data.reports.map(row=>`<option value="${e(row.id)}">${e(time(row.generated_at))}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${report?reportMarkup(report):empty('No accepted public editions yet.')}</div></details>`;
+    <details class="archive" id="archive"><summary>Archive <small>${history.length} briefs</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${history.map(row=>`<option value="${e(row.id)}">${e(time(row.generated_at))} · ${row.input?'Daily edition':'Evidence brief'}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${history[0]?(history[0].input?editionMarkup(history[0]):reportMarkup(history[0])):empty('No accepted public editions yet.')}</div></details>`;
   document.querySelector('#last-updated').textContent=data.collected_at?`Updated ${time(data.collected_at)}`:'No collection yet';
   document.querySelector('#attribution').innerHTML=data.stix.objects.length?`MITRE ATT&CK® data © 2015–2026 The MITRE Corporation. ${link(data.stix.license,'Terms of use')}`:'';
   trend();typeChart();news();cveRows();catalog();
@@ -84,11 +103,9 @@ function typeChart() {
 }
 
 function news() {
-  const stories=groupStories(data.news).filter(r=>newsFilter==='all'||r.category===newsFilter);
-  let illustrated=false;
-  document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map(row=>{
-    const image=row.category==='Security advisory'&&!illustrated; if(image)illustrated=true;
-    return `<article class="story"><div class="source-line">CISA · ${e(date(row.published_at))}</div>${image?'<img src="./assets/advisory.svg" alt="" width="112" height="75" loading="lazy">':''}<h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(row.excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(row.excerpt)}</p></details>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
+  const stories=editorialStories(data.news,data.exported_at||new Date().toISOString(),data.editions?.[0]?.topics.flatMap(t=>t.evidence_ids)||[]).filter(r=>newsFilter==='all'||r.category===newsFilter);
+  document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map((row,index)=>{
+    return `<article class="story ${index===0?'story-featured':index>=3?'story-brief':'story-secondary'}"><div class="source-line">CISA · ${e(date(row.published_at))}</div><h3 title="${e(row.title)}">${link(row.source_url,shortHeadline(row.title))}</h3><details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(row.excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(row.excerpt)}</p></details>${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${link(r.source_url,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${link(row.source_url,'Read source')}</div></article>`;
   }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No recent source reports match this filter.');
 }
 
@@ -105,7 +122,7 @@ function catalog() {
 }
 
 function evidence(id) {
-  const row=data.records.find(r=>r.id===id)||data.reports.flatMap(r=>r.observations||r.items).find(r=>r.id===id);if(!row)return;
+  const row=data.records.find(r=>r.id===id)||[...data.reports.flatMap(r=>r.observations||r.items),...(data.editions||[]).flatMap(editionRows)].find(r=>r.id===id);if(!row)return;
   document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2><div class="indicator">${e(row.value)}</div><p>${e(row.description||row.excerpt)}</p><h3>Defensive consideration</h3><p>${e(row.action)}</p><dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${link(row.source_url,'Original source','link')}`;
   if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
 }
@@ -159,7 +176,7 @@ main.addEventListener('input',event=>{
 });
 main.addEventListener('change',event=>{
   if(event.target.id==='catalog-type'){catalogType=event.target.value;catalogLimit=12;catalog();}
-  if(event.target.id==='archive-select'){const report=data.reports.find(r=>r.id===event.target.value);if(report)document.querySelector('#archived-report').innerHTML=reportMarkup(report);}
+  if(event.target.id==='archive-select'){const report=archives().find(r=>r.id===event.target.value);if(report)document.querySelector('#archived-report').innerHTML=report.input?editionMarkup(report):reportMarkup(report);}
 });
 document.querySelector('#search-form').addEventListener('submit',event=>{event.preventDefault();if(data){search();document.querySelector('#search-results')?.scrollIntoView({block:'start'});}});
 document.querySelector('#global-search').addEventListener('input',event=>{if(data&&!event.target.value)search();});
@@ -168,7 +185,7 @@ window.addEventListener('hashchange',()=>{if(data)anchor();});
 document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
   const response=await fetch('./snapshot.json',{cache:'no-cache'});if(!response.ok)throw new Error();data=await response.json();
-  if(![1,2,3].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
+  if(![1,2,3,4].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
   data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
   render();if(location.hash)anchor();
 } catch {

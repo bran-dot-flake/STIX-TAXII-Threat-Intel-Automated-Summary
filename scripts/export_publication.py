@@ -10,11 +10,14 @@ from ti_brief.publication import attach_briefs, collect_public, empty_snapshot, 
 from ti_brief.publish import DEFAULT_REPOSITORY, publish, read_remote
 from ti_brief.stix_publication import empty_context, project_context
 from ti_brief.briefing_public import enrich_snapshot
+from ti_brief.editorial import refresh,curate
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--publish", action="store_true", help="Update only intel-data/snapshot.json and dispatch Pages")
+    publication=parser.add_mutually_exclusive_group()
+    publication.add_argument("--publish", action="store_true", help="Collect, then update only intel-data/snapshot.json and dispatch Pages")
+    publication.add_argument('--publish-prepared',action='store_true',help='Publish the validated collected snapshot with a matching editorial composition; no recollection')
     parser.add_argument("--output", type=Path, default=Path("data/publication/snapshot.json"))
     parser.add_argument("--reports-dir", type=Path, default=Path("reports/live"))
     args = parser.parse_args()
@@ -25,6 +28,15 @@ def main():
         with run_lock(args.output.with_suffix(".lock")):
             repo = os.environ.get("TI_PUBLICATION_REPOSITORY", DEFAULT_REPOSITORY)
             previous = validate_snapshot(json.loads(args.output.read_text(encoding="utf-8"))) if args.output.exists() else None
+            if args.publish_prepared:
+                if previous is None:raise ValueError('No prepared public snapshot')
+                from datetime import datetime,timezone
+                if not 0<=(datetime.now(timezone.utc)-datetime.fromisoformat(previous['exported_at'])).total_seconds()<=86400:raise ValueError('Prepared public snapshot expired')
+                refresh(previous,Path('data/editorial'))
+                if previous['editions'][0]['input']!=curate(previous):raise ValueError('Editorial input changed')
+                save_snapshot(args.output,previous)
+                print(json.dumps({'status':'published-prepared','commit':publish(previous,repo)}))
+                return 0
             if previous is None and args.publish:
                 previous = read_remote(repo)
             snapshot, originals = collect_public(Http(), previous or empty_snapshot())
@@ -35,6 +47,7 @@ def main():
             except Exception as exc:
                 print(json.dumps({'source':'mitre-enterprise','status':'cached','error_type':type(exc).__name__}))
                 if snapshot['stix']['collected_at']:snapshot['stix']['status']='cached'
+            refresh(snapshot,Path('data/editorial'))
             save_snapshot(args.output, snapshot)
             result = {"status": "exported", "records": len(snapshot["records"]), "news": len(snapshot["news"]),
                 "briefs": len(snapshot["reports"]), "sources": snapshot["sources"]}

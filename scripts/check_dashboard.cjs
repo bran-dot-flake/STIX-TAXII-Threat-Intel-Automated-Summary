@@ -19,17 +19,26 @@ const output = process.argv[3];
     await page.getByRole('heading', { name: 'Daily Brief', exact: true }).waitFor();
     const snapshot = await (await page.request.get(base + '/snapshot.json')).json();
     assert.equal(await page.locator('.sidebar').count(), 0);
-    assert.equal(await page.locator('.brief-findings .finding').count(), (await import('../website/analytics.js')).briefDigest(snapshot.reports[0]).length);
+    if(snapshot.editions?.length){
+      const edition=snapshot.editions[0];
+      assert.equal(await page.locator('.radar article').count(),edition.topics.length>1?Math.min(3,edition.topics.length-1):edition.topics.length);
+      assert.equal(await page.locator('.editorial-lead .brief-overview').count(),edition.plan.overview.length);
+      for(const topic of edition.topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
+      await page.locator('#brief > .full-brief > summary').click();
+      assert(await page.locator('#brief .topic-evidence .evidence').count()>=edition.topics.length);
+      await page.locator('#brief > .full-brief > summary').click();
+    }else assert.equal(await page.locator('.brief-findings .finding').count(),(await import('../website/analytics.js')).briefDigest(snapshot.reports[0]).length);
     const actual = await page.locator('.metric strong').allTextContents();
     assert.equal(Number(actual[1].replaceAll(',', '')), new Set(snapshot.records.filter(r => r.kind !== 'vulnerability').map(r => r.kind + '|' + r.value)).size);
-    assert.equal(Number(actual[3]), snapshot.reports.length);
+    assert.equal(Number(actual[3]), snapshot.reports.length+(snapshot.editions||[]).length);
     await page.getByRole('button', { name: '7D', exact: true }).click();
     assert.equal(await page.locator('.bar').count(), 7);
     await page.getByRole('button', { name: '30D', exact: true }).click();
     assert.equal(await page.locator('.bar').count(), 30);
+    assert.equal(await page.locator('.story-featured').count(),snapshot.news.length?1:0);
     assert(await page.locator('.story img').count() <= 1);
-    assert.deepEqual(await page.locator('main > section[id], main > details[id]').evaluateAll(nodes=>nodes.map(n=>n.id).filter(id=>id!=='search-results')),['brief','intelligence','trends','vulnerabilities','archive']);
-    if(snapshot.reports[0]?.narrative){
+    assert.deepEqual(await page.locator('main > section[id], main > details[id]').evaluateAll(nodes=>nodes.map(n=>n.id).filter(id=>id!=='search-results')),['brief','intelligence','trends','context','vulnerabilities','archive']);
+    if(!snapshot.editions?.length&&snapshot.reports[0]?.narrative){
       const topics=snapshot.reports[0].narrative.plan.topics;
       for(const topic of topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
       assert(!(await page.locator('#brief').innerText()).includes('source observations for review'));

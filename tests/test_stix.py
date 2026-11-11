@@ -419,14 +419,16 @@ class StixTests(unittest.TestCase):
                     RuntimeError("source unavailable"),
                     RuntimeError("platform unavailable"),
                     None,
+                    RuntimeError("model unavailable"),
+                    None,
                 ],
             ) as invoke,
             patch("builtins.print"),
         ):
             self.assertEqual(daily_staged.main(["--manage-project"]), 0)
-            self.assertEqual(invoke.call_count, 3)
+            self.assertEqual(invoke.call_count, 5)
             self.assertEqual(
-                invoke.call_args.args[0][1:], ["scripts/export_publication.py", "--publish"]
+                invoke.call_args.args[0][1:], ["scripts/export_publication.py", "--publish-prepared"]
             )
 
     def test_scheduler_help_has_no_collection_or_environment_side_effects(self):

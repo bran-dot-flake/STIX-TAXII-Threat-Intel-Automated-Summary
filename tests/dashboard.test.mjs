@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest} from '../website/analytics.js';
+import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories} from '../website/analytics.js';
 
 const records=[
   {source:'cisa-kev',kind:'vulnerability',value:'CVE-2026-0001',published_at:'2026-11-10',first_seen:'2026-11-11T10:00:00Z'},
@@ -46,4 +46,14 @@ test('campaign digest groups by original event and keeps unrelated CVEs separate
   const topics=briefDigest({items});assert.equal(topics.length,4);assert.equal(topics.at(-1).records.length,5);
   items.at(-1).source_url=event.replace('000001.json','000002.json');
   assert.equal(briefDigest({items:items.slice(3)}).length,2);
+});
+
+test('front-page ranking prioritizes current source evidence over historical bulletins',()=>{
+  const rows=[
+    {id:'old',title:'Earlier KEV bulletin',category:'Exploitation watch',excerpt:'Known exploitation.',published_at:'2026-11-01T12:00:00Z'},
+    {id:'new',title:'Current advisory',category:'Security advisory',excerpt:'The source describes a remote attack.',published_at:'2026-11-11T12:00:00Z'},
+    {id:'significant',title:'Current detailed advisory',category:'Security advisory',excerpt:'An unauthenticated attacker could execute arbitrary code.',published_at:'2026-11-10T12:00:00Z'},
+  ];
+  const ranked=editorialStories(rows,'2026-11-11T18:00:00Z',['significant']);
+  assert.deepEqual(ranked.map(r=>r.id),['significant','new','old']);
 });

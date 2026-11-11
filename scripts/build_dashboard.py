@@ -20,6 +20,14 @@ def build(source, output, demo=False):
     if demo:
         source = ROOT / "examples/dashboard.synthetic.json"
     snapshot = validate_snapshot(json.loads(source.read_text(encoding="utf-8")), allow_synthetic=demo) if source else empty_snapshot()
+    if demo:
+        from ti_brief.briefing_public import enrich_snapshot
+        from ti_brief.editorial import refresh
+        from ti_brief.stix_publication import empty_context
+        snapshot['stix']=snapshot.get('stix',empty_context())
+        enrich_snapshot(snapshot)
+        refresh(snapshot)
+        validate_snapshot(snapshot,allow_synthetic=True)
     if source and not snapshot["records"] and not snapshot["news"]:
         raise ValueError("Live build requires a nonempty validated publication")
     # Refuse stale, unrelated output files: artifact upload copies this directory.

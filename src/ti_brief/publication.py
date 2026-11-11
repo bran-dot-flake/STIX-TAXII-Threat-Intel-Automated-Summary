@@ -255,7 +255,8 @@ def collect_public(http, previous=None, now=None):
         "exported_at": collected, "sources": statuses,
         "records": sorted({r["id"]: r for r in records}.values(), key=lambda r: (r["published_at"] or "", r["id"]), reverse=True),
         "news": news, "reports": previous["reports"], "stix":previous.get("stix",empty_context())}
-    result["schema_version"]=previous['schema_version'] if previous['schema_version']==3 else 2
+    result["schema_version"]=previous['schema_version'] if previous['schema_version'] in {3,4} else 2
+    if previous['schema_version']==4:result['editions']=previous['editions']
     validate_snapshot(result)
     return result, originals
 
@@ -342,10 +343,10 @@ def validate_item(row):
 
 def validate_snapshot(value, allow_synthetic=False):
     version=value.get("schema_version")
-    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3} else set()))
-    if version not in {1,2,3} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
+    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3,4} else set()) | ({'editions'} if version==4 else set()))
+    if version not in {1,2,3,4} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
         raise ValueError("Unsupported or synthetic public snapshot")
-    if version in {2,3}:validate_context(value["stix"])
+    if version in {2,3,4}:validate_context(value["stix"])
     for field in ("collected_at", "exported_at"):
         if value[field] is not None:
             stamp(value[field])
@@ -382,7 +383,7 @@ def validate_snapshot(value, allow_synthetic=False):
         if len(row["excerpt"].split()) > 45:
             raise ValueError("Oversized news excerpt")
     for row in value["reports"]:
-        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version==3 else set()))
+        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version in {3,4} else set()))
         valid_id(row["id"])
         stamp(row["generated_at"])
         quiet = row["mode"] == "quiet-day" and row["evidence_count"] == 0 and row["items"] == []
@@ -392,7 +393,7 @@ def validate_snapshot(value, allow_synthetic=False):
             exact_fields(item, ITEM_FIELDS)
             validate_item(item)
             clean_text(item["excerpt"], 240)
-        if version==3:
+        if version in {3,4}:
             from .briefing_public import validate_observation
             from .narrative import validate_narrative
             observations=row['observations']
@@ -402,6 +403,18 @@ def validate_snapshot(value, allow_synthetic=False):
             if len(ids)!=len(set(ids)) or any(item['id'] not in ids for item in row['items']):raise ValueError('Invalid topic evidence identifiers')
             for observation in observations:validate_observation(observation,row['generated_at'])
             validate_narrative(row['narrative'],row)
+    if version==4:
+        from .editorial import validate_edition
+        editions=value['editions']
+        if not isinstance(editions,list) or len(editions)>90:raise ValueError('Invalid editorial history')
+        ids=[r['id'] for r in editions]
+        if len(ids)!=len(set(ids)):raise ValueError('Duplicate editorial editions')
+        for edition in editions:
+            validate_edition(edition)
+            if stamp(edition['generated_at'])>stamp(value['exported_at']):raise ValueError('Future editorial edition')
+            if edition['generated_at']==value['exported_at']:
+                from .editorial import curate
+                if edition['input']!=curate(value):raise ValueError('Editorial input differs from the collected publication')
     return value
 
 
