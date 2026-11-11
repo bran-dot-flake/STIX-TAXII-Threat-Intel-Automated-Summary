@@ -15,7 +15,7 @@ export function metrics(snapshot, now) {
     news24: snapshot.news.filter(r => recent(r.published_at)).length,
     iocs: uniqueIndicators(snapshot.records),
     newIocs: [...firstSeen.values()].filter(recent).length,
-    briefs: snapshot.reports.length,
+    briefs: snapshot.reports.length+(snapshot.editions||[]).length,
     advisories: snapshot.news.length,
   };
 }
@@ -54,6 +54,23 @@ export function groupStories(news) {
     else groups.get(key).related.push(row);
   }
   return [...groups.values()];
+}
+
+export function editorialStories(news, asOf, selectedIds=[]) {
+  const end=Date.parse(asOf);
+  const start=new Date(end);start.setUTCDate(start.getUTCDate()-1);start.setUTCHours(0,0,0,0);
+  const selected=new Set(selectedIds);
+  const rank=row=>{
+    const stamp=Date.parse(row.published_at);
+    const current=stamp>=start.getTime()&&stamp<=end;
+    const supported=row.category==='Exploitation watch'?2:/unauthenticated|execute arbitrary code/i.test(row.excerpt)?1:0;
+    return [current?1:0,selected.has(row.id)?1:0,supported,stamp];
+  };
+  return groupStories(news).sort((a,b)=>{
+    const left=rank(a),right=rank(b);
+    for(let i=0;i<left.length;i++)if(left[i]!==right[i])return right[i]-left[i];
+    return a.id.localeCompare(b.id);
+  });
 }
 
 export function briefDigest(report) {

@@ -2,13 +2,13 @@
 
 `scripts/export_publication.py` independently recollects original public sources and optionally publishes through existing `gh` authentication. It does not call platform APIs or Ollama. The staged scheduler invokes it when `TI_PUBLICATION_ENABLED=true`, including after backend failures. All existing private reporting paths remain available.
 
-## Schema version 3 (versions 1 and 2 remain readable)
+## Schema version 4 (versions 1–3 remain readable)
 
 `src/ti_brief/publication.py:validate_snapshot` is the executable contract. Unknown object keys are rejected. The live validator rejects synthetic data; only explicit `build_dashboard.py --demo` permits the labeled fixture.
 
 | Object | Exact fields |
 | --- | --- |
-| Snapshot | `schema_version` (3), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix` |
+| Snapshot | `schema_version` (4), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix`, `editions` |
 | Source health | `id`, `status` (`ok`, `cached`, `unavailable`), `attempted_at`, `last_success_at` |
 | Observation | `id`, `source`, `source_url`, `kind`, `value`, `title`, `description`, `action`, `published_at`, `first_seen`, `last_seen` |
 | News | `id`, `source`, `source_url`, `title`, `excerpt`, `published_at`, `category`, `artwork` |
@@ -26,6 +26,10 @@ The `stix` object contains exactly `source`, `collected_at`, `status`, `objects`
 Timestamps are ISO 8601 UTC; source date-only values display as midnight UTC. `published_at` can be null when unknown. `first_seen` means first collection by this publication, not source discovery or incident occurrence. Initial IOC counts form a bootstrap baseline. Catalog dates specifically mean KEV `dateAdded`.
 
 `collected_at` is the latest successful adapter fetch, not proof all adapters succeeded. Each source retains its own success time. `exported_at` is sanitized snapshot creation; briefs carry their own generation time. The builder creates a separate `build.json`. Build time is explicitly distinguished from deployment completion, which is recorded in the linked public Actions log.
+
+`editions` retains up to ninety daily editorial editions, separately from the original batch reports. Each edition contains exactly `version`, `id`, `generated_at`, `window_start`, `window_end`, `input_digest`, `input`, `topics`, `plan`, and `mode`. Its typed `input` contains only `generated_at`, original source health, at most 36 public records, four advisories, eight proven updates, and eight explicitly referenced STIX objects. `generated_at` is the collection cutoff, not attack occurrence or model completion. Full input, topic descriptors and every publishable sentence are independently rederived/checked. The current edition must match the curated current snapshot; historical editions retain their accepted original evidence. New editorial claim-language revisions must preserve/version historical validators rather than reinterpret old editions silently.
+
+The collector/exporter never calls Ollama. `compose_brief.py --editorial` consumes the already sanitized snapshot and saves a digest-bound cache in ignored `data/editorial/`; rejected drafts stay under its private `review/`. `export_publication.py --publish-prepared` reapplies only a matching checked cache and publishes that same collected snapshot. It performs no recollection or platform/model calls and rejects snapshots older than 24 hours. This avoids regenerating a different reporting window between inference and publication. The original `--publish` command remains a safe immediate-collection/fallback path.
 
 ## Publication boundary
 
@@ -63,6 +67,6 @@ Export/publish failure returns nonzero to the service journal and retry mechanis
 
 `website/analytics.js` deterministically deduplicates KEV CVE values and IOC type/value pairs. New IOCs use the earliest collection time across all matching observations. Advisories/24h use source publication time and exclude future dates. Charts zero-fill UTC days and count unique catalog additions over seven or thirty days. No chart number or relationship is model-generated. Catalog inclusion is not relabeled as CVSS severity.
 
-The frontend is one page: a topic-based narrative daily brief, grouped editorial stories, compact statistics/trends, expandable CVEs/archive, and optional catalog context. The former source/status page and sidebar were removed; operational details remain here. Global search includes STIX names/IDs. Dialogs show original evidence and resolved catalog relationships. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Charts include accessible labels and data tables.
+The frontend is one page: an asymmetric narrative lead/radar, featured and secondary editorial stories, compact statistics/trends, understated catalog context, and expandable CVEs/archive. The composition chart is available on expansion and is labeled dataset information, not threat activity. The former source/status page and sidebar were removed; operational details remain here. Global search includes STIX names/IDs. Dialogs show original evidence and resolved catalog relationships. Source strings are HTML-escaped; links require approved HTTPS hosts. The Content Security Policy restricts scripts, images, fonts, and connections to the static origin. Charts include accessible labels and data tables.
 
 Run Python tests, Node calculation tests, the infrastructure validator, synthetic private reporting, and empty/demo builds. Browser acceptance uses real public data and prior validated briefs at widths 390, 768, and 1440: four primary views, no horizontal overflow or browser/CSP errors, metric agreement, chart/category filters, report selection, CVE filtering, search, and dialog Escape handling. Screenshots contain only public data. Browser tooling is a development aid, not a runtime dependency.
