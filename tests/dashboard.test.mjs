@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt} from '../website/analytics.js';
+import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt,searchResults,catalogEntries,chartRows} from '../website/analytics.js';
 
 const records=[
   {source:'cisa-kev',kind:'vulnerability',value:'CVE-2026-0001',published_at:'2026-11-10',first_seen:'2026-11-11T10:00:00Z'},
@@ -127,4 +127,57 @@ test('category metadata and optional filtering remain available without homepage
   const lead=readerFixture().input.news[0],advisory={...lead,id:'advisory',title:'Product advisory',category:'Security advisory'};
   assert.deepEqual(additionalStories([lead,advisory],'2026-11-11T18:00:00Z',null,'Security advisory').map(r=>r.id),['advisory']);
   assert.equal(lead.category,'Exploitation watch');
+});
+
+const eventURL='https://www.circl.lu/doc/misp/feed-osint/00000000-0000-4000-8000-000000000001.json';
+function searchFixture(){
+  const indicators=[{id:'hash',source:'circl-osint',source_url:eventURL,title:'MoustachedBouncer',kind:'sha256',value:'a'.repeat(64)},{id:'url',source:'circl-osint',source_url:eventURL,title:'MoustachedBouncer',kind:'url',value:'hxxps://malicious[.]org/path'},{id:'ip',source:'circl-osint',source_url:eventURL,title:'MoustachedBouncer',kind:'ip-dst',value:'8[.]8[.]8[.]8'}];
+  return {records:indicators,news:[],reports:[{items:[indicators[0]]}],editions:[{input:{records:indicators,news:[],updates:[]}}],stix:{objects:[]}};
+}
+test('global search groups one original report across records and archived datasets',()=>{
+  const data=searchFixture(),before=JSON.stringify(data),hits=searchResults(data,'moustachedbouncer');
+  assert.equal(hits.length,1);assert.equal(hits[0].type,'report');assert.equal(hits[0].records.length,3);assert.equal(hits[0].matching.length,3);
+  assert.equal(JSON.stringify(data),before);
+});
+test('same-title reports with different original event IDs stay separate',()=>{
+  const data=searchFixture();data.records.push({...data.records[0],id:'other',source_url:eventURL.replace('000001.json','000002.json')});
+  assert.equal(searchResults(data,'MoustachedBouncer').length,2);
+});
+test('exact hashes, armed/defanged URLs, domains and IPs still find their original observation',()=>{
+  const data=searchFixture();
+  for(const [query,id] of [['a'.repeat(64),'hash'],['https://malicious.org/path','url'],['malicious.org','url'],['hxxps://malicious[.]org/path','url'],['8.8.8.8','ip']]){
+    const hits=searchResults(data,query);assert.equal(hits.length,1);assert.deepEqual(hits[0].matching.map(r=>r.id),[id]);
+  }
+  assert.equal(data.records[1].value,'hxxps://malicious[.]org/path');
+});
+test('CVE and source article duplicates coalesce by identity, not matching title',()=>{
+  const data=searchFixture(),row={id:'cve',kind:'vulnerability',value:'CVE-2026-10000',title:'Product flaw'};
+  const article={id:'article',source:'cisa-advisories',source_url:articleURL,title:'Product advisory'};
+  data.records.push(row);data.news.push(article);data.reports.push({items:[{...row,id:'other-cve'}]});data.editions[0].input.news.push({...article,id:'archived-article'});
+  assert.equal(searchResults(data,'CVE-2026-10000').length,1);
+  assert.equal(searchResults(data,'Product advisory').length,1);
+  data.news.push({...article,id:'distinct',source_url:articleURL+'/different'});
+  assert.equal(searchResults(data,'Product advisory').length,2);
+});
+test('historical exact matches retain their own evidence version',()=>{
+  const data=searchFixture();data.reports.push({items:[{id:'older',kind:'vulnerability',value:'CVE-2026-10000',title:'Earlier source title'}]});
+  data.records.push({id:'current',kind:'vulnerability',value:'CVE-2026-10000',title:'Current source title'});
+  assert.equal(searchResults(data,'Earlier source title')[0].record.id,'older');
+  assert.equal(searchResults(data,'CVE-2026-10000').length,1);
+});
+const technique={id:'attack-pattern--00000000-0000-4000-8000-000000000001',type:'attack-pattern',external_id:'T1059',name:'Command and Scripting Interpreter',url:'https://attack.mitre.org/techniques/T1059/',tactics:[]};
+test('catalog cards exclude blank or malformed identity fields without invented placeholders',()=>{
+  const objects=[technique,null,{...technique,name:'  '},{...technique,name:23},{...technique,type:'unknown'},{...technique,external_id:''},{...technique,id:'attack-pattern--bad-id'},{...technique,url:'https://evil.com/'}];
+  assert.deepEqual(catalogEntries(objects),[technique]);
+});
+test('ATT&CK identifiers remain searchable with explicit source types',()=>{
+  const data=searchFixture();data.stix.objects=[technique];
+  const hit=searchResults(data,'T1059')[0];assert.equal(hit.type,'stix');assert.equal(hit.label,'ATT&CK technique');assert.equal(hit.record.external_id,'T1059');
+  assert.deepEqual(searchResults(data,'   '),[]);
+});
+test('condensed chart tables preserve full dates and totals behind the all-days option',()=>{
+  const series=dailyKev(records,30,'2026-11-11T12:00:00Z');
+  const compact=chartRows(series);assert(compact.every(r=>r.count>0));assert.equal(chartRows(series,true).length,30);
+  assert.equal(compact.reduce((n,r)=>n+r.count,0),series.reduce((n,r)=>n+r.count,0));
+  assert.deepEqual(chartRows(dailyKev([],7,'2026-11-11')),[]);assert.equal(chartRows(dailyKev([],7,'2026-11-11'),true).length,7);
 });

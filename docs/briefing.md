@@ -51,9 +51,9 @@ The selector scans at most 500 pending records, ranks actual source freshness be
 
 ## Operations
 
-Normal staged reporting runs the excerpt and narrative calls while this project's containers are paused. Both calls reuse the existing model, two CPU threads, a 4,096-token context, bounded output, and `keep_alive=0`. `TI_NARRATIVE_ENABLED=false` skips only narrative inference. No extra service or model is installed.
+When public publication is disabled, private staged reporting runs excerpt and batch-narrative calls while this project's containers are paused. The publication-enabled sequence is described above and performs editorial inference after resident-profile restoration. Both calls reuse the existing model, two CPU threads, a 4,096-token context, bounded output, and `keep_alive=0`. `TI_NARRATIVE_ENABLED=false` skips only narrative inference. No extra service or model is installed.
 
-For an existing public edition:
+To retrofit an accepted legacy batch report:
 
 ```sh
 PYTHONPATH=src python3 scripts/compose_brief.py

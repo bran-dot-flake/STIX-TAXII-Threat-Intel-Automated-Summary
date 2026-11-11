@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="290" viewBox="0 0 1280 290" role="img" aria-labelledby="title desc">
+<title id="title">EMBER architecture</title>
+<desc id="desc">CISA and CIRCL feed private Python, MISP and OpenCTI correlation, and are independently recollected by the public exporter. Optional TAXII and versioned STIX context pass a source and marking gate. Curated public input goes to Ollama, then independent claim validation, public JSON and GitHub Actions deploy GitHub Pages. Private databases stay local.</desc>
+<defs>
+ <style>
+ .heading{font:700 17px 'Segoe UI',Arial,sans-serif;fill:#e9e7dd}
+ .body{font:13px 'Segoe UI',Arial,sans-serif;fill:#b8b8ad}
+ .label{font:11px Consolas,monospace;fill:#b8b8ad}
+ .node{fill:#1b1b19;stroke-width:1.5}
+ </style>
+ <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#ee9468" stroke-width="1.4"/></marker>
+ <marker id="context" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#8badc6" stroke-width="1.4"/></marker>
+</defs>
+<rect x="1" y="1" width="1278" height="288" rx="8" fill="#141413" stroke="#383833"/>
+<text x="24" y="30" class="label">EMBER / COLLECTION → CORRELATION → PUBLICATION</text>
+<text x="1254" y="30" class="label" text-anchor="end">LOCAL INFERENCE · STATIC DELIVERY</text>
+<g>
+ <rect class="node" x="24" y="66" width="170" height="120" rx="5" stroke="#8badc6"/>
+ <text x="40" y="94" class="heading">Public sources</text>
+ <text x="40" y="121" class="body">CISA · CIRCL</text>
+ <text x="40" y="146" class="body">MITRE TAXII</text>
+ <text x="40" y="166" class="label">TAXII optional</text>
+ <rect class="node" x="218" y="66" width="230" height="120" rx="5" stroke="#acbfa0"/>
+ <text x="234" y="94" class="heading">Collection / correlation</text>
+ <text x="234" y="121" class="body">Python · MISP · OpenCTI</text>
+ <text x="234" y="146" class="body">Versioned STIX storage</text>
+ <text x="234" y="166" class="label">Private stores stay local</text>
+ <rect class="node" x="472" y="66" width="185" height="120" rx="5" stroke="#8badc6"/>
+ <text x="488" y="94" class="heading">Independent export</text>
+ <text x="488" y="121" class="body">Original-source checks</text>
+ <text x="488" y="146" class="body">Public evidence package</text>
+ <text x="488" y="166" class="label">Marking / license gate</text>
+ <rect class="node" x="681" y="66" width="160" height="120" rx="5" stroke="#ee9468"/>
+ <text x="697" y="94" class="heading">Local analysis</text>
+ <text x="697" y="121" class="body">Ollama</text>
+ <text x="697" y="146" class="body">Fact-cited narrative</text>
+ <text x="697" y="166" class="label">CPU · bounded input</text>
+ <rect class="node" x="865" y="66" width="185" height="120" rx="5" stroke="#8badc6"/>
+ <text x="881" y="94" class="heading">Validate + publish</text>
+ <text x="881" y="121" class="body">Independent claim gate</text>
+ <text x="881" y="146" class="body">Sanitized public JSON</text>
+ <text x="881" y="166" class="label">No private DB export</text>
+ <rect class="node" x="1074" y="66" width="180" height="120" rx="5" stroke="#acbfa0"/>
+ <text x="1090" y="94" class="heading">GitHub Pages</text>
+ <text x="1090" y="121" class="body">Actions validation</text>
+ <text x="1090" y="146" class="body">Static publication</text>
+ <text x="1090" y="166" class="label">Independent of VM uptime</text>
+</g>
+<g fill="none" stroke-width="1.7">
+ <path d="M194 125H214" stroke="#8badc6" marker-end="url(#context)"/>
+ <path d="M448 125H468" stroke="#8badc6" stroke-dasharray="4 3" marker-end="url(#context)"/>
+ <path d="M657 125H677" stroke="#ee9468" marker-end="url(#arrow)"/>
+ <path d="M841 125H861" stroke="#ee9468" marker-end="url(#arrow)"/>
+ <path d="M1050 125H1070" stroke="#ee9468" marker-end="url(#arrow)"/>
+ <path d="M109 186V236H564V190" stroke="#ee9468" marker-end="url(#arrow)"/>
+</g>
+<text x="333" y="211" text-anchor="middle" class="label">Dashed: revalidated excerpts /</text>
+<text x="333" y="227" text-anchor="middle" class="label">approved STIX context only</text>
+<text x="337" y="259" text-anchor="middle" class="label" style="fill:#ee9468">CISA / CIRCL recollected independently</text>
+<text x="1254" y="259" text-anchor="end" class="label">Catalog bridge optional · no guessed relationships</text>
+</svg>
