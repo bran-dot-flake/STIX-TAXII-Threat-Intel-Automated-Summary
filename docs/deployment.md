@@ -156,7 +156,14 @@ TAXII collection, the catalog bridge and publication are opt-in stages. Their ab
 
 ## Offline demonstration and operational entry points
 
-The static demo in the README requires no platforms. To exercise the isolated synthetic private reporting path as well:
+This optional static demonstration requires Python 3.11+ and no platforms, model or credentials. From the repository root:
+
+```sh
+python3 scripts/build_dashboard.py --demo
+python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
+```
+
+Open `http://127.0.0.1:4173`. The data is visibly synthetic and cannot be published as live intelligence. In PowerShell, use `python` if `python3` is unavailable. To exercise the isolated synthetic private reporting path as well:
 
 ```sh
 PYTHONPATH=src python3 -m ti_brief.cli --demo
@@ -165,3 +172,5 @@ PYTHONPATH=src python3 -m ti_brief.cli --demo
 Use an already installed model listed by `ollama list`; set its name in the private `OLLAMA_MODEL` configuration. Do not download another model merely to run this project. Native loopback inference, staged resource measurements and the accepted CPU model are recorded in [resources](resources.md) and [validation](validation.md). `scripts/smoke_ollama.py` tests source/model behavior separately from platform acceptance.
 
 The accepted deployment uses `TI_RESIDENT_PROFILE=all` after a measured combined pilot; `misp` remains the conservative default. `TI_TAXII_ENABLED=true` enables bounded structured collection, `TI_STIX_OPENCTI_ENABLED=true` the optional catalog bridge, and `TI_PUBLICATION_ENABLED=true` outbound publication. `TI_NARRATIVE_ENABLED=false` retains deterministic editorial fallback. Keep the private environment and credentials out of Git. Full source options are in [.env.example](../.env.example), [STIX/TAXII](stix-taxii.md), and [publication](publication.md).
+
+The full lab also requires Docker Compose and an installed Ollama model; optional STIX/TAXII dependencies use the pinned Python environment. Inspect resources before installation. See [resource measurements](resources.md) and [security boundaries](../SECURITY.md) for operational details.

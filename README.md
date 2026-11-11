@@ -5,21 +5,20 @@
 <p align="center"><strong>MISP · OpenCTI · STIX/TAXII · Ollama · GitHub Pages</strong></p>
 
 <p align="center">
-  <img alt="MISP" src="https://img.shields.io/badge/Intelligence-MISP-3c6e97?style=flat-square&amp;labelColor=252522">
-  <img alt="OpenCTI" src="https://img.shields.io/badge/Correlation-OpenCTI-6c54a1?style=flat-square&amp;labelColor=252522">
-  <img alt="Local Ollama" src="https://img.shields.io/badge/Inference-Ollama-3c7150?style=flat-square&amp;labelColor=252522">
-  <img alt="STIX and TAXII 2.1" src="https://img.shields.io/badge/STIX_%2F_TAXII-2.1-2b6771?style=flat-square&amp;labelColor=252522">
-  <img alt="GitHub Pages" src="https://img.shields.io/badge/Publication-GitHub_Pages-525963?style=flat-square&amp;labelColor=252522">
-  <a href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/actions/workflows/ci.yml"><img alt="Pipeline CI" src="https://img.shields.io/github/actions/workflow/status/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary/ci.yml?branch=main&amp;label=CI&amp;style=flat-square&amp;labelColor=252522"></a>
+  <img alt="MISP" src="https://img.shields.io/badge/Intelligence-MISP-a85432?style=flat-square&amp;labelColor=252522">
+  <img alt="OpenCTI" src="https://img.shields.io/badge/Correlation-OpenCTI-96583f?style=flat-square&amp;labelColor=252522">
+  <img alt="Local Ollama" src="https://img.shields.io/badge/Inference-Ollama-9b6b36?style=flat-square&amp;labelColor=252522">
+  <img alt="STIX and TAXII 2.1" src="https://img.shields.io/badge/STIX_%2F_TAXII-2.1-aa6236?style=flat-square&amp;labelColor=252522">
+  <img alt="GitHub Pages" src="https://img.shields.io/badge/Publication-GitHub_Pages-805746?style=flat-square&amp;labelColor=252522">
 </p>
 
 <p align="center">Public threat signals become private, source-linked intelligence and local LLM briefings.<br>A separate validation boundary publishes the daily edition to GitHub Pages.</p>
 
 <p align="center">
   <a href="https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/">Live Observatory ↗</a> ·
-  <a href="#overview">Overview</a> · <a href="#objectives">Objectives</a> ·
+  <a href="#overview">Overview</a> ·
   <a href="#architecture">Architecture</a> · <a href="#implementation">Implementation</a> ·
-  <a href="#results">Results</a> · <a href="#setup">Setup</a> · <a href="#documentation">Documentation</a>
+  <a href="#results">Results</a> · <a href="#documentation">Documentation</a>
 </p>
 
 <hr>
@@ -29,14 +28,6 @@
 EMBER turns public threat intelligence into a concise daily publication. It collects CISA vulnerability/advisory feeds, CIRCL indicators and structured MITRE ATT&CK® data, organizes evidence in MISP and OpenCTI, and uses an existing CPU-only Ollama model for source-grounded reporting. The website brings together a daily brief, supporting evidence, additional intelligence, trends, searchable vulnerabilities and an archive.
 
 The project explores the engineering needed to make that workflow dependable: interoperable STIX/TAXII ingestion, source-aware correlation, independent read-back, bounded local inference and a deliberate public/private boundary. The static site stays available when the lab is offline; fresh intelligence resumes when collection returns.
-
-## Objectives
-
-- Automate collection while retaining original sources, versions and meaningful dates.
-- Implement STIX 2.1 / TAXII 2.1 discovery, retrieval and incremental synchronization.
-- Verify MISP/OpenCTI integration through exact values and source provenance.
-- Generate evidence-grounded briefings with local inference and conservative fallbacks.
-- Publish validated public intelligence automatically through GitHub Actions and Pages.
 
 ## Architecture
 
@@ -56,7 +47,7 @@ The editorial edition draws from the full validated publication, rather than one
 
 ### Publication
 
-The exporter checks original sources, markings, addresses, evidence versions and allowed fields before producing public JSON. The model receives no credentials or execution tools. GitHub Actions validates the snapshot again and builds only approved static assets; no private database or report directory is uploaded. Reader links lead to human articles or local evidence views, with raw data explicitly labeled. [Publication contract](docs/publication.md) · [Security boundaries](SECURITY.md).
+The exporter independently checks original sources and produces a validated public JSON snapshot. GitHub Actions builds the static website from that snapshot, preserving source links, evidence views and historical editions. Private platform databases stay in the lab. [Publication workflow](docs/publication.md).
 
 ## Results
 
@@ -82,29 +73,11 @@ These are dated lab results and bounded samples, not complete ATT&CK coverage or
 
 </details>
 
-## Setup
-
-Python **3.11+** runs the core pipeline and static demo without external runtime packages. From the repository root:
-
-```sh
-python3 scripts/build_dashboard.py --demo
-python3 -m http.server 4173 --bind 127.0.0.1 --directory dist
-```
-
-Open `http://127.0.0.1:4173`. The demo is visibly synthetic, needs no lab credentials and cannot be published as live intelligence. In PowerShell, use `python` if `python3` is unavailable.
-
-The complete private lab additionally needs Docker Compose and an installed Ollama model. STIX/TAXII uses an optional pinned Python environment. Inspect available resources before installing: the accepted VM has about 10 GiB RAM and CPU-only inference, below OpenCTI production sizing. [Full deployment and recovery](docs/deployment.md) · [Resource measurements](docs/resources.md).
-
 ## Documentation
 
 | Guide | Purpose |
 | --- | --- |
-| [Deployment and operations](docs/deployment.md) | Lab setup, local model configuration, scheduling, backups and recovery |
 | [STIX/TAXII](docs/stix-taxii.md) | Parsing, synchronization, version history and the optional catalog bridge |
 | [Briefing](docs/briefing.md) | Editorial grouping, claim checks, fallbacks and reporting chronology |
 | [Publication](docs/publication.md) | Public schemas, original-source export and GitHub Pages |
-| [Resources](docs/resources.md) | Measured hardware limits and deployment tradeoffs |
 | [Validation](docs/validation.md) | Current checks, integration acceptance and detailed historical evidence |
-| [Security](SECURITY.md) | Trust boundaries, private state, credentials and source handling |
-
-`src/` contains the pipeline, `website/` the static interface, `scripts/` operational commands, `tests/` regression fixtures, `deploy/` the locked lab configuration, and `docs/` the engineering record.
