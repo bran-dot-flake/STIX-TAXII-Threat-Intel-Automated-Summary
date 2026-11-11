@@ -359,6 +359,55 @@ class EditorialTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_snapshot(bad)
 
+    def test_four_distinct_current_topics_keep_all_required_developments(self):
+        snapshot = fixture()
+        for row in snapshot["records"]:
+            row["description"] = "A source-reported vulnerability."
+        for i in range(2):
+            news = copy.deepcopy(snapshot["news"][0])
+            news.update(
+                id=str(i) * 24,
+                category="Security advisory",
+                source_url=f"https://www.cisa.gov/news-events/alerts/new-{i}",
+                title=f"Current advisory {i}",
+            )
+            snapshot["news"].append(news)
+        record = Record(
+            source="CIRCL OSINT",
+            source_url=EVENT,
+            kind="sha256",
+            value="b" * 64,
+            title="Current public source report",
+            description="Source evidence",
+            published_at="2026-11-11T12:00:00Z",
+        )
+        snapshot["records"].append(project_record(record, "circl-osint", NOW))
+        result = edition(curate(snapshot))
+        validate_edition(result)
+        self.assertEqual(len(result["topics"]), 4)
+        self.assertIn("Current public source report", json.dumps(result["plan"]["overview"]))
+
+    def test_large_current_catalog_keeps_a_bounded_complete_claim_fallback(self):
+        snapshot = fixture()
+        template = snapshot["records"][2]
+        snapshot["records"] = []
+        for i in range(24):
+            row = copy.deepcopy(template)
+            row.update(
+                id=f"{i:024x}",
+                value=f"CVE-2026-{20000+i}",
+                title=f"Vendor {i} "
+                + ("Long Product Name " * 3)
+                + "Improper Authentication Vulnerability",
+            )
+            snapshot["records"].append(row)
+        result = edition(curate(snapshot))
+        validate_edition(result)
+        self.assertLessEqual(
+            sum(len(c["text"].split()) for p in result["plan"]["overview"] for c in p), 230
+        )
+        self.assertIn("24 vulnerabilities", json.dumps(result["plan"]))
+
     def test_publish_prepared_never_recollects_sources(self):
         from scripts import export_publication
 

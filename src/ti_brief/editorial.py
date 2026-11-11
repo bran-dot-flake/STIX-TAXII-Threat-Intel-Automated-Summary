@@ -209,15 +209,25 @@ def ledger(package):
     if cves or bulletins:
         ids = [r["id"] for r in cves + bulletins]
         if cves:
-            products = joined(sorted({product(r) for r in cves}))
+            labels = sorted({product(r) for r in cves})
+            complete = len(labels) <= 6 and sum(len(s.split()) for s in labels) <= 70
+            names = labels if complete else [s for s in labels if len(s.split()) <= 12][:4]
+            products = joined(names) if names else None
             dates = sorted({r["published_at"][:10] for r in cves})
             when = dates[0] if len(dates) == 1 else f"{dates[0]} through {dates[-1]}"
-            summary = f"CISA added {len(cves)} vulnerabilities to its Known Exploited Vulnerabilities catalog on {when}, covering {products}."
+            base = f"CISA added {len(cves)} vulnerabilities to its Known Exploited Vulnerabilities catalog on {when}"
+            summary = base + (
+                f", {'covering' if complete else 'including'} {products}." if products else "."
+            )
             key = fact(
                 "catalog:lead",
                 [
                     summary,
-                    f"The {when} KEV additions cover {products}: {len(cves)} distinct vulnerabilities.",
+                    (
+                        f"The {when} KEV additions {'cover' if complete else 'include'} {products}: {len(cves)} distinct vulnerabilities."
+                        if products
+                        else summary
+                    ),
                 ],
                 ids,
             )
@@ -514,7 +524,7 @@ def ledger(package):
     return {
         "facts": facts,
         "topics": topics,
-        "first": overview_first[:3],
+        "first": overview_first,
         "second": overview_second[:4],
         "required": required,
         "generated_at": generated,
@@ -526,9 +536,27 @@ def claim(book, key):
 
 
 def fallback_plan(book):
-    paragraphs = [[claim(book, k) for k in book["first"]]]
-    if book["second"]:
-        paragraphs.append([claim(book, k) for k in book["second"]])
+    first = [claim(book, k) for k in book["first"]]
+    second = [claim(book, k) for k in book["second"]]
+
+    def words():
+        return sum(len(c["text"].split()) for c in first + second)
+
+    # Remove optional complete claims, never clip a qualifying sentence or omit
+    # a required current development, when a larger feed would overfill the lead.
+    for sentence in list(reversed(first)):
+        if words() <= 220:
+            break
+        if not set(sentence["fact_ids"]) & set(book["required"]):
+            first.remove(sentence)
+    while words() > 220 and len(second) > 1:
+        second.pop(0)
+    if words() > 220:
+        for sentence in first + second:
+            sentence["text"] = min(
+                book["facts"][sentence["fact_ids"][0]]["texts"], key=lambda text: len(text.split())
+            )
+    paragraphs = [first] + ([second] if second else [])
     return {
         "overview": paragraphs,
         "topics": [
