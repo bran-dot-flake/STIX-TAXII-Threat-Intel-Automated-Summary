@@ -1,0 +1,44 @@
+name: Publish observatory
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['website/**', 'scripts/build_dashboard.py', 'src/ti_brief/publication.py', '.github/workflows/pages.yml']
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch public data branch only
+        uses: actions/checkout@v4
+        with:
+          ref: intel-data
+          path: .publication
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate public boundary and build static site
+        run: python scripts/build_dashboard.py --snapshot .publication/snapshot.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy static observatory
+        id: deployment
+        uses: actions/deploy-pages@v4

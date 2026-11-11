@@ -27,7 +27,7 @@ def verify_ownership():
             raise RuntimeError("Project-name conflict: found a container not owned by ti-brief")
 
 
-def main():
+def orchestrate():
     p = argparse.ArgumentParser()
     p.add_argument("--manage-project", action="store_true", help="Explicit consent to start/stop only ti-lab containers")
     args = p.parse_args()
@@ -57,6 +57,16 @@ def main():
         targets = [] if resident == "all" else ["misp-nginx"]
         invoke(COMPOSE + ["up", "-d", "--no-build", "--wait", "--wait-timeout", "900", *targets])
     return 0
+
+
+def main():
+    # Public collection is independent: preserve the website even if a local
+    # integration fails. The existing report exit status remains visible.
+    try:
+        return orchestrate()
+    finally:
+        if os.environ.get("TI_PUBLICATION_ENABLED") == "true":
+            invoke([sys.executable, "scripts/export_publication.py", "--publish"])
 
 
 if __name__ == "__main__":

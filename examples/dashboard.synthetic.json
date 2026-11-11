@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "collected_at": "2026-11-11T09:00:00+00:00",
+  "exported_at": "2026-11-11T09:05:00+00:00",
+  "sources": [],
+  "records": [
+    {
+      "id": "adf2998bbca4a0172b043f99",
+      "source": "cisa-kev",
+      "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "kind": "vulnerability",
+      "value": "CVE-2099-10001",
+      "title": "DEMO: Fictional remote access vulnerability",
+      "description": "Synthetic evidence used only to demonstrate the dashboard.",
+      "action": "Demonstration only. Do not use this fictional record for operational decisions.",
+      "published_at": "2026-11-10",
+      "first_seen": "2026-11-11T09:00:00+00:00",
+      "last_seen": "2026-11-11T09:00:00+00:00"
+    }
+  ],
+  "news": [
+    {
+      "id": "bbbbbbbbbbbbbbbbbbbbbbbb",
+      "source": "cisa-advisories",
+      "source_url": "https://www.cisa.gov/news-events/cybersecurity-advisories",
+      "title": "DEMO: A fictional advisory for the intelligence desk",
+      "excerpt": "Synthetic editorial content for local development. No real threat activity is asserted.",
+      "published_at": "2026-11-11T08:00:00+00:00",
+      "category": "Security advisory",
+      "artwork": "advisory.svg"
+    }
+  ],
+  "reports": [
+    {
+      "id": "aaaaaaaaaaaaaaaaaaaaaaaa",
+      "generated_at": "2026-11-11T09:03:00+00:00",
+      "mode": "deterministic",
+      "evidence_count": 1,
+      "items": [
+        {
+          "id": "adf2998bbca4a0172b043f99",
+          "title": "DEMO: Fictional remote access vulnerability",
+          "source": "cisa-kev",
+          "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+          "value": "CVE-2099-10001",
+          "kind": "vulnerability",
+          "action": "Demonstration only. Do not use this fictional record for operational decisions.",
+          "published_at": "2026-11-10",
+          "excerpt": "DEMO: Fictional remote access vulnerability"
+        }
+      ]
+    }
+  ]
+}
