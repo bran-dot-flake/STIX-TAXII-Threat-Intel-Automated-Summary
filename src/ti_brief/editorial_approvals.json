@@ -4,15 +4,18 @@
     {
       "source_digest": "6cea341a88f465c97ba76deda810f07ae8d7afab45b37798ca0bb39478b3a6ef",
       "reviewer": "Codex-assisted source review",
-      "reviewed_at": "2026-11-12T16:28:37+00:00",
-      "facts": [
-        "Mandiant: multiple incidents during 2026; enterprise LLM access hijacked across cloud/model providers",
-        "Financial consequence: potentially large fraudulent cloud charges within hours; faster consumption than cryptojacking"
-      ],
-      "qualifications": [
-        "November 2 is the report date, not an incident date; do not describe all incidents as newly occurring this week",
-        "No initial-access mechanism or shared campaign established in this excerpt"
-      ],
+      "reviewed_at": "2026-11-12T18:37:04+00:00",
+      "facts": {
+        "finding": "Enterprise language-model access hijacked",
+        "researcher": "Mandiant",
+        "scope": "Multiple 2026 incidents; several cloud and model providers",
+        "consequence": "Potentially large fraudulent cloud charges within hours",
+        "comparison": "Cryptojacking consumes resources more gradually"
+      },
+      "qualifications": {
+        "incident_timing": "Incidents occurred during 2026; exact dates unspecified",
+        "entry_mechanism": "Not established in this excerpt"
+      },
       "spans": [
         {
           "start": 0,
@@ -24,16 +27,15 @@
     {
       "source_digest": "5c3d1049ab829c10cfab5badcddafade5aba896eec3d92586d45910f9bd35ead",
       "reviewer": "Codex-assisted source review",
-      "reviewed_at": "2026-11-12T16:28:37+00:00",
-      "facts": [
-        "Google and industry partners: XCPE backdoor dismantled; botnet enrollment greater than 1.3 million set-top boxes",
-        "Monetization: access sold to criminal affiliates; affiliates malware modules loaded onto infected devices"
-      ],
-      "qualifications": [
-        "Disruption occurred the week before the November 2 publication, not during this reporting window; describe it as reporting published this week",
-        "Omit manufacturer attribution; excerpt qualifies it as a high-confidence assessment, not an established fact",
-        "No relationship established to LLMJacking or SSH scanning"
-      ],
+      "reviewed_at": "2026-11-12T18:37:04+00:00",
+      "facts": {
+        "finding": "XCPE backdoor dismantled by Google and industry partners",
+        "enrollment": "More than 1.3 million set-top boxes",
+        "monetization": "Access sold to criminal affiliates; affiliate malware modules loaded onto infected devices"
+      },
+      "qualifications": {
+        "event_timing": "Disruption occurred the week before source publication"
+      },
       "spans": [
         {
           "start": 0,
@@ -45,15 +47,18 @@
     {
       "source_digest": "954f576d48a88fca9fa3e5bf9a3657b48642d492aa6987659cdc681c241ab143",
       "reviewer": "Codex-assisted source review",
-      "reviewed_at": "2026-11-12T16:28:37+00:00",
-      "facts": [
-        "SANS Cowrie SSH honeypots: increase in attempts to exploit Sshole; source published November 8",
-        "Collection limit: first 255 SSH password characters; unusually long passwords differ from usual brute forcing"
-      ],
-      "qualifications": [
-        "Limited observations; attempts do not establish successful compromise or a global increase in attacks",
-        "No incident count, affected enterprise count, or recommended mitigation established by this excerpt"
-      ],
+      "reviewed_at": "2026-11-12T18:37:04+00:00",
+      "facts": {
+        "finding": "Increased attempts to exploit Sshole",
+        "observer": "SANS Internet Storm Center",
+        "sensors": "Cowrie SSH honeypots",
+        "observation": "Unusually long passwords differ from usual brute-force traffic"
+      },
+      "qualifications": {
+        "scope": "Limited honeypot observations, not a global attack count",
+        "visibility": "Only first 255 SSH password characters collected",
+        "success": "Attempts described; confirmed compromise not established by this excerpt"
+      },
       "spans": [
         {
           "start": 0,
@@ -390,6 +395,238 @@
           "claim_digest": "24888ddf2c37f3c5b8fb6b106a310abb9be1b312ebcc811e9febc1275834c110",
           "kind": "interpretation",
           "rationale": "The source explicitly qualifies its visibility by password-length truncation and limited data; no broader exploitation conclusion is asserted.",
+          "spans": [
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "e88287ee4e78df8f1e07468f",
+      "evidence_digest": "177fc8507c63a3e2a89c70916e67fce73f3126a3b1c5911701d562d421b50d0d",
+      "plan": {
+        "headline": "LLM Hijacking Can Drive Rapid Cloud Bills",
+        "overview": [
+          [
+            {
+              "text": "Enterprise access to language models can become a fast-moving financial liability when it is hijacked.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "Mandiant described multiple LLMJacking incidents across cloud and model providers, with fraudulent charges capable of climbing sharply within hours.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "That speed distinguishes the abuse from the more gradual resource consumption of cryptojacking.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "For cloud teams, unexpected model-related charges are a concrete reason to investigate possible misuse of enterprise access.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            }
+          ],
+          [
+            {
+              "text": "Google and industry partners also dismantled the XCPE backdoor, which had enrolled more than 1.3 million set-top boxes.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "The operator sold access to criminal affiliates and loaded their malware modules onto infected devices.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "The disruption targeted a business that turned control of those devices into a service for criminal affiliates.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            }
+          ]
+        ],
+        "topics": [
+          {
+            "topic_id": "052d67304b3e5147eb08144f",
+            "headline": "LLMJacking Across Industries",
+            "summary": {
+              "text": "Cases included financial services, retail, technology and transportation organizations across North America, South America and Asia Pacific.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            }
+          },
+          {
+            "topic_id": "fc59dc677ba83ade14f2cf4d",
+            "headline": "XCPE Attribution",
+            "summary": {
+              "text": "Google assessed with high confidence that Videostrong Technology Co. developed, deployed and operated the backdoor for financial gain.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            }
+          },
+          {
+            "topic_id": "6c85a28703e1a8c5fe9cfa13",
+            "headline": "Sshole Exploit Attempts",
+            "summary": {
+              "text": "Long SSH passwords stood out in SANS’s Cowrie honeypots as attempts to exploit Sshole increased.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            }
+          }
+        ]
+      },
+      "origin": "ollama-edited",
+      "reviewer": "Codex-assisted editorial revision and claim-by-claim source review (not user approval)",
+      "reviewed_at": "2026-11-12T18:37:04+00:00",
+      "claims": [
+        {
+          "claim_digest": "681bc9f287dc37c0d4a42ca7533fa9052f84989511ced6ca9a9cfd7df3f9c8c5",
+          "kind": "interpretation",
+          "rationale": "Hijacked enterprise LLM access and rapid large fraudulent cloud charges directly support the financial-risk interpretation; no amount or local exposure is asserted.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "a0a4899be6a9d72f2bfce6c7b33013aabf7a899f79233615273c71b27b0b48d8",
+          "kind": "fact",
+          "rationale": "The source describes multiple incidents and varied cloud/model providers; the possible sharp charges within hours preserve its conditional consequence, without dating attacks to this reporting week.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "8074f00c2809e671f2c1053bb53cea96ba33a985d9615b1056fdada3ac860c26",
+          "kind": "fact",
+          "rationale": "The source explicitly contrasts the gradual consumption of cryptojacking with rapid LLMJacking charges; no global activity trend is inferred.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "da54025fddac9572ab948f845d59621e27cf94d1a5ef18741642bce22353d77d",
+          "kind": "interpretation",
+          "rationale": "This is a conditional editorial investigative consideration grounded in the specific fraudulent-billing consequence, not a claim of publisher advice, available telemetry, successful detection or local compromise.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "38bd124434a9957cb02d9217041e4516c396afa3a70a91375cf9d65153267fe5",
+          "kind": "fact",
+          "rationale": "Google attributes dismantling to itself and industry partners and states more than 1.3 million enrolled set-top boxes. Past tense preserves the prior disruption without calling it an in-window incident.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "69b6b94658a6c522cacaff54622c19b89ae90ec3f20235d36251a5a1504ddba4",
+          "kind": "fact",
+          "rationale": "The original text states that access was sold to criminal affiliates and their malware modules loaded onto devices; no capability or subsequent incident is invented.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "7b0de26ed18c0cdf21e6584c3698db3993b72c940e65948f01a596201ad95f20",
+          "kind": "interpretation",
+          "rationale": "Selling access and loading affiliate malware support describing the operation as a service business; this does not assert recurrence, customers beyond the described affiliates or a connection to other reporting.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "271b19d30b6c1be4d69e804018ff5eee00c0f123b81c13245922a6b4f15b234a",
+          "kind": "fact",
+          "rationale": "All listed sectors and regions appear in the frozen excerpt; this adds scope outside the main narrative without assigning a new victim or count.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "c434261bd56a604ed2d962c97aa7dd7b3543232a25cf112c63b020c098410f83",
+          "kind": "fact",
+          "rationale": "Manufacturer attribution is explicitly presented as Google’s high-confidence assessment, preserving the original qualification and the named company rather than treating identity as proven fact.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "db50925e14eedb9212b1b30f513cdfd3bbd13e431f6ec00423e3b7c366bb4602",
+          "kind": "fact",
+          "rationale": "SANS states that longer passwords are highly unusual, differ from normal brute forcing, and accompany increased exploit attempts in Cowrie. The claim stays scoped to those honeypots and does not infer confirmed compromise or global frequency.",
           "spans": [
             {
               "id": "4b7df559b706314dfcf9185f",

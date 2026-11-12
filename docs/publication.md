@@ -44,7 +44,7 @@ Reviewed November 12, 2026. These are public RSS adapters, with no paid API, art
 
 | Source | Official RSS | Attribution / rights |
 | --- | --- | --- |
-| SANS Internet Storm Center | [Handler diaries](https://isc.sans.edu/rssfeed.xml) | SANS Technology Institute, Internet Storm Center; [data-use policy](https://isc.sans.edu/linkback.html), [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). The reader footer identifies shortened/adapted excerpts. |
+| SANS Internet Storm Center | [Handler diaries](https://isc.sans.edu/rssfeed.xml) | SANS Technology Institute, Internet Storm Center; [data-use policy](https://isc.sans.edu/linkback.html), [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). The footer’s Sources & Licenses dialog preserves credit, supplied bylines, original diary links, CC BY-NC-SA 4.0 terms and an adaptation notice. |
 | Cisco Talos | [Talos RSS](https://blog.talosintelligence.com/rss/) | Publisher/byline, canonical link and [Cisco terms](https://www.cisco.com/c/en/us/about/legal/terms-conditions.html); no open article license is assumed. |
 | Google Threat Intelligence Group | [GTI RSS](https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/) | Publisher/byline, canonical link and [Google terms](https://policies.google.com/terms); no open article license is assumed. |
 
@@ -92,3 +92,12 @@ The frontend is one page: an asymmetric narrative lead/radar, featured and secon
 Reader-facing destinations are selected from validated CISA/SANS/Talos/Google article URLs or internal CVE/indicator detail views; URLs are not invented from CVE names or dates. Technical views retain the original source URLs with explicit “Raw source data” labels for JSON/CSV/XML. Homepage evidence groups deduplicate shared records across editorial topics, while the archive retains full reports. Additional stories suppress exact featured article IDs/URLs before grouping; CVE overlap only affects related-story ordering and never alone deletes a report. Research categories are derived deterministically from source title/description terms; they describe report subjects, not verified attack classifications.
 
 Run Python tests, Node calculation tests, the infrastructure validator, synthetic private reporting, and empty/demo builds. Browser acceptance uses real public data and prior validated briefs at widths 390, 768, and 1440: four primary views, no horizontal overflow or browser/CSP errors, metric agreement, chart controls, report selection, CVE filtering, search, and dialog Escape handling. Screenshots contain only public data. Browser tooling is a development aid, not a runtime dependency.
+
+
+## Reader attribution and chart access
+
+The footer contains GitHub and Sources & Licenses. The keyboard-accessible dialog retains full MITRE license text and copyright, SANS credit/license and modification notice, available source bylines and original links, other publisher rights and the Newsreader license. The ATT&CK context also carries MITRE’s reproduction notice and a link to the bundled license. Original source links remain beside stories and in technical evidence; attribution has not been replaced by a generic homepage link.
+
+Placement was reviewed against [MITRE’s terms](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/), the [SANS data-use policy](https://isc.sans.edu/linkback.html) and [CC BY-NC-SA 4.0 §3](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en#s3), including its allowance for a reasonable linked attribution resource. Cisco/Google rights links and supplied attribution remain; their content is not assigned an open license. This changes presentation, not collection scope or downstream reuse rights.
+
+The visible Chart data disclosure/table is removed. The same `dailyKev` calculation drives 7D/30D bars, accessible per-date labels and a nonvisual UTC-series description. `snapshot.json` retains original catalog dates and all observations; `chartRows` and report-count helpers remain available for technical analysis. No data is deleted or inferred attack-frequency chart introduced.

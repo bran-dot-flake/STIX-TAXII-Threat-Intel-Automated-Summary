@@ -37,6 +37,21 @@ def snapshot():
     return s
 
 
+def prose_draft(plan):
+    return {
+        "headline": plan["headline"],
+        "paragraphs": [" ".join(c["text"] for c in p) for p in plan["overview"][:2]],
+        "radar": [
+            {
+                "topic_id": t["topic_id"],
+                "headline": t["headline"],
+                "sentence": t["summary"]["text"],
+            }
+            for t in plan["topics"]
+        ],
+    }
+
+
 class ExecutiveTests(unittest.TestCase):
     def test_completed_windows_configurable_and_adjacent(self):
         now = datetime.fromisoformat(package()["generated_at"])
@@ -52,14 +67,18 @@ class ExecutiveTests(unittest.TestCase):
         result = e.fallback(p)
         self.assertEqual(result["version"], 3)
         self.assertEqual(result["mode"], "ollama-edited-reviewed")
-        self.assertEqual(len(result["plan"]["overview"]), 3)
-        self.assertEqual(
-            sum(
-                len(c["text"].split())
-                for para in result["plan"]["overview"]
-                for c in para
+        self.assertEqual(len(result["plan"]["overview"]), 2)
+        words = sum(
+            len(c["text"].split())
+            for paragraph in result["plan"]["overview"]
+            for c in paragraph
+        )
+        self.assertLessEqual(words, 180)
+        self.assertNotIn(
+            "reporting window",
+            " ".join(
+                c["text"] for paragraph in result["plan"]["overview"] for c in paragraph
             ),
-            225,
         )
         e.validate_edition(result)
         for cl in e.claims(result["plan"]):
@@ -207,7 +226,9 @@ class ExecutiveTests(unittest.TestCase):
         writer = e.writer_source(row)
         self.assertIn("reviewed_facts", writer)
         self.assertNotIn("untrusted_excerpt", writer)
-        self.assertTrue(any("week before" in q for q in writer["qualifications"]))
+        self.assertTrue(
+            any("week before" in q for q in writer["qualifications"].values())
+        )
         row["excerpt"] += " Changed."
         self.assertIn("untrusted_excerpt", e.writer_source(row))
 
@@ -340,21 +361,31 @@ class ExecutiveTests(unittest.TestCase):
             self.assertEqual(list(cache.glob("*.json")), [])
             self.assertEqual(len(list((cache / "review").glob("*.json"))), 1)
 
-    def test_model_json_uses_free_text_not_sentence_enumerations(self):
+    def test_model_json_uses_free_text_and_raw_draft_cannot_publish(self):
         p = package()
-        plan = e.fallback(p)["plan"]
+        raw = prose_draft(e.fallback(p)["plan"])
 
         class Model:
             def json(self, url, payload):
                 self.payload = payload
-                return {"done": True, "message": {"content": json.dumps(plan)}}
+                return {
+                    "done": True,
+                    "done_reason": "stop",
+                    "message": {"content": json.dumps(raw)},
+                }
 
         model = Model()
-        result = e.compose(model, "http://127.0.0.1:11434", "existing-model", p)
-        self.assertEqual(result["mode"], "ollama-edited-reviewed")
-        atom = model.payload["format"]["properties"]["overview"]["items"]["items"]
-        self.assertEqual(atom["properties"]["text"], {"type": "string"})
+        with self.assertRaises(e.NeedsReview) as pending:
+            e.compose(model, "http://127.0.0.1:11434", "existing-model", p)
+        self.assertEqual(pending.exception.draft, raw)
+        self.assertIn("citation annotation", str(pending.exception))
+        self.assertEqual(
+            model.payload["format"]["properties"]["paragraphs"]["items"],
+            {"type": "string"},
+        )
         self.assertEqual(model.payload["keep_alive"], 0)
+        with self.assertRaises(ValueError):
+            e.validate_plan(raw, p)
 
     def test_failed_upload_preserves_accepted_local_checkpoint(self):
         s = snapshot()
@@ -411,7 +442,10 @@ class ExecutiveTests(unittest.TestCase):
         registry = json.loads(e.APPROVALS.read_text(encoding="utf-8"))
         new = copy.deepcopy(registry["reviews"][0])
         new["plan"]["headline"] = "Cloud Misuse and Limited SSH Observations"
-        new["reviewed_at"] = "2026-11-12T18:00:00+00:00"
+        new["reviewed_at"] = (
+            max(datetime.fromisoformat(r["reviewed_at"]) for r in registry["reviews"])
+            + timedelta(minutes=1)
+        ).isoformat()
         new["id"] = e.digest({k: v for k, v in new.items() if k != "id"})[:24]
         registry["reviews"].append(new)
         with tempfile.TemporaryDirectory() as d:
@@ -430,3 +464,63 @@ class ExecutiveTests(unittest.TestCase):
                 self.assertEqual(s["editions"][0]["headline"], new["plan"]["headline"])
                 self.assertEqual(s["editions"][0]["published_at"], old["published_at"])
                 validate_snapshot(s)
+
+    def test_short_prose_needs_no_filler_or_equal_overview_coverage(self):
+        p = package()
+        plan = copy.deepcopy(e.fallback(p)["plan"])
+        first = p["news"][0]["id"]
+        plan["overview"] = [
+            [
+                {
+                    "text": "Enterprise model access was hijacked.",
+                    "evidence_ids": [first],
+                }
+            ],
+            [
+                {
+                    "text": "Fraudulent cloud charges could climb within hours.",
+                    "evidence_ids": [first],
+                }
+            ],
+        ]
+        e.mechanical_checks(plan, p)
+        # A short, lead-focused overview is allowed, but valid citations still
+        # cannot approve this new prose; other developments remain in radar.
+        with self.assertRaises(e.NeedsReview):
+            e.validate_plan(plan, p)
+
+    def test_writer_brief_is_two_paragraph_free_prose_with_lead_priority(self):
+        p = package()
+        raw = prose_draft(e.fallback(p)["plan"])
+
+        class Model:
+            def json(self, url, payload):
+                self.payload = payload
+                return {"done": True, "message": {"content": json.dumps(raw)}}
+
+        model = Model()
+        with self.assertRaises(e.NeedsReview):
+            e.compose(model, "http://127.0.0.1:11434", "existing-model", p)
+        overview = model.payload["format"]["properties"]["paragraphs"]
+        self.assertEqual((overview["minItems"], overview["maxItems"]), (2, 2))
+        prompt = model.payload["messages"][0]["content"]
+        self.assertIn("120-180", prompt)
+        self.assertIn("Other developments may stay in radar", prompt)
+        sources = json.loads(model.payload["messages"][1]["content"])["sources"]
+        self.assertIsInstance(sources[0]["reviewed_facts"], dict)
+        self.assertNotIn("Omit manufacturer", json.dumps(sources))
+
+    def test_previous_three_paragraph_edition_keeps_its_review_validator(self):
+        p = package()
+        old = json.loads(e.APPROVALS.read_text(encoding="utf-8"))["reviews"][0]
+        self.assertEqual(len(old["plan"]["overview"]), 3)
+        self.assertEqual(
+            sum(
+                len(c["text"].split())
+                for paragraph in old["plan"]["overview"]
+                for c in paragraph
+            ),
+            225,
+        )
+        result = e.edition(p, old["plan"], e.review_mode(old), old["id"])
+        e.validate_edition(result)

@@ -176,7 +176,7 @@ test('ATT&CK identifiers remain searchable with explicit source types',()=>{
   const hit=searchResults(data,'T1059')[0];assert.equal(hit.type,'stix');assert.equal(hit.label,'ATT&CK technique');assert.equal(hit.record.external_id,'T1059');
   assert.deepEqual(searchResults(data,'   '),[]);
 });
-test('condensed chart tables preserve full dates and totals behind the all-days option',()=>{
+test('technical chart helpers retain condensed and complete date series without changing totals',()=>{
   const series=dailyKev(records,30,'2026-11-11T12:00:00Z');
   const compact=chartRows(series);assert(compact.every(r=>r.count>0));assert.equal(chartRows(series,true).length,30);
   assert.equal(compact.reduce((n,r)=>n+r.count,0),series.reduce((n,r)=>n+r.count,0));

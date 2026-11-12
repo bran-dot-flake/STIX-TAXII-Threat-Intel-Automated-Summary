@@ -6,7 +6,7 @@ Daily collection refreshes the Latest Intelligence feed, search, vulnerability r
 
 The completed seven-day UTC window defaults to Monday 08:00 through the following Monday 08:00, half-open `[start, end)`. Configure `TI_WEEKLY_DAY` (Monday=0) and `TI_WEEKLY_HOUR_UTC`; the existing daily timer runs the next collection after that boundary. No additional service is needed. The first run may publish the latest completed window late, with its real publication time. It does not manufacture missed historical weeks. Accepted windows cannot overlap, and the same window ID cannot be published twice. A quiet or failed run retains the last accepted article.
 
-The front page shows **Weekly Brief**, one compact period and one header update indicator. Exact evidence cutoff, original publication time, source publication/modification and any explicit revision time remain in the JSON and archive. A publication date is not an incident date.
+The front page shows **Weekly Brief** and one compact period. It has no header collection timestamp. The lead and supporting evidence precede a compact horizontal radar strip (stacked on mobile). Exact evidence cutoff, original publication time, source publication/modification and any explicit revision time remain in the JSON and archive. A publication date is not an incident date.
 
 ## Evidence preparation
 
@@ -14,19 +14,21 @@ Only independently sanitized public projections enter editorial selection. Up to
 
 Exact report URLs and explicit matching CVE subjects support grouping. Microsoft Patch Tuesday reports can share a verified month/year release identity, retaining both publishers and their separate totals. Shared actor, vendor or technique names never establish a common campaign. Only healthy sources can trigger a new edition. Old material requires both an in-window source modification and a measured substantive change; a new collection clock is insufficient. Content modified after cutoff is excluded rather than reconstructed as an earlier version.
 
-Reviewed structured fact notes in `editorial_approvals.json` can clarify exact source versions before inference. They carry source-content digests, dated qualifications and hashed evidence spans. Unknown or changed sources use their original bounded, untrusted excerpts. Notes are evidence preparation, not prewritten sentence options. Source assertions are not independently proven ground truth.
+Reviewed structured fact notes in `editorial_approvals.json` can clarify exact source versions before inference. They carry source-content digests, dated qualifications and hashed evidence spans. Unknown or changed sources use their original bounded, untrusted excerpts. Current reviewed notes use named fact/qualification slots rather than imperative editorial comments that the small model might copy into prose. Legacy note lists remain readable. Notes are evidence preparation, not prewritten sentence options. Source assertions are not independently proven ground truth.
 
 ## Natural composition and independent review
 
-The existing CPU-only Ollama receives selected evidence and writes a short headline, two or three cohesive overview paragraphs (target 200–300 words), and one concise radar sentence per development. It is free to paraphrase and organize ideas; the schema does not enumerate approved sentences. The prompt distinguishes attempts from compromise, publication from incident timing, assessed attribution from certainty, and thematic comparisons from shared campaigns. No paid API, extra model, package or service is required.
+The existing CPU-only Ollama receives selected evidence and writes a short headline, two cohesive overview paragraphs (target 120–180 words, with no minimum word count), and one concise radar sentence per development. The writer returns plain paragraph strings and compact radar prose; it does not juggle per-sentence citation enums while drafting. This draft document is deliberately incompatible with the publishable plan schema. A separate review annotates each sentence with its actual supporting sources before the existing mechanical and approval gates. No guessed or blanket citations are assigned automatically. The schema does not enumerate approved sentences. The writer leads with one consequential finding, explains its documented consequence and gives secondary developments less space or leaves them to the radar. It does not manufacture a theme or give every source equal overview coverage. The prompt distinguishes attempts from compromise, publication from incident timing and assessed attribution from certainty without turning the article into a methodology discussion. No paid API, extra model, package or service is required.
 
 Mechanical checks reject unknown identifiers, unsupported numbers/scales, unrelated citations, extra fields, missing developments, long copied passages, repeated wording and generic filler. These are **not semantic entailment**. A valid evidence ID, word overlap or another model's approval cannot verify arbitrary English.
 
 Novel prose therefore stays in ignored `data/editorial/review/` until explicit source review is recorded in the repository-owned registry. The writer cannot modify that registry. A receipt binds the exact plan and semantic evidence digest, each claim's text hash, review rationale and hashed source spans. Every cited source must have reviewed support. Review covers chronology, attribution, negation, uncertainty and interpretive conclusions as well as identifiers. The model cannot approve its own output. A reviewer must assess each actual claim; copying citations into a receipt is not an adequate review.
 
-Origins are honest: `ollama-reviewed` means an unchanged reviewed model plan; `ollama-edited-reviewed` means a model proposal was revised and source-reviewed; `deterministic-fallback` means an explicitly reviewed editorial plan. Codex-assisted review is labeled as such, not as user or human approval. No receipt is generated automatically by the scheduler.
+Origins are honest: `ollama-reviewed` means unchanged reviewed model wording with separately checked citation annotations; `ollama-edited-reviewed` means a model proposal was revised and source-reviewed; `deterministic-fallback` means an explicitly reviewed editorial plan. Codex-assisted review is labeled as such, not as user or human approval. No receipt is generated automatically by the scheduler.
 
 This conservative design limits fully unattended publication of **novel unrestricted analysis**: daily intelligence collection is automatic, but new free-form prose may need editorial review. An evidence-identical reviewed plan can be reused without inference as a readable fallback. If no acceptable reviewed prose exists, the last valid weekly stays visible; excerpt concatenation and empty daily articles are not substituted.
+
+See the [same-evidence before/after comparison](editorial-comparison.md) for the current concise edition and the observed model limitations.
 
 ## Scheduled operation
 
@@ -40,7 +42,7 @@ Collection prepares the sanitized snapshot; composition skips already accepted w
 
 An operator-requested correction can use `compose_brief.py --editorial --revise-latest` followed by `export_publication.py --publish-prepared --revise-latest`. This exceptional path uses the latest weekly's frozen source evidence, preserves its ID and original publication date, and records `revised_at`. Routine scheduled runs cannot revise accepted articles. Prior data commits retain earlier text; the archive does not add a duplicate week.
 
-## November 12 diagnosis and correction
+## Historical November 12 diagnosis and correction
 
 Both inspected CPU Ollama runs completed; the observed rejection was validation-related, not an assumed resource failure. One overview used story identifiers instead of required fact identifiers. Another attached lead IDs but failed the previous complete-sentence wording check. The old gate protected factual claims but prevented free paraphrase. Historical validators remain unchanged; version-3 editions use the new review-bound path.
 
