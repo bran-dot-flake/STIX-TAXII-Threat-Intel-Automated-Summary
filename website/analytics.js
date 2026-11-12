@@ -19,20 +19,24 @@ export function metrics(snapshot, now) {
     advisories: snapshot.news.length,
   };
 }
-export function dailyKev(records, days, now) {
-  const end = new Date(now); end.setUTCHours(0, 0, 0, 0);
-  const rows = Array.from({length: days}, (_, index) => {
-    const date = new Date(end.getTime() - (days - index - 1) * 86400000).toISOString().slice(0, 10);
-    return {date, count: 0};
-  });
-  const byDate = new Map(rows.map(r => [r.date, r])); const seen = new Set();
-  for (const r of records) {
-    if (r.source !== 'cisa-kev' || seen.has(r.value) || !r.published_at) continue;
-    const date = r.published_at.slice(0, 10);
-    if (byDate.has(date)) { byDate.get(date).count++; seen.add(r.value); }
+function kevBuckets(records,days,now) {
+  const end=new Date(now);end.setUTCHours(0,0,0,0);
+  const rows=Array.from({length:days},(_,i)=>({date:new Date(end.getTime()-(days-i-1)*86400000).toISOString().slice(0,10),records:[]}));
+  const byDate=new Map(rows.map(r=>[r.date,r]));const seen=new Set();
+  for(const r of records){
+    if(r.source!=='cisa-kev'||seen.has(r.value)||!r.published_at)continue;
+    const day=byDate.get(r.published_at.slice(0,10));
+    if(day){day.records.push(r);seen.add(r.value);}
   }
   return rows;
 }
+export function dailyKev(records,days,now) {
+  return kevBuckets(records,days,now).map(r=>({date:r.date,count:r.records.length}));
+}
+export function kevRecords(records,days,now,date) {
+  return [...(kevBuckets(records,days,now).find(r=>r.date===date)?.records||[])].sort((a,b)=>a.value.localeCompare(b.value));
+}
+
 export function kindCounts(records) {
   const unique = new Set(); const counts = {};
   for (const r of records) {
@@ -50,15 +54,13 @@ export function matches(item, query) {
 
 export const publicationTime = edition => edition.published_at||edition.generated_at;
 
-export function visibleHistory(snapshot) {
-  return [...(snapshot.editions||[]).filter(e=>e.topics.length),...snapshot.reports.filter(r=>r.mode!=='quiet-day'&&(r.observations||r.items).length)]
-    .sort((a,b)=>publicationTime(b).localeCompare(publicationTime(a)));
+export function weeklyEditions(snapshot) {
+  const rows=(snapshot.editions||[]).filter(e=>e.publication_kind==='weekly'&&e.topics.length)
+    .sort((a,b)=>Date.parse(b.window_end||publicationTime(b))-Date.parse(a.window_end||publicationTime(a))||Date.parse(b.revised_at||publicationTime(b))-Date.parse(a.revised_at||publicationTime(a)));
+  const seen=new Set();return rows.filter(e=>{const key=e.window_start&&e.window_end?Date.parse(e.window_start)+'|'+Date.parse(e.window_end):e.id;if(seen.has(key))return false;seen.add(key);return true;});
 }
-
-export function publicationView(snapshot) {
-  const editions=(snapshot.editions||[]).filter(e=>e.topics.length&&e.publication_kind==='weekly').sort((a,b)=>Date.parse(publicationTime(b))-Date.parse(publicationTime(a)));
-  return {primary:editions[0]||null,update:null};
-}
+export function visibleHistory(snapshot) {return weeklyEditions(snapshot).slice(1);}
+export function publicationView(snapshot) {return {primary:weeklyEditions(snapshot)[0]||null,update:null};}
 
 export function featuredPublication(snapshot) {
   return publicationView(snapshot).primary;

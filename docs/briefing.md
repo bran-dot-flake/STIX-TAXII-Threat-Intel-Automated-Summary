@@ -89,3 +89,14 @@ PYTHONPATH=src python3 scripts/export_publication.py --publish
 ```
 
 The one-edition cache lives in ignored `data/narrative/`. A changed input digest rejects a stale cache and falls back safely. The exporter never calls Ollama. Original report dates and accepted history remain intact.
+
+
+## Optional weekly illustration
+
+`artwork.py` selects a versioned original vector composition from the final approved headline, then its first supported lead sentence. It never changes reporting text or feeds. Five narrow subjects are supported (LLM hijacking, ransomware, phishing, exploitation, botnets); unrecognized subjects omit the image. The November 2–9 example uses cloud/AI, access-key and rising-cost linework, not a numerical statistic. These are original code-drawn compositions; no reference bitmap, external artwork or image service is published.
+
+A direct trial with the existing CPU `llama3.2:latest` model reached its 800-token output bound (`done_reason=length`) and failed SVG parsing. The production workflow therefore uses the requested deterministic library fallback and spends no extra inference time on daily runs. The rejected proposal stays private under `work/functionality/` on the VM. It is not claimed as accepted model artwork.
+
+Schema 7 adds optional illustration history. A cached artifact binds edition ID, exact approved-lead/evidence digest, style version, subject, deterministic alternative text, canonical SVG and SHA-256. Repeated daily exports reuse it; a new weekly edition gets its own artifact. Earlier illustrations remain with earlier weekly editions. An explicit lead revision changes the binding. Style version 1 is frozen; future drawing changes must use a new version to preserve old artifacts. Unsupported subjects or invalid new generation omit the image without withholding the brief.
+
+SVG validation permits only a fixed viewport, a small geometry-only element/attribute list and the existing cream/orange/charcoal palette. It rejects text, scripts, handlers, references, external resources, namespaces on elements, CSS, entities, declarations and active embedded content. Bounds are 12 KB, 64 nodes, 2,000 characters per geometry field, 500 numeric path values and finite coordinates within ±4096. Public validation also requires exact reproduction from the bound original composition. The builder writes validated bytes to digest-named static SVG assets. The browser loads them as images with descriptive alt text, never inline markup.

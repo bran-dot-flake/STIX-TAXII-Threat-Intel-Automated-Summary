@@ -2,13 +2,13 @@
 
 `scripts/export_publication.py` independently recollects original public sources and optionally publishes through existing `gh` authentication. It does not call platform APIs or Ollama. The staged scheduler invokes it when `TI_PUBLICATION_ENABLED=true`, including after backend failures. All existing private reporting paths remain available.
 
-## Schema version 6 (versions 1–5 remain readable)
+## Schema version 7 (versions 1–6 remain readable)
 
 `src/ti_brief/publication.py:validate_snapshot` is the executable contract. Unknown object keys are rejected. The live validator rejects synthetic data; only explicit `build_dashboard.py --demo` permits the labeled fixture.
 
 | Object | Exact fields |
 | --- | --- |
-| Snapshot | `schema_version` (6), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix`, `editions`, `collection` |
+| Snapshot | `schema_version` (7), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix`, `editions`, `collection`, `illustrations` |
 | Collection | `checked_at`, `status` (`ready`, `quiet`, `source-failure`, `published`, `withheld`), `last_substantive_at`, `weekly_window_end` |
 | Source health | `id`, `status` (`ok`, `cached`, `unavailable`), `attempted_at`, `last_success_at` |
 | Observation | `id`, `source`, `source_url`, `kind`, `value`, `title`, `description`, `action`, `published_at`, `first_seen`, `last_seen` |
@@ -101,3 +101,18 @@ The footer contains GitHub and Sources & Licenses. The keyboard-accessible dialo
 Placement was reviewed against [MITRE’s terms](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/), the [SANS data-use policy](https://isc.sans.edu/linkback.html) and [CC BY-NC-SA 4.0 §3](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.en#s3), including its allowance for a reasonable linked attribution resource. Cisco/Google rights links and supplied attribution remain; their content is not assigned an open license. This changes presentation, not collection scope or downstream reuse rights.
 
 The visible Chart data disclosure/table is removed. The same `dailyKev` calculation drives 7D/30D bars, accessible per-date labels and a nonvisual UTC-series description. `snapshot.json` retains original catalog dates and all observations; `chartRows` and report-count helpers remain available for technical analysis. No data is deleted or inferred attack-frequency chart introduced.
+
+
+## Static artwork and weekly reader archive
+
+`illustrations` is bounded to ninety exact-field artifacts: `version`, `edition_id`, `lead_digest`, `kind`, `alt`, `svg`, `digest`. Schema 7 leaves all existing edition/source data intact. The public data branch still contains only `snapshot.json`; the static builder saves each validated SVG under `assets/briefs/<edition-id>-<digest-prefix>.svg`. It never copies a runtime asset directory. New-image failures are optional, cached images are validated on every read, and synthetic assets require an explicit demo build.
+
+The public archive filters accepted weekly editions, deduplicates reporting windows, sorts by reporting period and excludes the currently featured week. Earlier daily/interim/batch evidence stays unchanged in JSON and global search; it is not deleted. The current dataset has no previous weekly edition, so the archive has a minimal empty state. Historical-week presentation and image association are covered with isolated synthetic browser fixtures.
+
+The More/Less intelligence control keeps its position between the initial six stories and additional stories, preserving source ordering/deduplication and keyboard focus. KEV popovers use the same deduplicated per-day buckets as the unchanged chart counts; hover, focus/Enter/ArrowDown and touch expose up to five actual CVEs, with a full list available in the detail dialog. Dialogs support X, Escape and genuine backdrop clicks (not interior clicks), with focus restoration and background scroll locking.
+
+## Relationship-date investigation
+
+For `relationship--001ecf24-8276-40d2-ba05-2d20e5c53ec9`, the stored original source object and a fresh [MITRE TAXII object response](https://attack-taxii.mitre.org/api/v21/collections/x-mitre-collection--1f5f1533-f617-4ca8-9ab4-6a02367fa019/objects/relationship--001ecf24-8276-40d2-ba05-2d20e5c53ec9/) both contain `created=2021-03-26T16:48:31.963Z` and `modified=2026-04-29T14:23:05.903Z`. Local first collection was November 11, 2026; it is not the displayed relationship date. The exporter copies `modified` directly from each STIX relationship object; no entity date or synchronization clock substitutes for it.
+
+The related GoldFinder object has `modified=2025-04-16T20:38:31.830Z`, and Internet Connection Discovery has `modified=2025-10-24T17:48:26.017Z`. These are separate entity revisions. The reader now labels the relationship date **Relationship modified**, with a tooltip identifying the source STIX property. No underlying STIX object was changed to align dates.

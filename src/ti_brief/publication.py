@@ -271,10 +271,11 @@ def collect_public(http, previous=None, now=None):
         "news": news, "reports": previous["reports"], "stix":previous.get("stix",empty_context())}
     # Retain public research history independently of article publication.
     result['news']=sorted({r['id']:r for r in result['news']}.values(),key=lambda r:(r['published_at'],r['id']),reverse=True)[:240]
-    result["schema_version"]=previous['schema_version'] if previous['schema_version'] in {3,4,5,6} else 2
-    if previous['schema_version'] in {4,5,6}:result['editions']=previous['editions']
-    if previous['schema_version'] in {5,6}:
-        if previous['schema_version']==6:
+    result["schema_version"]=previous['schema_version'] if previous['schema_version'] in {3,4,5,6,7} else 2
+    if previous['schema_version'] in {4,5,6,7}:result['editions']=previous['editions']
+    if previous['schema_version']==7:result['illustrations']=previous['illustrations']
+    if previous['schema_version'] in {5,6,7}:
+        if previous['schema_version'] in {6,7}:
             from .executive import prepare
         else:
             from .hybrid import prepare
@@ -367,10 +368,10 @@ def validate_item(row):
 
 def validate_snapshot(value, allow_synthetic=False):
     version=value.get("schema_version")
-    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3,4,5,6} else set()) | ({'editions'} if version in {4,5,6} else set()) | ({'collection'} if version in {5,6} else set()))
-    if version not in {1,2,3,4,5,6} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
+    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3,4,5,6,7} else set()) | ({'editions'} if version in {4,5,6,7} else set()) | ({'collection'} if version in {5,6,7} else set()) | ({'illustrations'} if version==7 else set()))
+    if version not in {1,2,3,4,5,6,7} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
         raise ValueError("Unsupported or synthetic public snapshot")
-    if version in {2,3,4,5,6}:validate_context(value["stix"])
+    if version in {2,3,4,5,6,7}:validate_context(value["stix"])
     for field in ("collected_at", "exported_at"):
         if value[field] is not None:
             stamp(value[field])
@@ -400,7 +401,7 @@ def validate_snapshot(value, allow_synthetic=False):
         if value['exported_at'] and any(row.get(k) and stamp(row[k])>stamp(value['exported_at']) for k in ('published_at','modified_at','last_seen','content_changed_at')):
             raise ValueError('Future public news')
     for row in value["reports"]:
-        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version in {3,4,5,6} else set()))
+        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version in {3,4,5,6,7} else set()))
         valid_id(row["id"])
         stamp(row["generated_at"])
         quiet = row["mode"] == "quiet-day" and row["evidence_count"] == 0 and row["items"] == []
@@ -410,7 +411,7 @@ def validate_snapshot(value, allow_synthetic=False):
             exact_fields(item, ITEM_FIELDS)
             validate_item(item)
             clean_text(item["excerpt"], 240)
-        if version in {3,4,5,6}:
+        if version in {3,4,5,6,7}:
             from .briefing_public import validate_observation
             from .narrative import validate_narrative
             observations=row['observations']
@@ -420,7 +421,7 @@ def validate_snapshot(value, allow_synthetic=False):
             if len(ids)!=len(set(ids)) or any(item['id'] not in ids for item in row['items']):raise ValueError('Invalid topic evidence identifiers')
             for observation in observations:validate_observation(observation,row['generated_at'])
             validate_narrative(row['narrative'],row)
-    if version in {4,5,6}:
+    if version in {4,5,6,7}:
         from .editorial import validate_edition
         editions=value['editions']
         if not isinstance(editions,list) or len(editions)>90:raise ValueError('Invalid editorial history')
@@ -437,12 +438,15 @@ def validate_snapshot(value, allow_synthetic=False):
                 originals={r['id']:r for r in value['records']+value['news']}
                 for row in edition['input']['records']+edition['input']['news']:
                     if originals.get(row['id'])!=row:raise ValueError('Hybrid evidence differs from collected publication')
-    if version in {5,6}:
-        if version==6:
+    if version in {5,6,7}:
+        if version in {6,7}:
             from .executive import validate_collection
         else:
             from .hybrid import validate_collection
         validate_collection(value)
+    if version==7:
+        from .artwork import validate
+        validate(value)
     return value
 
 

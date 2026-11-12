@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {publicationView,visibleHistory,featuredPublication,weeklyPeriod,reportingTrends} from '../website/analytics.js';
+import {publicationView,visibleHistory,featuredPublication,weeklyPeriod,reportingTrends,weeklyEditions,kevRecords} from '../website/analytics.js';
 import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt,searchResults,catalogEntries,chartRows} from '../website/analytics.js';
 
 const records=[
@@ -189,19 +189,19 @@ test('quiet collections keep the substantive weekly date and hide quiet archive 
   const quiet={id:'q',generated_at:'2026-11-12T08:05:00Z',topics:[]};
   const snapshot={editions:[quiet,weekly],reports:[{mode:'quiet-day',generated_at:'2026-11-12T08:00:00Z',items:[]}]};
   assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,null);
-  assert.deepEqual(visibleHistory(snapshot),[weekly]);assert.equal(publicationView(snapshot).primary.generated_at,'2026-11-09T08:05:00Z');
+  assert.deepEqual(visibleHistory(snapshot),[]);assert.equal(publicationView(snapshot).primary.generated_at,'2026-11-09T08:05:00Z');
 });
-test('legacy interim stays in the archive but never replaces or expands the weekly article',()=>{
+test('legacy interim remains in data but is excluded from the weekly archive',()=>{
   const weekly={id:'w',publication_kind:'weekly',generated_at:'2026-11-09T08:05:00Z',topics:[{evidence_ids:['a']}],input:{records:[],news:[{id:'a',source_url:'https://isc.sans.edu/a'}],updates:[]}};
   const update={id:'u',publication_kind:'update',generated_at:'2026-11-12T08:05:00Z',topics:[{evidence_ids:['b']}],input:{records:[],news:[{id:'b',source_url:'https://isc.sans.edu/b'}],updates:[]}};
   const snapshot={editions:[update,weekly],reports:[]};
   assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,null);
-  assert.equal(featuredPublication(snapshot).input.news.length,1);assert.equal(visibleHistory(snapshot).length,2);
+  assert.equal(featuredPublication(snapshot).input.news.length,1);assert.equal(visibleHistory(snapshot).length,0);
 });
 test('initial publication state and legacy substantive history remain usable',()=>{
   assert.deepEqual(publicationView({editions:[],reports:[]}),{primary:null,update:null});
   const old={id:'old',generated_at:'2026-11-10',topics:[{}]};
-  assert.equal(publicationView({editions:[old],reports:[]}).primary,null);assert.deepEqual(visibleHistory({editions:[old],reports:[]}),[old]);
+  assert.equal(publicationView({editions:[old],reports:[]}).primary,null);assert.deepEqual(visibleHistory({editions:[old],reports:[]}),[]);
 });
 test('reporting trends count unique original reports, UTC dates and subjects, not attacks',()=>{
   const rows=[{source_url:'https://isc.sans.edu/a',category:'Malware research',published_at:'2026-11-10T12:00:00Z'},
@@ -230,4 +230,27 @@ test('weekly periods use concise UTC dates across month and year boundaries',()=
   assert.equal(weeklyPeriod('2026-11-02T08:00:00Z','2026-11-09T08:00:00Z'),'Nov 2–9, 2026');
   assert.equal(weeklyPeriod('2026-10-26T08:00:00Z','2026-11-02T08:00:00Z'),'Oct 26 – Nov 2, 2026');
   assert.equal(weeklyPeriod('2026-12-28T08:00:00Z','2027-01-04T08:00:00Z'),'Dec 28, 2026 – Jan 4, 2027');
+});
+
+test('archive uses previous reporting windows, deduplicates revisions and keeps technical data intact',()=>{
+ const row=(id,start,end,pub,extra={})=>({id,publication_kind:'weekly',topics:[{}],window_start:start,window_end:end,published_at:pub,...extra});
+ const current=row('c','2026-11-09','2026-11-16','2026-11-17');
+ const older=row('a','2026-11-02','2026-11-09','2026-11-18');
+ const revision={...older,id:'b',window_start:'2026-11-02T00:00:00Z',window_end:'2026-11-09T00:00:00Z',revised_at:'2026-11-19'};
+ const snapshot={editions:[older,revision,current,{...current,id:'update',publication_kind:'update'}],reports:[{id:'daily'}]};
+ const original=JSON.stringify(snapshot);
+ assert.deepEqual(weeklyEditions(snapshot).map(r=>r.id),['c','b']);
+ assert.deepEqual(visibleHistory(snapshot).map(r=>r.id),['b']);
+ assert.equal(JSON.stringify(snapshot),original);
+});
+test('chart details use the exact deduplicated KEV records behind each count',()=>{
+ const rows=[{id:'a',source:'cisa-kev',value:'CVE-2026-11111',published_at:'2026-11-10'},
+ {id:'b',source:'cisa-kev',value:'CVE-2026-11111',published_at:'2026-11-11'},
+ {id:'c',source:'cisa-kev',value:'CVE-2026-22222',published_at:'2026-11-11'},
+ {id:'d',source:'circl-osint',value:'unrelated',published_at:'2026-11-11'}];
+ for(const days of [7,30])for(const day of dailyKev(rows,days,'2026-11-12')){
+  const members=kevRecords(rows,days,'2026-11-12',day.date);assert.equal(members.length,day.count);
+  assert(members.every(r=>r.source==='cisa-kev'));assert.equal(new Set(members.map(r=>r.value)).size,members.length);
+ }
+ assert.deepEqual(kevRecords(rows,7,'2026-11-12','2026-11-10').map(r=>r.id),['a']);
 });

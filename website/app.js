@@ -1,4 +1,4 @@
-import {metrics, dailyKev, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, publicationTime, publicationView, visibleHistory, featuredPublication, weeklyPeriod} from './analytics.js';
+import {metrics, dailyKev, kevRecords, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, publicationTime, publicationView, visibleHistory, featuredPublication, weeklyPeriod} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
@@ -15,7 +15,7 @@ const link = (url,text,cls='') => {
   catch {return e(text);}
   return `<a class="${e(cls)}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)} ↗</a>`;
 };
-let data, period=30, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
+let data, chartAsOf, period=30, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
 const empty = text => `<p class="empty">${e(text)}</p>`;
 
 function warnings() {
@@ -47,10 +47,16 @@ function editorialTopics(edition) {
   const rows=editionRows(edition);
   return edition.topics.map(topic=>({...topic,records:rows.filter(r=>topic.evidence_ids.includes(r.id)),summary:edition.plan.topics.find(t=>t.topic_id===topic.id)?.summary.text||''}));
 }
+function illustration(edition) {
+  const art=(data.illustrations||[]).find(a=>a.edition_id===edition.id);
+  if(!art||!/^([a-f0-9]{24})$/.test(art.edition_id)||!/^([a-f0-9]{64})$/.test(art.digest))return '';
+  return `<figure class="weekly-illustration"><img src="./assets/briefs/${art.edition_id}-${art.digest.slice(0,16)}.svg" width="640" height="400" alt="${e(art.alt)}"></figure>`;
+}
+
 function editionMarkup(edition) {
   const topics=editorialTopics(edition);
   const actions=[...new Set(topics.flatMap(t=>t.records.map(r=>r.action)).filter(Boolean))];
-  return `<div class="metadata">${e(editionLabel(edition))} · ${e(time(publicationTime(edition)))} · ${edition.mode==='ollama-edited-reviewed'?'Edited and source-reviewed Ollama draft':edition.mode==='ollama-reviewed'?'Reviewed Ollama composition':edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}${topic.previously_reported?' · Previously covered':''}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4>${description(row)?`<p>${e(description(row))}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
+  return `<h3 class="archive-headline">${e(edition.headline||topics[0]?.headline||'Weekly briefing')}</h3><div class="metadata">${e(weeklyPeriod(edition.window_start,edition.window_end))}</div>${illustration(edition)}${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}${topic.previously_reported?' · Previously covered':''}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4>${description(row)?`<p>${e(description(row))}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
 }
 const description = row => row.description==='Public CIRCL OSINT observation. Source attribution is not independent verification.'?'':row.description||row.excerpt||'';
 const sourceLink = row => link(row.source_url,isRawSource(row.source_url)?'Raw source data':'Original source','link');
@@ -88,7 +94,7 @@ function opening(edition) {
   const topics=editorialTopics(edition);
   const radar=edition.version===3?topics:topics.slice(1,4);
   const sentence=text=>{if(edition.version===3)return text.split(/\s+/).length<=38?text:'';const first=text.match(/^.*?[.!?](?:[”"'])?(?=\s|$)/)?.[0]||text;return first.split(/\s+/).length<=38?first:'';};
-  return `<div class="section-head"><h2>Weekly Brief</h2><time class="edition-date">${e(weeklyPeriod(edition.window_start,edition.window_end))}</time></div><div class="editorial-lead"><h1>${e(edition.headline||topics[0]?.headline||'Weekly intelligence briefing')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}</div>${supportingEvidence(edition)}${radar.length?`<section class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2><div class="radar-items">${radar.map(topic=>`<article><h3>${e(topic.headline)}</h3>${sentence(topic.summary)?`<p>${e(sentence(topic.summary))}</p>`:''}<div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</div></section>`:''}`;
+  return `<div class="section-head"><h2>Weekly Brief</h2><time class="edition-date">${e(weeklyPeriod(edition.window_start,edition.window_end))}</time></div><div class="editorial-lead"><h1>${e(edition.headline||topics[0]?.headline||'Weekly intelligence briefing')}</h1><div class="lead-body ${illustration(edition)?'illustrated':''}"><div class="lead-copy">${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}</div>${illustration(edition)}</div></div>${supportingEvidence(edition)}${radar.length?`<section class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2><div class="radar-items">${radar.map(topic=>`<article><h3>${e(topic.headline)}</h3>${sentence(topic.summary)?`<p>${e(sentence(topic.summary))}</p>`:''}<div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</div></section>`:''}`;
 }
 
 function render() {
@@ -104,11 +110,10 @@ function render() {
       <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
       <details class="collection-composition"><summary>Dataset composition · unique values by type</summary><div id="types" class="type-list"></div></details></div></section>
       <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${catalogEntries(data.stix.objects).length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
-        <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
         <p class="catalog-note mitre-credit">© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation. <a href="./assets/licenses/MITRE-ATTACK.txt">License</a>.</p><div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details>
 
     <details class="register" id="vulnerabilities"><summary>Vulnerabilities <small>${m.kev} KEV entries</small></summary><div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input id="cve-search" type="search" placeholder="CVE, vendor, or keyword…"><small id="cve-count"></small></div><div id="cve-results"></div></details>
-    <details class="archive" id="archive"><summary>Archive <small>${history.length} briefs</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${history.map(row=>`<option value="${e(row.id)}">${e(time(publicationTime(row)))} · ${row.input?editionLabel(row):'Evidence brief'}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${history[0]?(history[0].input?editionMarkup(history[0]):reportMarkup(history[0])):empty('No accepted public editions yet.')}</div></details>`;
+    <details class="archive" id="archive"><summary>Archive <small>${history.length} previous weekly editions</small></summary>${history.length?`<div class="filter-row"><label for="archive-select">Reporting period</label><select id="archive-select">${history.map(row=>`<option value="${e(row.id)}">${e(weeklyPeriod(row.window_start,row.window_end))}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${editionMarkup(history[0])}</div>`:empty('No previous weekly editions.')}</details>`;
   const sans=new Map();
   for(const row of [...data.news,...(data.editions||[]).flatMap(edition=>edition.input.news)]){
     if(row.source==='sans-isc'&&(!sans.has(row.source_url)||(!sans.get(row.source_url).author&&row.author)))sans.set(row.source_url,row);
@@ -118,15 +123,41 @@ function render() {
 }
 
 function trend() {
-  const rows=dailyKev(data.records,period,new Date().toISOString());
+  chartAsOf=new Date().toISOString();
+  const rows=dailyKev(data.records,period,chartAsOf);
   const max=Math.max(...rows.map(r=>r.count),1);
   document.querySelector('#chart-total').textContent=`${rows.reduce((sum,r)=>sum+r.count,0)} / ${period} days`;
   const total=rows.reduce((sum,row)=>sum+row.count,0);
   const nonzero=rows.filter(row=>row.count);
   const description=`${period} UTC calendar days; ${total} KEV catalog additions. Counts describe catalog additions, not attack frequency. `+(nonzero.length?nonzero.map(row=>`${row.date}: ${row.count}`).join('; ')+'. Other days: zero.':'All days: zero.');
-  document.querySelector('#trend').innerHTML=`<p class="sr-only" id="trend-description">${e(description)}</p><div class="bar-chart" role="group" aria-label="Daily KEV catalog additions" aria-describedby="trend-description">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div>`;
+  document.querySelector('#trend').innerHTML=`<p class="sr-only" id="trend-description">${e(description)}</p><div class="bar-chart" role="group" aria-label="Daily KEV catalog additions" aria-describedby="trend-description">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" data-kev-date="${r.date}" aria-controls="kev-popover" aria-expanded="false" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><div id="kev-popover" class="chart-popover" role="dialog" aria-modal="false" aria-labelledby="kev-popover-title" hidden></div>`;
   document.querySelectorAll('[data-height]').forEach(el=>el.style.height=`${el.dataset.height}%`);
 }
+
+let chartAnchor=null,chartPinned=false,chartHideTimer;
+function hideChart(){clearTimeout(chartHideTimer);document.querySelector('#kev-popover')?.setAttribute('hidden','');chartAnchor?.setAttribute('aria-expanded','false');chartAnchor=null;chartPinned=false;}
+function showChart(bar,pin=false){
+  if(!bar||!data)return;
+  clearTimeout(chartHideTimer);
+  if(chartPinned&&!pin&&bar!==chartAnchor)return;
+  chartAnchor?.setAttribute('aria-expanded','false');chartAnchor=bar;chartPinned=pin||chartPinned;bar.setAttribute('aria-expanded','true');
+  const rows=kevRecords(data.records,period,chartAsOf,bar.dataset.kevDate);
+  const panel=document.querySelector('#kev-popover');
+  panel.innerHTML=`<h3 id="kev-popover-title">${e(date(bar.dataset.kevDate))} — ${rows.length} addition${rows.length===1?'':'s'}</h3>${rows.length?`<ul>${rows.slice(0,5).map(r=>`<li><button class="link" data-evidence="${e(r.id)}">${e(r.value)}</button><span>${e(r.title.replace(/ Vulnerability$/,''))}</span></li>`).join('')}</ul>`:'<p>No catalog additions.</p>'}${rows.length>5?`<button class="link" data-kev-all>View all ${rows.length} additions →</button>`:''}`;
+  panel.hidden=false;
+  const anchor=bar.getBoundingClientRect(),box=panel.getBoundingClientRect();
+  panel.style.left=Math.max(12,Math.min(innerWidth-box.width-12,anchor.left+anchor.width/2-box.width/2))+'px';
+  panel.style.top=Math.max(12,Math.min(innerHeight-box.height-12,anchor.top-box.height-10>12?anchor.top-box.height-10:anchor.bottom+10))+'px';
+}
+main.addEventListener('pointerover',event=>{const bar=event.target.closest('[data-kev-date]');if(bar&&event.pointerType!=='touch')showChart(bar);if(event.target.closest('#kev-popover'))clearTimeout(chartHideTimer);});
+main.addEventListener('pointerout',event=>{if(event.target.closest('[data-kev-date],#kev-popover')&&!chartPinned)chartHideTimer=setTimeout(hideChart,220);});
+main.addEventListener('focusin',event=>{const bar=event.target.closest('[data-kev-date]');if(bar)showChart(bar);});
+main.addEventListener('focusout',event=>{if(event.target.closest('[data-kev-date],#kev-popover')&&!event.relatedTarget?.closest('[data-kev-date],#kev-popover')&&!chartPinned)hideChart();});
+main.addEventListener('keydown',event=>{const bar=event.target.closest('[data-kev-date]');if(bar&&event.key==='ArrowDown'){event.preventDefault();showChart(bar,true);document.querySelector('#kev-popover button')?.focus();}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]')){const bar=chartAnchor;hideChart();if(bar){bar.focus({preventScroll:true});hideChart();}}});
+document.addEventListener('pointerdown',event=>{if(!event.target.closest('[data-kev-date],#kev-popover,dialog'))hideChart();});
+window.addEventListener('scroll',()=>{if(!chartPinned&&!document.querySelector('dialog[open]'))hideChart();},{passive:true});
+window.addEventListener('resize',hideChart);
 
 function typeChart() {
   const rows=kindCounts(data.records);const max=Math.max(...rows.map(r=>r[1]),1);
@@ -136,10 +167,12 @@ function typeChart() {
 
 function news() {
   const stories=additionalStories(data.news,data.exported_at||new Date().toISOString(),featuredPublication(data));
-  document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${stories.slice(0,newsLimit).map((row,index)=>{
+  const markup=stories.map((row,index)=>{
     const excerpt=usefulExcerpt(row);
     return `<article data-story-id="${e(row.id)}" class="story ${index===0?'story-featured':index>=3?'story-brief':'story-secondary'}"><div class="source-line">${e(names[row.source]||row.publisher)} · ${e(date(row.published_at))}${row.author&&row.author!==row.publisher?` · ${e(row.author)}`:''}</div><h3 title="${e(row.title)}">${readerReference(row,shortHeadline(row.title))}</h3>${excerpt?`<details class="story-excerpt"><summary title="Expand or collapse full source excerpt"><span class="story-preview">${e(excerpt)}</span><span class="excerpt-close">Collapse excerpt</span></summary><p>${e(excerpt)}</p></details>`:''}${row.related.length?`<details class="related-updates"><summary>${row.related.length} related source updates</summary><ul>${row.related.map(r=>`<li>${readerReference(r,date(r.published_at))} — ${e(r.title)}</li>`).join('')}</ul></details>`:''}<div class="story-meta"><span>${e(row.category)}</span>${readerReference(row,readerTarget(row).kind==='article'?'Read source':'View details')}</div></article>`;
-  }).join('')}</div>${stories.length>newsLimit?'<button class="more" data-more-news>More intelligence ↓</button>':''}`:empty('No additional source reports are available for this edition.');
+  });
+  const expanded=newsLimit>6;
+  document.querySelector('#news-content').innerHTML=stories.length?`<div class="news-grid">${markup.slice(0,6).join('')}</div>${stories.length>6?`<button class="more" data-more-news aria-expanded="${expanded}" aria-controls="more-intelligence">${expanded?'Less intelligence ↑':'More intelligence ↓'}</button><div id="more-intelligence" ${expanded?'':'hidden'}>${expanded?`<div class="news-grid news-extra">${markup.slice(6).join('')}</div>`:''}</div>`:''}`:empty('No additional source reports are available for this edition.');
 }
 
 function cveRows() {
@@ -158,7 +191,7 @@ function evidence(id,scope=null,preferred=null) {
   const scoped=scope?(scope.input?editionRows(scope):scope.observations||scope.items).find(r=>r.id===id):null;
   const row=preferred||scoped||data.records.find(r=>r.id===id)||data.news.find(r=>r.id===id)||[...data.reports.flatMap(r=>r.observations||r.items),...(data.editions||[]).flatMap(editionRows)].find(r=>r.id===id);if(!row)return;
   document.querySelector('#dialog-content').innerHTML=`<div class="source-line">${e(names[row.source])}</div><h2 id="dialog-title">${e(row.title)}</h2>${row.value?`<div class="indicator">${e(row.value)}</div>`:''}${description(row)?`<p>${e(description(row))}</p>`:''}${row.action?`<h3>Defensive consideration</h3><p>${e(row.action)}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.first_seen?`<dt>First collected</dt><dd>${e(time(row.first_seen))}</dd>`:''}</dl>${sourceLink(row)}`;
-  if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
+  if(!dialog.open)openModal(dialog);else document.querySelector('.dialog-close').focus();
 }
 
 function stixDetail(id) {
@@ -168,9 +201,9 @@ function stixDetail(id) {
   const edges=data.stix.relationships.filter(r=>(r.source_ref===id||r.target_ref===id)&&lookup.has(r.source_ref)&&lookup.has(r.target_ref));
   document.querySelector('#dialog-content').innerHTML=`<div class="source-line">MITRE ATT&CK® · ${e(types[row.type]||row.type)} · ${e(row.external_id)}</div><h2 id="dialog-title">${e(row.name)}</h2>${tactics.length?`<p>Tactics: ${tactics.map(e).join(', ')}</p>`:''}<p class="source-line">Catalog modified ${e(date(row.modified))}</p>${link(row.url,'ATT&CK reference','link')}${edges.length?`<h3>Source relationships</h3><ul class="relationship-list">${edges.map(edge=>{
     const source=lookup.get(edge.source_ref),target=lookup.get(edge.target_ref);
-    return `<li><button class="link" data-stix="${e(source.id)}">${e(source.name)}</button> ${e(edge.relationship_type.replaceAll('-',' '))} <button class="link" data-stix="${e(target.id)}">${e(target.name)}</button><small>${e(edge.id)} · ${e(date(edge.modified))}</small></li>`;
-  }).join('')}</ul>`:''}<p class="source-line">Knowledge-base context; not a claim of recent activity.</p>`;
-  if(!dialog.open)dialog.showModal();else document.querySelector('.dialog-close').focus();
+    return `<li><button class="link" data-stix="${e(source.id)}">${e(source.name)}</button> ${e(edge.relationship_type.replaceAll('-',' '))} <button class="link" data-stix="${e(target.id)}">${e(target.name)}</button><small>${e(edge.id)} · <span title="Source STIX relationship object's modified field; separate from entity dates and collection time">Relationship modified: ${e(date(edge.modified))}</span></small></li>`;
+  }).join('')}</ul>`:''}`;
+  if(!dialog.open)openModal(dialog);else document.querySelector('.dialog-close').focus();
 }
 
 function search() {
@@ -211,9 +244,11 @@ function click(event) {
   }
   if(button.hasAttribute('data-search-hit')){const hit=searchHits[Number(button.dataset.searchHit)];const row=hit&&(button.dataset.searchRecord?hit.matching.find(r=>r.id===button.dataset.searchRecord):hit.record);if(row)evidence(row.id,null,row);}
   if(button.dataset.stix)stixDetail(button.dataset.stix);
-  if(button.dataset.period){period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
+  if(button.dataset.kevDate){showChart(button,true);if(event.detail===0)document.querySelector('#kev-popover button')?.focus();}
+  if(button.hasAttribute('data-kev-all')&&chartAnchor){const rows=kevRecords(data.records,period,chartAsOf,chartAnchor.dataset.kevDate);document.querySelector('#dialog-content').innerHTML=`<h2 id="dialog-title">${e(date(chartAnchor.dataset.kevDate))} — ${rows.length} KEV additions</h2><ul class="kev-all">${rows.map(r=>`<li><button class="link" data-evidence="${e(r.id)}">${e(r.value)}</button> — ${e(r.title)}</li>`).join('')}</ul>`;openModal(dialog);dialog.returnTarget=chartAnchor;}
+  if(button.dataset.period){hideChart();period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
 
-  if(button.hasAttribute('data-more-news')){const before=newsLimit;newsLimit+=6;news();document.querySelectorAll('.story')[before]?.querySelector('a')?.focus();}
+  if(button.hasAttribute('data-more-news')){newsLimit=newsLimit===6?Number.MAX_SAFE_INTEGER:6;news();document.querySelector('[data-more-news]')?.focus({preventScroll:true});}
   if(button.hasAttribute('data-more-catalog')){const before=catalogLimit;catalogLimit+=12;catalog();document.querySelectorAll('.catalog-item')[before]?.focus();}
   if(button.dataset.page){cvePage+=Number(button.dataset.page);cveRows();document.querySelector('[data-page]:not(:disabled)')?.focus();}
   if(button.hasAttribute('data-clear-search')){document.querySelector('#global-search').value='';search();document.querySelector('#global-search').focus();}
@@ -231,13 +266,26 @@ document.querySelector('#search-form').addEventListener('submit',event=>{event.p
 document.querySelector('#global-search').addEventListener('input',event=>{if(data&&!event.target.value)search();});
 document.querySelector('#detail-dialog .dialog-close').addEventListener('click',()=>dialog.close());
 const sourcesDialog=document.querySelector('#sources-dialog');
-document.querySelector('#sources-open').addEventListener('click',()=>sourcesDialog.showModal());
+document.querySelector('#sources-open').addEventListener('click',()=>openModal(sourcesDialog));
 sourcesDialog.querySelector('.dialog-close').addEventListener('click',()=>sourcesDialog.close());
+
+function openModal(modal) {
+  if(modal.open)return;
+  modal.returnTarget=document.activeElement;
+  modal.showModal();document.documentElement.classList.add('modal-open');
+}
+for(const modal of document.querySelectorAll('dialog')) {
+  let outside=false;
+  const inBox=event=>{const r=modal.getBoundingClientRect();return event.clientX>=r.left&&event.clientX<=r.right&&event.clientY>=r.top&&event.clientY<=r.bottom;};
+  modal.addEventListener('pointerdown',event=>{outside=event.target===modal&&!inBox(event);});
+  modal.addEventListener('click',event=>{if(outside&&event.target===modal&&!inBox(event))modal.close();outside=false;});
+  modal.addEventListener('close',()=>{if(!document.querySelector('dialog[open]'))document.documentElement.classList.remove('modal-open');if(modal.returnTarget?.isConnected)modal.returnTarget.focus({preventScroll:true});});
+}
 window.addEventListener('hashchange',()=>{if(data)anchor();});
 document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
   const response=await fetch('./snapshot.json',{cache:'no-cache'});if(!response.ok)throw new Error();data=await response.json();
-  if(![1,2,3,4,5,6].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
+  if(![1,2,3,4,5,6,7].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
   data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
   render();if(location.hash)anchor();
 } catch {

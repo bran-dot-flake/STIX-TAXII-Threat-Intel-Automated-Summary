@@ -742,7 +742,7 @@ def prepare(snapshot, config=None):
             1
         ].isoformat(),
     }
-    snapshot["schema_version"] = 6
+    snapshot["schema_version"] = 7 if snapshot.get("schema_version")==7 else 6
     return package
 
 
