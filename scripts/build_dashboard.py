@@ -20,6 +20,7 @@ ASSETS = (
     "assets/exploitation.svg",
     "assets/advisory.svg",
     "assets/favicon.svg",
+    "assets/licenses/MITRE-ATTACK.txt",
     "assets/fonts/newsreader-latin-700.woff2",
     "assets/fonts/OFL-Newsreader.txt",
 )

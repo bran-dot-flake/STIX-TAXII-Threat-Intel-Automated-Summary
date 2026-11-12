@@ -31,6 +31,7 @@ const output = process.argv[3];
       assert.equal(await page.locator('#brief .collection-status,#brief .lead-development,#brief .lead-source').count(),0);
       assert(!(await page.locator('#brief').innerText()).includes('Sources checked'));
       for(const words of await page.locator('.radar article p').allTextContents())assert(words.split(/\s+/).length<=38);
+      if(edition.version===3)assert.deepEqual(await page.locator('.radar article p').allTextContents(),edition.topics.map(t=>edition.plan.topics.find(r=>r.topic_id===t.id).summary.text));
       await page.evaluate(()=>document.fonts.ready);
       assert((await page.locator('.editorial-lead h1').evaluate(n=>getComputedStyle(n).fontFamily)).includes('EMBER Newsreader'));
       const supporting=page.locator('#brief > .supporting-evidence');
@@ -76,15 +77,26 @@ const output = process.argv[3];
     assert.equal(await page.locator('#trend .bar').count(), 30);
     assert.equal(await page.locator('#reporting-trend,.reporting-trend,.reporting-data').count(),0);
     const series=analytics.dailyKev(snapshot.records,30,new Date().toISOString());
-    await page.locator('.chart-data > summary').click();
-    assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
-    await page.locator('#show-all-days').check();
-    assert.equal(await page.locator('#chart-table tbody tr').count(),30);
-    const tableTotal=(await page.locator('#chart-table tbody td:nth-child(2)').allTextContents()).reduce((n,text)=>n+Number(text),0);
-    assert.equal(tableTotal,series.reduce((n,r)=>n+r.count,0));
-    await page.locator('#show-all-days').uncheck();
-    assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
-    await page.locator('.chart-data > summary').click();
+    assert.equal(await page.locator('.chart-data,#chart-table,#show-all-days').count(),0);
+    assert.equal(await page.locator('#last-updated,.last-updated').count(),0);
+    assert(!(await page.locator('header').innerText()).includes('Updated'));
+    assert.deepEqual(await page.locator('#trend .bar').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label'))),series.map(r=>`${r.date}: ${r.count} catalog additions`));
+    assert.equal(await page.locator('.bar-chart').getAttribute('aria-describedby'),'trend-description');
+    assert((await page.locator('#trend-description').textContent()).includes(`${series.reduce((n,r)=>n+r.count,0)} KEV catalog additions`));
+    assert((await page.locator('#trend-description').getAttribute('class')).includes('sr-only'));
+    assert.equal(await page.locator('footer a,footer button').count(),2);
+    assert.equal((await page.locator('footer').innerText()).trim().replace(/\s+/g,' '),'GitHub ↗ Sources & Licenses');
+    await page.getByRole('button',{name:'Sources & Licenses',exact:true}).click();
+    await page.locator('#sources-dialog[open]').waitFor();
+    assert((await page.locator('#sources-dialog').innerText()).includes('SANS Technology Institute, Internet Storm Center'));
+    assert((await page.locator('#sources-dialog').innerText()).includes('shared under CC BY-NC-SA 4.0'));
+    const license=await (await page.request.get(base+'/assets/licenses/MITRE-ATTACK.txt')).text();
+    assert.equal((await page.locator('.license-text').textContent()).trim(),license.replaceAll('\r\n','\n').trim());
+    for(const article of snapshot.news.filter(r=>r.source==='sans-isc'))assert(await page.locator('#sans-credits a').evaluateAll((nodes,url)=>nodes.some(n=>n.href===url),article.source_url));
+    await page.keyboard.press('Shift+Tab');
+    assert(await page.locator('#sources-dialog').evaluate(n=>n.contains(document.activeElement)));
+    await page.keyboard.press('Escape');
+    assert(await page.getByRole('button',{name:'Sources & Licenses',exact:true}).evaluate(n=>n===document.activeElement));
     assert.equal(await page.locator('.story-featured').count(),expectedStories.length?1:0);
     assert.deepEqual(await page.locator('.story').evaluateAll(nodes=>nodes.map(n=>n.dataset.storyId)),expectedStories.slice(0,6).map(r=>r.id));
     assert(!(await page.locator('#intelligence').innerText()).includes('Source excerpt'));
@@ -186,6 +198,19 @@ const output = process.argv[3];
       }
       await page.evaluate(() => window.scrollTo(0, 0));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Horizontal overflow at ' + width);
+      await page.getByRole('button',{name:'Sources & Licenses',exact:true}).click();
+      assert.equal(await page.locator('#sources-dialog').evaluate(n=>n.scrollWidth>n.clientWidth),false,'License dialog fits at '+width);
+      await page.keyboard.press('Escape');
+      if(selected){
+        const radar=await page.locator('.radar').boundingBox();
+        const evidence=await page.locator('#brief > .supporting-evidence').boundingBox();
+        if(radar&&evidence)assert(radar.y>=evidence.y+evidence.height,'Radar follows the main article and evidence');
+        const boxes=await page.locator('.radar article').evaluateAll(nodes=>nodes.map(n=>({x:n.getBoundingClientRect().x,y:n.getBoundingClientRect().y})));
+        if(boxes.length>1){if(width>650)assert(Math.abs(boxes[0].y-boxes[1].y)<2);else assert(boxes[1].y>boxes[0].y);}
+        assert.equal(await page.locator('#brief > .section-head .edition-date').count(),1);
+      }
+
+      await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
       if (output && [390, 1440].includes(width)) {
         fs.mkdirSync(output, { recursive: true });
         await page.screenshot({ path: path.join(output, width === 390 ? 'dashboard-mobile.png' : 'dashboard-desktop.png'), fullPage: true });
@@ -248,6 +273,12 @@ const output = process.argv[3];
       assert.equal(await page.locator('.story-excerpt').count(),placeholders.news.length>2?1:0);
       await page.unroute('**/snapshot.json');
     }
+    await page.route('**/snapshot.json',route=>route.fulfill({json:{invalid:true}}));
+    await page.goto(base);await page.getByRole('heading',{name:'Intelligence unavailable',exact:true}).waitFor();
+    assert.equal(await page.locator('#last-updated').count(),0);
+    await page.getByRole('button',{name:'Sources & Licenses',exact:true}).click();
+    await page.locator('#sources-dialog[open]').waitFor();await page.keyboard.press('Escape');
+    await page.unroute('**/snapshot.json');
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ status: 'passed', widths: [390, 768, 1440], metrics: actual, stixObjects: snapshot.stix?.objects.length || 0, relationships: snapshot.stix?.relationships.length || 0, errors }));
   } finally { await browser.close(); }

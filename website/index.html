@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#141413">
-  <meta name="description" content="Weekly cybersecurity briefings, significant updates, public-source intelligence, exploited vulnerabilities, and sourced ATT&CK context.">
+  <meta name="description" content="Weekly cybersecurity briefings, daily public-source intelligence, exploited vulnerabilities, and sourced ATT&CK context.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>EMBER — Cyber Threat Intelligence</title>
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
@@ -18,12 +18,49 @@
       <a class="brand" href="#brief"><img src="./assets/favicon.svg" alt="" width="27" height="27">EMBER</a>
       <nav aria-label="Sections"><a href="#brief">Weekly Brief</a><a href="#intelligence">Intelligence</a><a href="#trends">Trends</a><a href="#vulnerabilities">Vulnerabilities</a><a href="#archive">Archive</a></nav>
       <form id="search-form" role="search"><label for="global-search" class="sr-only">Search intelligence</label><input id="global-search" type="search" placeholder="Search intelligence…" autocomplete="off"><button aria-label="Search" type="submit">↵</button></form>
-      <span class="last-updated" id="last-updated">Loading…</span>
     </div>
   </header>
   <main id="main"><p class="loading" role="status">Loading intelligence…</p></main>
-  <footer><a href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary" target="_blank" rel="noopener noreferrer">GitHub ↗</a><span id="attribution"></span></footer>
+  <footer><a href="https://github.com/bran-dot-flake/STIX-TAXII-Threat-Intel-Automated-Summary" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button class="link" id="sources-open" type="button" aria-haspopup="dialog">Sources &amp; Licenses</button></footer>
   <dialog id="detail-dialog" aria-labelledby="dialog-title"><button class="dialog-close" aria-label="Close detail">✕</button><div id="dialog-content"></div></dialog>
+  <dialog id="sources-dialog" aria-labelledby="sources-title"><button class="dialog-close" aria-label="Close sources and licenses">✕</button>
+    <h2 id="sources-title">Sources &amp; Licenses</h2>
+    <p>Original articles remain linked beside each story and in its supporting evidence. Source material retains its own rights.</p>
+    <h3>SANS Internet Storm Center</h3>
+    <p>© 2026 SANS™ Internet Storm Center. Attribution: <a href="https://isc.sans.edu/" target="_blank" rel="noopener noreferrer">SANS Technology Institute, Internet Storm Center</a>. <a href="https://isc.sans.edu/linkback.html" target="_blank" rel="noopener noreferrer">Data-use policy</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.</p>
+    <p>Feed excerpts are shortened; SANS-derived editorial summaries are adaptations, shared under CC BY-NC-SA 4.0 for noncommercial use. Supplied bylines and original diary links follow. Material is provided as-is; see the license for its warranty disclaimer.</p>
+    <ul id="sans-credits"></ul>
+    <h3>MITRE ATT&amp;CK®</h3>
+    <p>Copyright 2015–2026, The MITRE Corporation. MITRE ATT&amp;CK and ATT&amp;CK are registered trademarks of The MITRE Corporation.</p>
+    <p><a href="https://attack.mitre.org/resources/legal-and-branding/terms-of-use/" target="_blank" rel="noopener noreferrer">Official terms</a> · <a href="./assets/licenses/MITRE-ATTACK.txt">Included license</a></p>
+    <pre class="license-text">ATT&amp;CK®
+===========================
+License
+-------
+The MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free license to use ATT&amp;CK® for research,
+development, and commercial purposes. Any copy you make for such purposes is authorized provided that you reproduce
+MITRE&#x27;s copyright designation and this license in any such copy.
+
+&quot;© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation.&quot;
+
+Disclaimers
+-----------
+MITRE does not claim ATT&amp;CK enumerates all possibilities for the types of actions and behaviors documented as part
+of its adversary model and framework of techniques. Using the information contained within ATT&amp;CK to address or
+cover full categories of techniques will not guarantee full defensive coverage as there may be undisclosed techniques
+or variations on existing techniques not documented by ATT&amp;CK.
+
+ALL DOCUMENTS AND THE INFORMATION CONTAINED THEREIN ARE PROVIDED ON AN &quot;AS IS&quot; BASIS AND THE CONTRIBUTOR, THE
+ORGANIZATION HE/SHE REPRESENTS OR IS SPONSORED BY (IF ANY), THE MITRE CORPORATION, ITS BOARD OF TRUSTEES, OFFICERS,
+AGENTS, AND EMPLOYEES, DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE
+USE OF THE INFORMATION THEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS
+FOR A PARTICULAR PURPOSE.</pre>
+    <h3>Other public sources</h3>
+    <p><a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener noreferrer">CISA KEV</a> and <a href="https://www.cisa.gov/news-events/cybersecurity-advisories" target="_blank" rel="noopener noreferrer">CISA advisories</a>; <a href="https://www.circl.lu/doc/misp/feed-osint/" target="_blank" rel="noopener noreferrer">CIRCL OSINT</a>. Original attribution, public references and sharing restrictions remain in the evidence.</p>
+    <p>© Cisco and/or its affiliates; © Google LLC. Cisco Talos and Google Threat Intelligence Group reporting retains its publisher, supplied byline and canonical article link in the public data. Limited feed excerpts are shortened and editorial summaries are adaptations. Their material is not relicensed by EMBER: <a href="https://www.cisco.com/c/en/us/about/legal/terms-conditions.html" target="_blank" rel="noopener noreferrer">Cisco terms</a> · <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Google terms</a>.</p>
+    <h3>Typeface and data</h3>
+    <p>Newsreader © 2020 The Newsreader Project Authors, under the <a href="./assets/fonts/OFL-Newsreader.txt">SIL Open Font License 1.1</a>. <a href="./snapshot.json">Public evidence JSON</a> retains detailed catalog dates, source chronology and reporting history. No source endorsement is implied.</p>
+  </dialog>
   <noscript><p>Enable JavaScript to browse, or <a href="./snapshot.json">read the public JSON</a>.</p></noscript>
 </body>
 </html>

@@ -1,4 +1,4 @@
-import {metrics, dailyKev, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, chartRows, publicationTime, publicationView, visibleHistory, featuredPublication, weeklyPeriod} from './analytics.js';
+import {metrics, dailyKev, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, publicationTime, publicationView, visibleHistory, featuredPublication, weeklyPeriod} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
@@ -15,7 +15,7 @@ const link = (url,text,cls='') => {
   catch {return e(text);}
   return `<a class="${e(cls)}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)} ↗</a>`;
 };
-let data, period=30, showAllDays=false, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
+let data, period=30, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
 const empty = text => `<p class="empty">${e(text)}</p>`;
 
 function warnings() {
@@ -87,8 +87,8 @@ function opening(edition) {
   if(!edition)return `<div class="section-head"><h1>Weekly Brief</h1></div>${empty('No accepted weekly briefing is available yet.')}`;
   const topics=editorialTopics(edition);
   const radar=edition.version===3?topics:topics.slice(1,4);
-  const sentence=text=>{const first=text.match(/^.*?[.!?](?:[”"'])?(?=\s|$)/)?.[0]||text;return first.split(/\s+/).length<=38?first:'';};
-  return `<div class="section-head"><h2>Weekly Brief</h2><time class="edition-date">${e(weeklyPeriod(edition.window_start,edition.window_end))}</time></div><div class="edition-grid"><div class="editorial-lead"><h1>${e(edition.headline||topics[0]?.headline||'Weekly intelligence briefing')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}</div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><h3>${e(topic.headline)}</h3>${sentence(topic.summary)?`<p>${e(sentence(topic.summary))}</p>`:''}<div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</aside>`:''}</div>${supportingEvidence(edition)}`;
+  const sentence=text=>{if(edition.version===3)return text.split(/\s+/).length<=38?text:'';const first=text.match(/^.*?[.!?](?:[”"'])?(?=\s|$)/)?.[0]||text;return first.split(/\s+/).length<=38?first:'';};
+  return `<div class="section-head"><h2>Weekly Brief</h2><time class="edition-date">${e(weeklyPeriod(edition.window_start,edition.window_end))}</time></div><div class="editorial-lead"><h1>${e(edition.headline||topics[0]?.headline||'Weekly intelligence briefing')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}</div>${supportingEvidence(edition)}${radar.length?`<section class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2><div class="radar-items">${radar.map(topic=>`<article><h3>${e(topic.headline)}</h3>${sentence(topic.summary)?`<p>${e(sentence(topic.summary))}</p>`:''}<div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</div></section>`:''}`;
 }
 
 function render() {
@@ -105,13 +105,15 @@ function render() {
       <details class="collection-composition"><summary>Dataset composition · unique values by type</summary><div id="types" class="type-list"></div></details></div></section>
       <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${catalogEntries(data.stix.objects).length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
         <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
-        <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details>
+        <p class="catalog-note mitre-credit">© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation. <a href="./assets/licenses/MITRE-ATTACK.txt">License</a>.</p><div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details>
 
     <details class="register" id="vulnerabilities"><summary>Vulnerabilities <small>${m.kev} KEV entries</small></summary><div class="filter-row"><label class="sr-only" for="cve-search">Filter vulnerabilities</label><input id="cve-search" type="search" placeholder="CVE, vendor, or keyword…"><small id="cve-count"></small></div><div id="cve-results"></div></details>
     <details class="archive" id="archive"><summary>Archive <small>${history.length} briefs</small></summary><div class="filter-row"><label for="archive-select">Edition</label><select id="archive-select">${history.map(row=>`<option value="${e(row.id)}">${e(time(publicationTime(row)))} · ${row.input?editionLabel(row):'Evidence brief'}</option>`).join('')}</select></div><div id="archived-report" class="report-body">${history[0]?(history[0].input?editionMarkup(history[0]):reportMarkup(history[0])):empty('No accepted public editions yet.')}</div></details>`;
-  document.querySelector('#last-updated').textContent=data.collected_at?`Updated ${time(data.collected_at)}`:'No collection yet';
-  document.querySelector('#attribution').innerHTML=data.stix.objects.length?`MITRE ATT&CK® data © 2015–2026 The MITRE Corporation. ${link(data.stix.license,'Terms of use')}`:'';
-  if(data.news.some(r=>r.source==='sans-isc')||(data.editions||[]).some(e=>e.input.news.some(r=>r.source==='sans-isc')))document.querySelector('#attribution').innerHTML+=` <span>SANS Technology Institute, Internet Storm Center · ${link('https://creativecommons.org/licenses/by-nc-sa/4.0/','CC BY-NC-SA 4.0')}. Feed excerpts shortened; editorial summaries adapted.</span>`;
+  const sans=new Map();
+  for(const row of [...data.news,...(data.editions||[]).flatMap(edition=>edition.input.news)]){
+    if(row.source==='sans-isc'&&(!sans.has(row.source_url)||(!sans.get(row.source_url).author&&row.author)))sans.set(row.source_url,row);
+  }
+  document.querySelector('#sans-credits').innerHTML=[...sans.values()].map(row=>`<li>${row.author?e(row.author)+' · ':''}${link(row.source_url,row.title)}</li>`).join('')||'<li>No SANS diary material in this dataset.</li>';
   trend();typeChart();news();cveRows();catalog();
 }
 
@@ -119,14 +121,11 @@ function trend() {
   const rows=dailyKev(data.records,period,new Date().toISOString());
   const max=Math.max(...rows.map(r=>r.count),1);
   document.querySelector('#chart-total').textContent=`${rows.reduce((sum,r)=>sum+r.count,0)} / ${period} days`;
-  document.querySelector('#trend').innerHTML=`<div class="bar-chart" role="group" aria-label="Daily KEV catalog additions">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details class="chart-data"><summary>Chart data</summary><label class="chart-table-control"><input id="show-all-days" type="checkbox" ${showAllDays?'checked':''}> Show all days</label><div id="chart-table"></div></details>`;
+  const total=rows.reduce((sum,row)=>sum+row.count,0);
+  const nonzero=rows.filter(row=>row.count);
+  const description=`${period} UTC calendar days; ${total} KEV catalog additions. Counts describe catalog additions, not attack frequency. `+(nonzero.length?nonzero.map(row=>`${row.date}: ${row.count}`).join('; ')+'. Other days: zero.':'All days: zero.');
+  document.querySelector('#trend').innerHTML=`<p class="sr-only" id="trend-description">${e(description)}</p><div class="bar-chart" role="group" aria-label="Daily KEV catalog additions" aria-describedby="trend-description">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div>`;
   document.querySelectorAll('[data-height]').forEach(el=>el.style.height=`${el.dataset.height}%`);
-  chartTable();
-}
-
-function chartTable() {
-  const rows=chartRows(dailyKev(data.records,period,new Date().toISOString()),showAllDays);
-  document.querySelector('#chart-table').innerHTML=rows.length?`<table class="data-table"><caption class="sr-only">KEV additions by catalog date, UTC</caption><thead><tr><th scope="col">Date (UTC)</th><th scope="col">Additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table>`:empty('No KEV additions in this interval.');
 }
 
 function typeChart() {
@@ -225,13 +224,15 @@ main.addEventListener('input',event=>{
   if(event.target.id==='catalog-search'){catalogQuery=event.target.value;catalogLimit=12;catalog();}
 });
 main.addEventListener('change',event=>{
-  if(event.target.id==='show-all-days'){showAllDays=event.target.checked;chartTable();}
   if(event.target.id==='catalog-type'){catalogType=event.target.value;catalogLimit=12;catalog();}
   if(event.target.id==='archive-select'){const report=archives().find(r=>r.id===event.target.value);if(report)document.querySelector('#archived-report').innerHTML=report.input?editionMarkup(report):reportMarkup(report);}
 });
 document.querySelector('#search-form').addEventListener('submit',event=>{event.preventDefault();if(data){search();document.querySelector('#search-results')?.scrollIntoView({block:'start'});}});
 document.querySelector('#global-search').addEventListener('input',event=>{if(data&&!event.target.value)search();});
-document.querySelector('.dialog-close').addEventListener('click',()=>dialog.close());
+document.querySelector('#detail-dialog .dialog-close').addEventListener('click',()=>dialog.close());
+const sourcesDialog=document.querySelector('#sources-dialog');
+document.querySelector('#sources-open').addEventListener('click',()=>sourcesDialog.showModal());
+sourcesDialog.querySelector('.dialog-close').addEventListener('click',()=>sourcesDialog.close());
 window.addEventListener('hashchange',()=>{if(data)anchor();});
 document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
@@ -240,5 +241,5 @@ try {
   data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
   render();if(location.hash)anchor();
 } catch {
-  data=null;document.querySelector('#last-updated').textContent='Data unavailable';main.innerHTML='<h1>Intelligence unavailable</h1><p class="empty">The public data file could not be loaded. Refresh to retry.</p>';
+  data=null;main.innerHTML='<h1>Intelligence unavailable</h1><p class="empty">The public data file could not be loaded. Refresh to retry.</p>';
 }
