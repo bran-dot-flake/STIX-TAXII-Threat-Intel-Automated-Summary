@@ -48,6 +48,43 @@ export function matches(item, query) {
   return normalize([item.title, item.name, item.external_id, item.value, item.kind, item.type, item.description, item.excerpt].filter(Boolean).join(' ')).includes(normalize(query.trim()));
 }
 
+export const publicationTime = edition => edition.published_at||edition.generated_at;
+
+export function visibleHistory(snapshot) {
+  return [...(snapshot.editions||[]).filter(e=>e.topics.length),...snapshot.reports.filter(r=>r.mode!=='quiet-day'&&(r.observations||r.items).length)]
+    .sort((a,b)=>publicationTime(b).localeCompare(publicationTime(a)));
+}
+
+export function publicationView(snapshot) {
+  const editions=(snapshot.editions||[]).filter(e=>e.topics.length).sort((a,b)=>publicationTime(b).localeCompare(publicationTime(a)));
+  const weekly=editions.find(e=>e.publication_kind==='weekly');
+  const primary=weekly||editions[0]||null;
+  const update=weekly?editions.find(e=>e.publication_kind==='update'&&publicationTime(e)>publicationTime(weekly))||null:null;
+  return {primary,update};
+}
+
+export function featuredPublication(snapshot) {
+  const {primary,update}=publicationView(snapshot);
+  if(!primary)return null;
+  if(!update)return primary;
+  return {...primary,topics:[...primary.topics,...update.topics],input:{
+    records:[...primary.input.records,...update.input.records],news:[...primary.input.news,...update.input.news],
+    updates:[...primary.input.updates,...update.input.updates],context:[]}};
+}
+
+export function reportingTrends(news,days,now) {
+  const rows=dailyKev([],days,now).map(r=>({...r,categories:{}}));
+  const byDate=new Map(rows.map(r=>[r.date,r]));const seen=new Set(),counts={};
+  for(const row of news){
+    if(seen.has(row.source_url)||!row.published_at||Date.parse(row.published_at)>Date.parse(now))continue;
+    const day=byDate.get(row.published_at.slice(0,10));if(!day)continue;
+    seen.add(row.source_url);
+    const category=['Exploitation watch','Security advisory','Vulnerability research'].includes(row.category)?'Vulnerabilities':row.category;
+    day.count++;day.categories[category]=(day.categories[category]||0)+1;counts[category]=(counts[category]||0)+1;
+  }
+  return {series:rows,categories:Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])),total:seen.size};
+}
+
 export function catalogEntries(objects) {
   const ids={'attack-pattern':/^T\d{4}(?:\.\d{3})?$/,'intrusion-set':/^G\d{4}$/,malware:/^S\d{4}$/,tool:/^S\d{4}$/};
   return objects.filter(row=>{
@@ -76,7 +113,7 @@ export function searchResults(snapshot,query) {
     else if(row.source==='circl-osint'&&/^https:\/\/www\.circl\.lu\/doc\/misp\/feed-osint\/[0-9a-f-]{36}\.json$/.test(row.source_url))add('report:'+row.source_url,row,'report','Intelligence report',row.title);
     else add('indicator:'+row.id,row,'indicator','Indicator',row.title);
   }
-  for(const row of [...snapshot.news,...(snapshot.editions||[]).flatMap(e=>e.input.news)])add('article:'+row.source_url,row,'advisory','Security advisory',row.title);
+  for(const row of [...snapshot.news,...(snapshot.editions||[]).flatMap(e=>e.input.news)])add('article:'+row.source_url,row,'advisory',row.source==='cisa-advisories'?'Security advisory':'Research report',row.title);
   const labels={'attack-pattern':'ATT&CK technique','intrusion-set':'Threat actor',malware:'Malware',tool:'Tool'};
   for(const row of catalogEntries(snapshot.stix?.objects||[]))add('stix:'+row.id,row,'stix',labels[row.type],row.name);
   const results=[];
@@ -94,7 +131,7 @@ export function searchResults(snapshot,query) {
 export function groupStories(news) {
   const groups = new Map();
   for (const row of [...news].sort((a,b)=>b.published_at.localeCompare(a.published_at))) {
-    const key = row.category === 'Exploitation watch' ? 'kev-catalog' : row.title.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    const key = row.category === 'Exploitation watch' ? 'kev-catalog' : row.source_url||row.id;
     if (!groups.has(key)) groups.set(key,{...row,related:[]});
     else groups.get(key).related.push(row);
   }
@@ -136,7 +173,8 @@ export function isRawSource(url) {
 export function readerTarget(row) {
   try {
     const url=new URL(row.source_url);
-    if(row.source==='cisa-advisories'&&url.protocol==='https:'&&url.hostname==='www.cisa.gov'&&url.pathname.startsWith('/news-events/')&&!url.username&&!url.password&&!url.search&&!url.hash&&['','443'].includes(url.port)&&!isRawSource(url.href))return {kind:'article',url:row.source_url,id:row.id};
+    const approved=(row.source==='cisa-advisories'&&url.hostname==='www.cisa.gov'&&url.pathname.startsWith('/news-events/'))||(row.source==='sans-isc'&&url.hostname==='isc.sans.edu')||(row.source==='cisco-talos'&&url.hostname==='blog.talosintelligence.com')||(row.source==='google-gti'&&url.hostname==='cloud.google.com'&&url.pathname.startsWith('/blog/topics/threat-intelligence/'));
+    if(approved&&url.protocol==='https:'&&!url.username&&!url.password&&!url.search&&!url.hash&&['','443'].includes(url.port)&&!isRawSource(url.href))return {kind:'article',url:row.source_url,id:row.id};
   }catch{}
   return {kind:'detail',id:row.id};
 }
@@ -145,7 +183,7 @@ export function evidenceGroups(rows,topics=[]) {
   const lookup=new Map(rows.map(r=>[r.id,r]));const seen=new Set(),contexts=new Set(),groups=[];
   const append=(label,members)=>{
     if(!members.length)return;
-    const unit=members.every(r=>r.kind==='vulnerability')?'CVE':members.every(r=>r.source==='cisa-advisories')?'source report':members.every(r=>r.kind&&r.kind!=='vulnerability')?'indicator':'record';
+    const unit=members.every(r=>r.kind==='vulnerability')?'CVE':members.every(r=>!r.kind)?'source report':members.every(r=>r.kind&&r.kind!=='vulnerability')?'indicator':'record';
     groups.push({key:`evidence-${members[0].id}`,label,unit,records:members,context_ids:[]});
     members.forEach(r=>seen.add(r.id));
   };
@@ -176,7 +214,7 @@ export function additionalStories(news,asOf,edition,category='all') {
   if(!edition)return editorialStories(categoryRows,asOf);
   const ids=new Set(edition.topics.flatMap(t=>t.evidence_ids));
   const featured=editionEvidence(edition).filter(r=>ids.has(r.id));
-  const articles=featured.filter(r=>r.source==='cisa-advisories');
+  const articles=featured.filter(r=>!r.kind);
   const articleIds=new Set(articles.map(r=>r.id)),urls=new Set(articles.map(r=>r.source_url).filter(Boolean));
   const cves=new Set(featured.filter(r=>r.kind==='vulnerability').map(r=>r.value.toUpperCase()));
   const catalog=edition.topics.some(t=>t.kind==='catalog');

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {publicationView,visibleHistory,featuredPublication,reportingTrends} from '../website/analytics.js';
 import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt,searchResults,catalogEntries,chartRows} from '../website/analytics.js';
 
 const records=[
@@ -180,4 +181,47 @@ test('condensed chart tables preserve full dates and totals behind the all-days 
   const compact=chartRows(series);assert(compact.every(r=>r.count>0));assert.equal(chartRows(series,true).length,30);
   assert.equal(compact.reduce((n,r)=>n+r.count,0),series.reduce((n,r)=>n+r.count,0));
   assert.deepEqual(chartRows(dailyKev([],7,'2026-11-11')),[]);assert.equal(chartRows(dailyKev([],7,'2026-11-11'),true).length,7);
+});
+
+
+test('quiet collections keep the substantive weekly date and hide quiet archive entries',()=>{
+  const weekly={id:'w',publication_kind:'weekly',generated_at:'2026-11-09T08:05:00Z',topics:[{evidence_ids:[]}],input:{records:[],news:[],updates:[]}};
+  const quiet={id:'q',generated_at:'2026-11-12T08:05:00Z',topics:[]};
+  const snapshot={editions:[quiet,weekly],reports:[{mode:'quiet-day',generated_at:'2026-11-12T08:00:00Z',items:[]}]};
+  assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,null);
+  assert.deepEqual(visibleHistory(snapshot),[weekly]);assert.equal(publicationView(snapshot).primary.generated_at,'2026-11-09T08:05:00Z');
+});
+test('a newer interim update supplements the weekly edition and both contribute evidence',()=>{
+  const weekly={id:'w',publication_kind:'weekly',generated_at:'2026-11-09T08:05:00Z',topics:[{evidence_ids:['a']}],input:{records:[],news:[{id:'a',source_url:'https://isc.sans.edu/a'}],updates:[]}};
+  const update={id:'u',publication_kind:'update',generated_at:'2026-11-12T08:05:00Z',topics:[{evidence_ids:['b']}],input:{records:[],news:[{id:'b',source_url:'https://isc.sans.edu/b'}],updates:[]}};
+  const snapshot={editions:[update,weekly],reports:[]};
+  assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,update);
+  assert.equal(featuredPublication(snapshot).input.news.length,2);assert.equal(visibleHistory(snapshot).length,2);
+});
+test('initial publication state and legacy substantive history remain usable',()=>{
+  assert.deepEqual(publicationView({editions:[],reports:[]}),{primary:null,update:null});
+  const old={id:'old',generated_at:'2026-11-10',topics:[{}]};
+  assert.equal(publicationView({editions:[old],reports:[]}).primary,old);
+});
+test('reporting trends count unique original reports, UTC dates and subjects, not attacks',()=>{
+  const rows=[{source_url:'https://isc.sans.edu/a',category:'Malware research',published_at:'2026-11-10T12:00:00Z'},
+    {source_url:'https://isc.sans.edu/a',category:'Malware research',published_at:'2026-11-10T12:00:00Z'},
+    {source_url:'https://blog.talosintelligence.com/b',category:'Phishing',published_at:'2026-11-11T12:00:00Z'},
+    {source_url:'https://www.cisa.gov/c',category:'Exploitation watch',published_at:'2026-11-12T09:00:00Z'},
+    {source_url:'https://isc.sans.edu/future',category:'Malware research',published_at:'2026-11-12T14:00:00Z'},
+    {source_url:'https://isc.sans.edu/old',category:'Campaign reporting',published_at:'2025-01-01T00:00:00Z'}];
+  const result=reportingTrends(rows,7,'2026-11-12T12:00:00Z');
+  assert.equal(result.total,3);assert.equal(result.series.length,7);
+  assert.equal(result.series.reduce((n,r)=>n+r.count,0),3);
+  assert.deepEqual(Object.fromEntries(result.categories),{'Malware research':1,Phishing:1,Vulnerabilities:1});
+  assert.equal(reportingTrends(rows,30,'2026-11-12T12:00:00Z').series.length,30);
+});
+test('same-title research reports keep independent source identities',()=>{
+  const rows=['one','two'].map((id)=>({id,title:'Same actor campaign',category:'Campaign reporting',published_at:'2026-11-11',source_url:'https://isc.sans.edu/'+id}));
+  assert.equal(groupStories(rows).length,2);
+});
+test('research readers only open the matching official publisher',()=>{
+  for(const [source,url] of [['sans-isc','https://isc.sans.edu/diary/123/'],['cisco-talos','https://blog.talosintelligence.com/research/'],['google-gti','https://cloud.google.com/blog/topics/threat-intelligence/report/']])assert.equal(readerTarget({id:'x',source,source_url:url}).kind,'article');
+  assert.equal(readerTarget({id:'x',source:'google-gti',source_url:'https://cloud.google.com/private/'}).kind,'detail');
+  assert.equal(readerTarget({id:'x',source:'sans-isc',source_url:'https://evil.com/diary/123/'}).kind,'detail');
 });

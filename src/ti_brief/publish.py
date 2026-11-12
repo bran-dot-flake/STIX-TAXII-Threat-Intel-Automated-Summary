@@ -66,5 +66,10 @@ def publish(snapshot, repo=DEFAULT_REPOSITORY, api=gh_api):
         api(f"repos/{repo}/git/refs/heads/{DATA_BRANCH}", {"sha": commit["sha"], "force": False}, "PATCH")
     else:
         api(f"repos/{repo}/git/refs", {"ref": "refs/heads/" + DATA_BRANCH, "sha": commit["sha"]})
-    api(f"repos/{repo}/actions/workflows/pages.yml/dispatches", {"ref": "main"})
+    try:
+        api(f"repos/{repo}/actions/workflows/pages.yml/dispatches", {"ref": "main"})
+    except RuntimeError:
+        # The immutable public data commit succeeded. Hosting quota/dispatch
+        # failures must not make an accepted edition appear unpublished locally.
+        print(json.dumps({'stage':'pages','status':'dispatch-failed-data-committed','commit':commit['sha']}))
     return commit["sha"]

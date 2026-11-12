@@ -25,7 +25,7 @@
 
 ## Overview
 
-EMBER turns public threat intelligence into a concise daily publication. It collects CISA vulnerability/advisory feeds, CIRCL indicators and structured MITRE ATT&CK® data, organizes evidence in MISP and OpenCTI, and uses an existing CPU-only Ollama model for source-grounded reporting. The website brings together a daily brief, supporting evidence, additional intelligence, trends, searchable vulnerabilities and an archive.
+EMBER collects intelligence daily and publishes weekly briefings plus significant interim updates. CISA, CIRCL and MITRE ATT&CK® support the private MISP/OpenCTI lab; official SANS ISC, Cisco Talos and Google Threat Intelligence RSS feeds broaden the public editorial coverage. An existing CPU-only Ollama model composes from validated evidence. Quiet collections refresh the data while keeping the latest substantive briefing visible with its original date.
 
 The project explores the engineering needed to make that workflow dependable: interoperable STIX/TAXII ingestion, source-aware correlation, independent read-back, bounded local inference and a deliberate public/private boundary. The static site stays available when the lab is offline; fresh intelligence resumes when collection returns.
 
@@ -33,7 +33,7 @@ The project explores the engineering needed to make that workflow dependable: in
 
 <p align="center"><img src="docs/images/architecture.svg" width="100%" alt="Public sources feed private correlation and an independent public exporter; curated evidence passes through local Ollama, claim validation, and GitHub Pages. Private databases remain local."></p>
 
-MISP/OpenCTI and versioned STIX storage serve the private lab. The public exporter independently recollects approved CISA/CIRCL evidence; only revalidated excerpts and approved MITRE projections can cross from lab state. Ollama composes from the sanitized publication input, and a separate claim gate precedes the public JSON commit. TAXII and its catalog bridge are optional. [Detailed data paths and operations](docs/deployment.md#detailed-data-paths).
+MISP/OpenCTI and versioned STIX storage serve the private lab. The public exporter independently recollects approved CISA/CIRCL evidence and bounded official research-feed metadata; only revalidated excerpts and approved MITRE projections can cross from lab state. Ollama composes from the sanitized publication input, and a separate claim gate precedes the public JSON commit. TAXII and its catalog bridge are optional. [Detailed data paths and operations](docs/deployment.md#detailed-data-paths).
 
 ## Implementation
 
@@ -43,17 +43,17 @@ Python normalizes CISA KEV additions and a bounded CIRCL sample, writes source-a
 
 ### Analysis and reporting
 
-The editorial edition draws from the full validated publication, rather than one synchronization batch. Related indicators share their original report; CVEs remain individually inspectable. Source publication, catalog additions, substantive updates and collection times remain distinct. Ollama drafts cited claims, while deterministic checks reject unsupported wording, identifiers, numbers or relationships. Unverified prose stays private or receives a source-grounded fallback. [Reporting and grounding](docs/briefing.md).
+Completed seven-day windows drive the weekly edition. Interim updates require concrete source-reported developments; a new feed item alone is insufficient. Exact report references and CVEs support grouping and continuity, while timestamps distinguish publication from collection. Ollama arranges cited findings and defensive review steps; deterministic checks reject unsupported claims. Rejected or unavailable inference uses a checked fallback, and repeat runs preserve accepted editions. [Reporting and grounding](docs/briefing.md).
 
 ### Publication
 
-The exporter independently checks original sources and produces a validated public JSON snapshot. GitHub Actions builds the static website from that snapshot, preserving source links, evidence views and historical editions. Private platform databases stay in the lab. [Publication workflow](docs/publication.md).
+The exporter independently checks original sources and produces a validated public JSON snapshot. GitHub Actions builds the static website from that snapshot, preserving source links, evidence views and historical editions. Compact charts count KEV additions and distinct source reports by subject and date; reporting frequency is not attack volume. Private platform databases stay in the lab. [Publication workflow](docs/publication.md).
 
 ## Results
 
 [Take a look at EMBER ↗](https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/)
 
-![EMBER daily intelligence brief, source-linked evidence, additional reports and trends](docs/images/dashboard-desktop.png)
+![EMBER weekly intelligence briefing, source-linked evidence, additional reports and trends](docs/images/dashboard-desktop.png)
 
 ## Documentation
 

@@ -11,6 +11,19 @@
   --serif: Georgia, "Times New Roman", serif;
   --sans: "Segoe UI", Arial, sans-serif;
 }
+
+.collection-status { margin: 0 0 10px; color: var(--muted); font: 10px/1.5 var(--mono); }
+.edition-date { color: var(--muted); font: 10px/1.6 var(--mono); text-align: right; }
+.edition-date small { display: block; font: inherit; }
+.lead-development { margin-top: 15px; font: 15px/1.65 var(--serif); }
+.interim-update { margin: 0 0 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.interim-update > summary { color: var(--orange); font: 11px/1.6 var(--mono); }
+.reporting-trend { margin-top: 20px; }
+.reporting-bars { height: 66px; }
+.reporting-bars .bar { background: #aa774f; }
+.reporting-data { margin: 7px 0; }
+.reporting-data > summary { font: 10px/1.6 var(--mono); color: var(--muted); }
+footer #attribution span { display: inline-block; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); }
 button, input, select { font: inherit; color: inherit; }
