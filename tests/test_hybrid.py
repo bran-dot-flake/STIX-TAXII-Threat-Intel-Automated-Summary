@@ -234,6 +234,38 @@ class HybridTests(unittest.TestCase):
         self.assertTrue(weekly["topics"][0]["previously_reported"])
         self.assertEqual(weekly["window_start"], "2026-11-09T08:00:00+00:00")
 
+    def test_older_report_updated_this_week_carries_into_weekly_retrospective(self):
+        s = fixture()
+        row = s["news"][0]
+        hybrid.refresh(s, config=CONFIG)
+        row.update(
+            modified_at="2026-11-12T10:00:00+00:00",
+            content_changed_at="2026-11-12T11:00:00+00:00",
+            excerpt="Researchers observed a malware campaign targeting a new authentication workflow.",
+        )
+        hybrid.refresh(s, config=CONFIG)
+        self.assertEqual(s["editions"][0]["publication_kind"], "update")
+        s["exported_at"] = "2026-11-16T12:00:00+00:00"
+        package = hybrid.candidate(s, CONFIG)
+        self.assertIsNotNone(package)
+        self.assertEqual(package["publication_kind"], "weekly")
+        self.assertIn(row, package["news"])
+        result = hybrid.edition(package)
+        self.assertTrue(result["topics"][0]["previously_reported"])
+        self.assertEqual(result["topics"][0]["freshness"], "source-updated")
+        self.assertEqual(result["topics"][0]["published_at"], row["modified_at"])
+
+    def test_current_content_modified_after_weekly_cutoff_is_not_backdated(self):
+        s = fixture()
+        row = s["news"][0]
+        row.update(
+            modified_at="2026-11-10T10:00:00+00:00",
+            content_changed_at="2026-11-10T11:00:00+00:00",
+        )
+        package = hybrid.candidate(s, CONFIG)
+        self.assertIsNotNone(package)
+        self.assertNotIn(row, package["news"])
+
     def test_duplicate_cve_reports_group_but_shared_actor_names_do_not(self):
         a = article()
         b = article("cisco-talos", slug="second")

@@ -50,6 +50,13 @@ def within(row, start, end, include_end=False):
     )
 
 
+def changed_in_window(row, start, end, include_end=False):
+    return all(
+        row.get(key) and within({"published_at": row[key]}, start, end, include_end)
+        for key in ("modified_at", "content_changed_at")
+    )
+
+
 def story_key(row):
     if row.get("kind") == "vulnerability":
         chain = sorted(
@@ -152,7 +159,6 @@ def covered(snapshot):
 
 def package_for(snapshot, kind, start, end):
     generated = snapshot["exported_at"]
-    now = instant(generated)
     # Failed sources retain data and history but cannot trigger fresh articles.
     healthy = {s["id"] for s in snapshot["sources"] if s["status"] == "ok"}
     seen = covered(snapshot)
@@ -174,6 +180,11 @@ def package_for(snapshot, kind, start, end):
         if r["source"] in healthy
         and not contaminated(r)
         and within(r, start, end, kind == "update")
+        and not (
+            kind == "weekly"
+            and r.get("modified_at")
+            and instant(r["modified_at"]) >= end
+        )
     ]
     if kind == "update":
         rows = [
@@ -188,21 +199,23 @@ def package_for(snapshot, kind, start, end):
                 )
             )
         ]
-        # Explicit source modification plus a measured content change can qualify
-        # an older report. Mere first ingestion or timestamp refresh cannot.
-        for r in snapshot["news"]:
-            if (
-                r["source"] in healthy
-                and not contaminated(r)
-                and significant(r)
-                and r.get("modified_at")
-                and start <= instant(r["modified_at"]) < end
-                and r.get("content_changed_at")
-                and start <= instant(r["content_changed_at"]) <= now
-                and r["id"] in old_rows
-                and fingerprint(r) != fingerprint(old_rows[r["id"]])
-            ):
-                rows.append(r)
+    # Explicit source modification plus a measured change can qualify an older
+    # report in either window. Weekly retrospectives retain prior interim updates.
+    for r in snapshot["news"]:
+        if (
+            r["source"] in healthy
+            and not contaminated(r)
+            and changed_in_window(r, start, end, kind == "update")
+            and (
+                kind == "weekly"
+                or (
+                    significant(r)
+                    and r["id"] in old_rows
+                    and fingerprint(r) != fingerprint(old_rows[r["id"]])
+                )
+            )
+        ):
+            rows.append(r)
     unique = {r["id"]: r for r in rows}
     ordered = sorted(
         unique.values(),
@@ -280,6 +293,13 @@ def headline(value):
     return value if len(value) <= 95 else value[:92].rsplit(" ", 1)[0] + "…"
 
 
+def attribution_prefix(row):
+    dates = row["published_at"][:10]
+    if row.get("modified_at") and row.get("content_changed_at"):
+        dates += "; updated " + row["modified_at"][:10]
+    return f"{row.get('publisher','CISA')} ({dates}) reports: "
+
+
 def ledger(package):
     facts, topics, groups = {}, [], {}
     rows = package["news"] + package["records"]
@@ -332,9 +352,8 @@ def ledger(package):
             row["excerpt"]
             or f"{row.get('publisher', 'CISA')} published “{row['title']}”."
         )
-        attribution = row.get("publisher", "CISA")
         if row["excerpt"]:
-            summary = f"{attribution} ({row['published_at'][:10]}) reports: {summary}"
+            summary = attribution_prefix(row) + summary
         topic(
             key,
             row["title"],
@@ -450,8 +469,7 @@ def ledger(package):
                 re.I,
             ):
                 lead_indices.add(index + 1)
-            publisher = article.get("publisher", "CISA")
-            prefix = f"{publisher} ({article['published_at'][:10]}) reports: "
+            prefix = attribution_prefix(article)
             first.append(
                 fact(
                     "lead:" + t["id"],
@@ -592,14 +610,14 @@ def validate_input(package):
     for uid in package["covered_story_ids"]:
         valid_id(uid)
     for r in package["records"] + package["news"]:
+        if (
+            kind == "weekly"
+            and r.get("modified_at")
+            and instant(r["modified_at"]) >= end
+        ):
+            raise ValueError("Source content postdates weekly cutoff")
         if not within(r, start, end, kind == "update"):
-            if not (
-                kind == "update"
-                and r.get("modified_at")
-                and r.get("content_changed_at")
-                and start <= instant(r["modified_at"]) < end
-                and start <= instant(r["content_changed_at"]) <= generated
-            ):
+            if not changed_in_window(r, start, end, kind == "update"):
                 raise ValueError("Historical evidence mislabeled as current")
         if kind == "update" and not significant(r):
             raise ValueError("Routine evidence in interim edition")

@@ -744,6 +744,11 @@ def validate_input(package):
         validate_news(r)
         if stamp(r["published_at"]) > stamp(package["generated_at"]):
             raise ValueError("Future editorial advisory")
+        if any(
+            r.get(k) and stamp(r[k]) > stamp(package["generated_at"])
+            for k in ("modified_at", "first_seen", "last_seen", "content_changed_at")
+        ):
+            raise ValueError("Future editorial research chronology")
         clean_text(r["title"], 300)
         research = r["source"] != "cisa-advisories"
         clean_text(r["excerpt"], 900 if research else 600)
