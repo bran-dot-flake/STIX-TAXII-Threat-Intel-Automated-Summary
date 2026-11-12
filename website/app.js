@@ -15,7 +15,7 @@ const link = (url,text,cls='') => {
   catch {return e(text);}
   return `<a class="${e(cls)}" href="${e(url)}" target="_blank" rel="noopener noreferrer">${e(text)} ↗</a>`;
 };
-let data, period=30, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
+let data, chartAsOf, period=30, searchHits=[], newsLimit=6, cveQuery='', cvePage=0, catalogQuery='', catalogType='all', catalogLimit=12;
 const empty = text => `<p class="empty">${e(text)}</p>`;
 
 function warnings() {
@@ -123,7 +123,8 @@ function render() {
 }
 
 function trend() {
-  const rows=dailyKev(data.records,period,new Date().toISOString());
+  chartAsOf=new Date().toISOString();
+  const rows=dailyKev(data.records,period,chartAsOf);
   const max=Math.max(...rows.map(r=>r.count),1);
   document.querySelector('#chart-total').textContent=`${rows.reduce((sum,r)=>sum+r.count,0)} / ${period} days`;
   const total=rows.reduce((sum,row)=>sum+row.count,0);
@@ -140,7 +141,7 @@ function showChart(bar,pin=false){
   clearTimeout(chartHideTimer);
   if(chartPinned&&!pin&&bar!==chartAnchor)return;
   chartAnchor?.setAttribute('aria-expanded','false');chartAnchor=bar;chartPinned=pin||chartPinned;bar.setAttribute('aria-expanded','true');
-  const rows=kevRecords(data.records,period,new Date().toISOString(),bar.dataset.kevDate);
+  const rows=kevRecords(data.records,period,chartAsOf,bar.dataset.kevDate);
   const panel=document.querySelector('#kev-popover');
   panel.innerHTML=`<h3 id="kev-popover-title">${e(date(bar.dataset.kevDate))} — ${rows.length} addition${rows.length===1?'':'s'}</h3>${rows.length?`<ul>${rows.slice(0,5).map(r=>`<li><button class="link" data-evidence="${e(r.id)}">${e(r.value)}</button><span>${e(r.title.replace(/ Vulnerability$/,''))}</span></li>`).join('')}</ul>`:'<p>No catalog additions.</p>'}${rows.length>5?`<button class="link" data-kev-all>View all ${rows.length} additions →</button>`:''}`;
   panel.hidden=false;
@@ -244,7 +245,7 @@ function click(event) {
   if(button.hasAttribute('data-search-hit')){const hit=searchHits[Number(button.dataset.searchHit)];const row=hit&&(button.dataset.searchRecord?hit.matching.find(r=>r.id===button.dataset.searchRecord):hit.record);if(row)evidence(row.id,null,row);}
   if(button.dataset.stix)stixDetail(button.dataset.stix);
   if(button.dataset.kevDate){showChart(button,true);if(event.detail===0)document.querySelector('#kev-popover button')?.focus();}
-  if(button.hasAttribute('data-kev-all')&&chartAnchor){const rows=kevRecords(data.records,period,new Date().toISOString(),chartAnchor.dataset.kevDate);document.querySelector('#dialog-content').innerHTML=`<h2 id="dialog-title">${e(date(chartAnchor.dataset.kevDate))} — ${rows.length} KEV additions</h2><ul class="kev-all">${rows.map(r=>`<li><button class="link" data-evidence="${e(r.id)}">${e(r.value)}</button> — ${e(r.title)}</li>`).join('')}</ul>`;openModal(dialog);dialog.returnTarget=chartAnchor;}
+  if(button.hasAttribute('data-kev-all')&&chartAnchor){const rows=kevRecords(data.records,period,chartAsOf,chartAnchor.dataset.kevDate);document.querySelector('#dialog-content').innerHTML=`<h2 id="dialog-title">${e(date(chartAnchor.dataset.kevDate))} — ${rows.length} KEV additions</h2><ul class="kev-all">${rows.map(r=>`<li><button class="link" data-evidence="${e(r.id)}">${e(r.value)}</button> — ${e(r.title)}</li>`).join('')}</ul>`;openModal(dialog);dialog.returnTarget=chartAnchor;}
   if(button.dataset.period){hideChart();period=Number(button.dataset.period);document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.period)===period));trend();}
 
   if(button.hasAttribute('data-more-news')){newsLimit=newsLimit===6?Number.MAX_SAFE_INTEGER:6;news();document.querySelector('[data-more-news]')?.focus({preventScroll:true});}
