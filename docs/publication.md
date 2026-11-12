@@ -2,14 +2,14 @@
 
 `scripts/export_publication.py` independently recollects original public sources and optionally publishes through existing `gh` authentication. It does not call platform APIs or Ollama. The staged scheduler invokes it when `TI_PUBLICATION_ENABLED=true`, including after backend failures. All existing private reporting paths remain available.
 
-## Schema version 5 (versions 1–4 remain readable)
+## Schema version 6 (versions 1–5 remain readable)
 
 `src/ti_brief/publication.py:validate_snapshot` is the executable contract. Unknown object keys are rejected. The live validator rejects synthetic data; only explicit `build_dashboard.py --demo` permits the labeled fixture.
 
 | Object | Exact fields |
 | --- | --- |
-| Snapshot | `schema_version` (5), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix`, `editions`, `collection` |
-| Collection | `checked_at`, `status` (`ready`, `quiet`, `source-failure`, `published`), `last_substantive_at`, `weekly_window_end` |
+| Snapshot | `schema_version` (6), `synthetic`, `collected_at`, `exported_at`, `sources`, `records`, `news`, `reports`, `stix`, `editions`, `collection` |
+| Collection | `checked_at`, `status` (`ready`, `quiet`, `source-failure`, `published`, `withheld`), `last_substantive_at`, `weekly_window_end` |
 | Source health | `id`, `status` (`ok`, `cached`, `unavailable`), `attempted_at`, `last_success_at` |
 | Observation | `id`, `source`, `source_url`, `kind`, `value`, `title`, `description`, `action`, `published_at`, `first_seen`, `last_seen` |
 | News | `id`, `source`, `source_url`, `title`, `excerpt`, `published_at`, `category`, `artwork` |
@@ -35,6 +35,8 @@ Timestamps are ISO 8601 UTC; source date-only values display as midnight UTC. `p
 Research news extends the original news fields with exactly `publisher`, `author`, `license`, `modified_at`, `first_seen`, `last_seen`, `content_changed_at`, `source_id` and `references`. Source IDs, publishers, rights URLs and HTTPS article hosts/paths are allowlisted. Publication is source-provided; explicit modification may be null. First collection and measured content changes are local clocks. Timestamp-only changes do not count as substantive changes. The original canonical article URL is retained as a reference; article/IOC URLs are never followed for enrichment.
 
 The collector/exporter never calls Ollama. `compose_brief.py --editorial` consumes the already sanitized snapshot and saves a digest-bound cache in ignored `data/editorial/`; rejected drafts stay under its private `review/`. `export_publication.py --publish-prepared` reapplies only a matching checked cache and publishes that same collected snapshot. It performs no recollection or platform/model calls and rejects snapshots older than 24 hours. This avoids regenerating a different reporting window between inference and publication. The original `--publish` command remains a safe immediate-collection/fallback path.
+
+Current version-3 editorial editions bind `headline`, `plan`, `approval_id`, `evidence_digest`, frozen `input`, `input_digest`, `topics`, `window_start`, `window_end`, `generated_at`, `published_at`, `revised_at`, `publication_kind`, `mode`, `version` and `id`. Only weekly publication is active. The builder independently rechecks the repository-owned source-review receipt; unknown prose cannot gain approval by supplying a valid citation ID. Schema 6 retains the same top-level keys as schema 5. Older edition validators remain frozen for archive compatibility. See [weekly generation and review](briefing.md#natural-composition-and-independent-review).
 
 ## Official research feeds and reuse policy
 

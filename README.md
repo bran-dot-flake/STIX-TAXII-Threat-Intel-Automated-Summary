@@ -12,7 +12,7 @@
   <img alt="GitHub Pages" src="https://img.shields.io/badge/Publication-GitHub_Pages-805746?style=flat-square&amp;labelColor=252522">
 </p>
 
-<p align="center">Public threat signals become private, source-linked intelligence and local LLM briefings.<br>A separate validation boundary publishes the daily edition to GitHub Pages.</p>
+<p align="center">Public threat signals become private, source-linked intelligence and local LLM briefings.<br>A separate validation boundary publishes weekly intelligence to GitHub Pages.</p>
 
 <p align="center">
   <a href="https://brandonchaney.dev/STIX-TAXII-Threat-Intel-Automated-Summary/">Live Observatory ↗</a> ·
@@ -25,7 +25,7 @@
 
 ## Overview
 
-EMBER collects intelligence daily and publishes weekly briefings plus significant interim updates. CISA, CIRCL and MITRE ATT&CK® support the private MISP/OpenCTI lab; official SANS ISC, Cisco Talos and Google Threat Intelligence RSS feeds broaden the public editorial coverage. An existing CPU-only Ollama model composes from validated evidence. Quiet collections refresh the data while keeping the latest substantive briefing visible with its original date.
+EMBER collects intelligence daily and publishes one evidence-grounded weekly executive briefing. CISA, CIRCL and MITRE ATT&CK® support the private MISP/OpenCTI lab; official SANS ISC, Cisco Talos and Google Threat Intelligence RSS feeds broaden the public editorial coverage. An existing CPU-only Ollama model drafts from prepared evidence; an independent review gate checks novel prose. Daily refreshes keep searchable intelligence and statistics current while the latest accepted weekly briefing stays visible.
 
 The project explores the engineering needed to make that workflow dependable: interoperable STIX/TAXII ingestion, source-aware correlation, independent read-back, bounded local inference and a deliberate public/private boundary. The static site stays available when the lab is offline; fresh intelligence resumes when collection returns.
 
@@ -43,11 +43,11 @@ Python normalizes CISA KEV additions and a bounded CIRCL sample, writes source-a
 
 ### Analysis and reporting
 
-Completed seven-day windows drive the weekly edition. Interim updates require concrete source-reported developments; a new feed item alone is insufficient. Exact report references and CVEs support grouping and continuity, while timestamps distinguish publication from collection. Ollama arranges cited findings and defensive review steps; deterministic checks reject unsupported claims. Rejected or unavailable inference uses a checked fallback, and repeat runs preserve accepted editions. [Reporting and grounding](docs/briefing.md).
+Completed seven-day UTC windows drive the weekly edition. Exact report references, CVEs and identified Microsoft releases group related coverage without merging unrelated campaigns. Ollama drafts natural prose; deterministic checks and source-bound editorial review protect factual claims. Unverified drafts stay private, and publication retains the last accepted briefing. Evidence and previous weekly editions remain available. [Reporting and grounding](docs/briefing.md).
 
 ### Publication
 
-The exporter independently checks original sources and produces a validated public JSON snapshot. GitHub Actions builds the static website from that snapshot, preserving source links, evidence views and historical editions. Compact charts count KEV additions and distinct source reports by subject and date; reporting frequency is not attack volume. Private platform databases stay in the lab. [Publication workflow](docs/publication.md).
+The exporter independently checks original sources and produces a validated public JSON snapshot. GitHub Actions builds the static website from that snapshot, preserving source links, evidence views and historical editions. The KEV chart counts catalog additions; underlying source-report counts remain available for technical analysis. Private platform databases stay in the lab. [Publication workflow](docs/publication.md).
 
 ## Results
 

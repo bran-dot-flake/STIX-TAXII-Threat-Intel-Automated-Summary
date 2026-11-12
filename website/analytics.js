@@ -56,20 +56,21 @@ export function visibleHistory(snapshot) {
 }
 
 export function publicationView(snapshot) {
-  const editions=(snapshot.editions||[]).filter(e=>e.topics.length).sort((a,b)=>publicationTime(b).localeCompare(publicationTime(a)));
-  const weekly=editions.find(e=>e.publication_kind==='weekly');
-  const primary=weekly||editions[0]||null;
-  const update=weekly?editions.find(e=>e.publication_kind==='update'&&publicationTime(e)>publicationTime(weekly))||null:null;
-  return {primary,update};
+  const editions=(snapshot.editions||[]).filter(e=>e.topics.length&&e.publication_kind==='weekly').sort((a,b)=>Date.parse(publicationTime(b))-Date.parse(publicationTime(a)));
+  return {primary:editions[0]||null,update:null};
 }
 
 export function featuredPublication(snapshot) {
-  const {primary,update}=publicationView(snapshot);
-  if(!primary)return null;
-  if(!update)return primary;
-  return {...primary,topics:[...primary.topics,...update.topics],input:{
-    records:[...primary.input.records,...update.input.records],news:[...primary.input.news,...update.input.news],
-    updates:[...primary.input.updates,...update.input.updates],context:[]}};
+  return publicationView(snapshot).primary;
+}
+
+export function weeklyPeriod(start,end) {
+  if(!start||!end)return '';
+  const a=new Date(start),b=new Date(end);
+  const month=d=>d.toLocaleDateString('en-US',{month:'short',timeZone:'UTC'});
+  if(a.getUTCFullYear()===b.getUTCFullYear()&&a.getUTCMonth()===b.getUTCMonth())return `${month(a)} ${a.getUTCDate()}–${b.getUTCDate()}, ${b.getUTCFullYear()}`;
+  if(a.getUTCFullYear()===b.getUTCFullYear())return `${month(a)} ${a.getUTCDate()} – ${month(b)} ${b.getUTCDate()}, ${b.getUTCFullYear()}`;
+  return `${month(a)} ${a.getUTCDate()}, ${a.getUTCFullYear()} – ${month(b)} ${b.getUTCDate()}, ${b.getUTCFullYear()}`;
 }
 
 export function reportingTrends(news,days,now) {

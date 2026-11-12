@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {publicationView,visibleHistory,featuredPublication,reportingTrends} from '../website/analytics.js';
+import {publicationView,visibleHistory,featuredPublication,weeklyPeriod,reportingTrends} from '../website/analytics.js';
 import {metrics,dailyKev,kindCounts,matches,groupStories,briefDigest,editorialStories,editionEvidence,evidenceGroups,readerTarget,isRawSource,additionalStories,usefulExcerpt,searchResults,catalogEntries,chartRows} from '../website/analytics.js';
 
 const records=[
@@ -191,17 +191,17 @@ test('quiet collections keep the substantive weekly date and hide quiet archive 
   assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,null);
   assert.deepEqual(visibleHistory(snapshot),[weekly]);assert.equal(publicationView(snapshot).primary.generated_at,'2026-11-09T08:05:00Z');
 });
-test('a newer interim update supplements the weekly edition and both contribute evidence',()=>{
+test('legacy interim stays in the archive but never replaces or expands the weekly article',()=>{
   const weekly={id:'w',publication_kind:'weekly',generated_at:'2026-11-09T08:05:00Z',topics:[{evidence_ids:['a']}],input:{records:[],news:[{id:'a',source_url:'https://isc.sans.edu/a'}],updates:[]}};
   const update={id:'u',publication_kind:'update',generated_at:'2026-11-12T08:05:00Z',topics:[{evidence_ids:['b']}],input:{records:[],news:[{id:'b',source_url:'https://isc.sans.edu/b'}],updates:[]}};
   const snapshot={editions:[update,weekly],reports:[]};
-  assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,update);
-  assert.equal(featuredPublication(snapshot).input.news.length,2);assert.equal(visibleHistory(snapshot).length,2);
+  assert.equal(publicationView(snapshot).primary,weekly);assert.equal(publicationView(snapshot).update,null);
+  assert.equal(featuredPublication(snapshot).input.news.length,1);assert.equal(visibleHistory(snapshot).length,2);
 });
 test('initial publication state and legacy substantive history remain usable',()=>{
   assert.deepEqual(publicationView({editions:[],reports:[]}),{primary:null,update:null});
   const old={id:'old',generated_at:'2026-11-10',topics:[{}]};
-  assert.equal(publicationView({editions:[old],reports:[]}).primary,old);
+  assert.equal(publicationView({editions:[old],reports:[]}).primary,null);assert.deepEqual(visibleHistory({editions:[old],reports:[]}),[old]);
 });
 test('reporting trends count unique original reports, UTC dates and subjects, not attacks',()=>{
   const rows=[{source_url:'https://isc.sans.edu/a',category:'Malware research',published_at:'2026-11-10T12:00:00Z'},
@@ -224,4 +224,10 @@ test('research readers only open the matching official publisher',()=>{
   for(const [source,url] of [['sans-isc','https://isc.sans.edu/diary/123/'],['cisco-talos','https://blog.talosintelligence.com/research/'],['google-gti','https://cloud.google.com/blog/topics/threat-intelligence/report/']])assert.equal(readerTarget({id:'x',source,source_url:url}).kind,'article');
   assert.equal(readerTarget({id:'x',source:'google-gti',source_url:'https://cloud.google.com/private/'}).kind,'detail');
   assert.equal(readerTarget({id:'x',source:'sans-isc',source_url:'https://evil.com/diary/123/'}).kind,'detail');
+});
+
+test('weekly periods use concise UTC dates across month and year boundaries',()=>{
+  assert.equal(weeklyPeriod('2026-11-02T08:00:00Z','2026-11-09T08:00:00Z'),'Nov 2–9, 2026');
+  assert.equal(weeklyPeriod('2026-10-26T08:00:00Z','2026-11-02T08:00:00Z'),'Oct 26 – Nov 2, 2026');
+  assert.equal(weeklyPeriod('2026-12-28T08:00:00Z','2027-01-04T08:00:00Z'),'Dec 28, 2026 – Jan 4, 2027');
 });

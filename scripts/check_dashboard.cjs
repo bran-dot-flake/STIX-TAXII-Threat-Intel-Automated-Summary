@@ -16,7 +16,7 @@ const output = process.argv[3];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto(base);
-    await page.getByRole('heading', { name: 'Brief', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Weekly Brief', exact: true }).waitFor();
     const snapshot = await (await page.request.get(base + '/snapshot.json')).json();
     const analytics=await import('../website/analytics.js');
     const selected=analytics.publicationView(snapshot).primary;
@@ -25,9 +25,14 @@ const output = process.argv[3];
     assert.equal(await page.locator('[data-news-filter],.news-filters').count(),0);
     if(selected){
       const edition=selected;
-      assert.equal(await page.locator('.radar article').count(),Math.min(3,Math.max(0,edition.topics.length-1)));
+      assert.equal(await page.locator('.radar article').count(),edition.version===3?edition.topics.length:Math.min(3,Math.max(0,edition.topics.length-1)));
       assert.deepEqual(await page.locator('.editorial-lead .brief-overview').allTextContents(),edition.plan.overview.map(p=>p.map(c=>c.text).join(' ')));
-      for(const topic of edition.topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
+      assert.equal(await page.locator('.edition-date').innerText(),analytics.weeklyPeriod(edition.window_start,edition.window_end));
+      assert.equal(await page.locator('#brief .collection-status,#brief .lead-development,#brief .lead-source').count(),0);
+      assert(!(await page.locator('#brief').innerText()).includes('Sources checked'));
+      for(const words of await page.locator('.radar article p').allTextContents())assert(words.split(/\s+/).length<=38);
+      await page.evaluate(()=>document.fonts.ready);
+      assert((await page.locator('.editorial-lead h1').evaluate(n=>getComputedStyle(n).fontFamily)).includes('EMBER Newsreader'));
       const supporting=page.locator('#brief > .supporting-evidence');
       const groups=analytics.evidenceGroups(analytics.editionEvidence(edition),edition.topics);
       assert.equal(await supporting.count(),groups.length?1:0);
@@ -61,7 +66,7 @@ const output = process.argv[3];
         await page.keyboard.press('Escape');
       }
 
-    }else assert.equal(await page.locator('.brief-findings .finding').count(),(await import('../website/analytics.js')).briefDigest(snapshot.reports[0]).length);
+    }else assert.equal(await page.locator('.editorial-lead').count(),0);
     const actual = await page.locator('.metric strong').allTextContents();
     assert.equal(Number(actual[1].replaceAll(',', '')), new Set(snapshot.records.filter(r => r.kind !== 'vulnerability').map(r => r.kind + '|' + r.value)).size);
     assert.equal(Number(actual[3]), analytics.visibleHistory(snapshot).length);
@@ -69,14 +74,7 @@ const output = process.argv[3];
     assert.equal(await page.locator('#trend .bar').count(), 7);
     await page.getByRole('button', { name: '30D', exact: true }).click();
     assert.equal(await page.locator('#trend .bar').count(), 30);
-    const reporting=analytics.reportingTrends(snapshot.news,30,new Date().toISOString());
-    assert.equal(await page.locator('#reporting-trend .bar').count(),30);
-    assert.equal(await page.locator('#reporting-total').innerText(),`${reporting.total} / 30 days`);
-    await page.locator('.reporting-data > summary').click();
-    const reportingSum=(await page.locator('.reporting-data tbody td:nth-child(2)').allTextContents()).reduce((n,s)=>n+Number(s),0);
-    assert.equal(reportingSum,reporting.total);
-    assert((await page.locator('.reporting-trend').innerText()).includes('not attack volume'));
-    await page.locator('.reporting-data > summary').click();
+    assert.equal(await page.locator('#reporting-trend,.reporting-trend,.reporting-data').count(),0);
     const series=analytics.dailyKev(snapshot.records,30,new Date().toISOString());
     await page.locator('.chart-data > summary').click();
     assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
@@ -90,16 +88,8 @@ const output = process.argv[3];
     assert.equal(await page.locator('.story-featured').count(),expectedStories.length?1:0);
     assert.deepEqual(await page.locator('.story').evaluateAll(nodes=>nodes.map(n=>n.dataset.storyId)),expectedStories.slice(0,6).map(r=>r.id));
     assert(!(await page.locator('#intelligence').innerText()).includes('Source excerpt'));
-    if(snapshot.editions?.[0]?.input.news.some(r=>r.source_url.includes('/2026/11/10/'))){
-      assert.equal(await page.locator('.editorial-lead a').first().getAttribute('href'),snapshot.editions[0].input.news.find(r=>r.source_url.includes('/2026/11/10/')).source_url);
-    }
     assert(await page.locator('.story img').count() <= 1);
     assert.deepEqual(await page.locator('main > section[id], main > details[id]').evaluateAll(nodes=>nodes.map(n=>n.id).filter(id=>id!=='search-results')),['brief','intelligence','trends','context','vulnerabilities','archive']);
-    if(!snapshot.editions?.length&&snapshot.reports[0]?.narrative){
-      const topics=snapshot.reports[0].narrative.plan.topics;
-      for(const topic of topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
-      assert(!(await page.locator('#brief').innerText()).includes('source observations for review'));
-    }
     const excerpt=page.locator('.story-excerpt').first();
     if(await excerpt.count()){
       await excerpt.locator('summary').click();
@@ -206,11 +196,11 @@ const output = process.argv[3];
     if(acceptedReports.length){
       const legacy=structuredClone(snapshot);legacy.synthetic=true;legacy.editions=[];legacy.reports=acceptedReports;
       await page.route('**/snapshot.json',route=>route.fulfill({json:legacy}));
-      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
-      const supporting=page.locator('#brief > .supporting-evidence');
-      await supporting.locator(':scope > summary').click();
-      assert.equal(await supporting.locator('.evidence').count(),(legacy.reports[0].observations||legacy.reports[0].items).length);
-      assert.equal(await supporting.locator('.brief-overview,.report-overview').count(),0);
+      await page.goto(base);await page.getByRole('heading',{name:'Weekly Brief',exact:true}).waitFor();
+      assert.equal(await page.locator('#brief .editorial-lead').count(),0);
+      await page.locator('#archive > summary').click();
+      await page.locator('#archive-select').selectOption(legacy.reports[0].id);
+      assert.equal(await page.locator('#archived-report .evidence').count(),(legacy.reports[0].observations||legacy.reports[0].items).length);
       await page.unroute('**/snapshot.json');
     }
     if(selected){
@@ -222,13 +212,10 @@ const output = process.argv[3];
       update.topics[0].headline='Synthetic significant interim development';
       fixture.editions=[update,weekly];
       await page.route('**/snapshot.json',route=>route.fulfill({json:fixture}));
-      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
-      assert.equal(await page.locator('.editorial-lead h1').innerText(),weekly.topics[0].headline);
-      assert((await page.locator('.edition-date').innerText()).includes('Weekly edition'));
-      assert.equal(await page.locator('.interim-update').count(),1);
-      await page.locator('.interim-update > summary').click();
-      assert((await page.locator('.interim-update .metadata').innerText()).includes('Interim update'));
-      await page.locator('.interim-update > summary').click();
+      await page.goto(base);await page.getByRole('heading',{name:'Weekly Brief',exact:true}).waitFor();
+      assert.equal(await page.locator('.editorial-lead h1').innerText(),weekly.headline||weekly.topics[0].headline);
+      assert.equal(await page.locator('.edition-date').innerText(),analytics.weeklyPeriod(weekly.window_start,weekly.window_end));
+      assert.equal(await page.locator('.interim-update').count(),0);
       for(const width of [390,768,1440]){
         await page.setViewportSize({width,height:900});
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -236,8 +223,8 @@ const output = process.argv[3];
       await page.unroute('**/snapshot.json');
       fixture.editions=[];fixture.reports=[];fixture.news=[];
       await page.route('**/snapshot.json',route=>route.fulfill({json:fixture}));
-      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
-      assert((await page.locator('#brief').innerText()).includes('No accepted public edition'));
+      await page.goto(base);await page.getByRole('heading',{name:'Weekly Brief',exact:true}).waitFor();
+      assert((await page.locator('#brief').innerText()).includes('No accepted weekly briefing'));
       assert.equal(await page.locator('.editorial-lead,.radar,.interim-update').count(),0);
       await page.unroute('**/snapshot.json');
     }
@@ -247,16 +234,16 @@ const output = process.argv[3];
       quiet.editions.unshift(emptyEdition);
       quiet.news=[];
       await page.route('**/snapshot.json',route=>route.fulfill({json:quiet}));
-      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
+      await page.goto(base);await page.getByRole('heading',{name:'Weekly Brief',exact:true}).waitFor();
       assert.equal(await page.locator('.story').count(),0);
-      assert.equal(await page.locator('.editorial-lead h1').innerText(),selected.topics[0].headline);
+      assert.equal(await page.locator('.editorial-lead h1').innerText(),selected.headline||selected.topics[0].headline);
       assert(!(await page.locator('#brief').innerText()).includes('No source-dated developments'));
       assert.equal(await page.locator('#archive-select option').count(),analytics.visibleHistory(quiet).length);
       const placeholders=structuredClone(snapshot);placeholders.synthetic=true;
       placeholders.news=expectedStories.slice(0,3).map((r,i)=>({...r,excerpt:i===0?'':i===1?'Source excerpt':'A short supported source observation.'}));
       await page.unroute('**/snapshot.json');
       await page.route('**/snapshot.json',route=>route.fulfill({json:placeholders}));
-      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
+      await page.goto(base);await page.getByRole('heading',{name:'Weekly Brief',exact:true}).waitFor();
       assert(!(await page.locator('#intelligence').innerText()).includes('Source excerpt'));
       assert.equal(await page.locator('.story-excerpt').count(),placeholders.news.length>2?1:0);
       await page.unroute('**/snapshot.json');

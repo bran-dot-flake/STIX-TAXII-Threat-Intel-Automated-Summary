@@ -1,4 +1,4 @@
-import {metrics, dailyKev, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, chartRows, publicationTime, publicationView, visibleHistory, featuredPublication, reportingTrends} from './analytics.js';
+import {metrics, dailyKev, kindCounts, matches, briefDigest, editionEvidence, evidenceGroups, readerTarget, isRawSource, additionalStories, usefulExcerpt, searchResults, catalogEntries, chartRows, publicationTime, publicationView, visibleHistory, featuredPublication, weeklyPeriod} from './analytics.js';
 
 const main = document.querySelector('main');
 const dialog = document.querySelector('dialog');
@@ -50,7 +50,7 @@ function editorialTopics(edition) {
 function editionMarkup(edition) {
   const topics=editorialTopics(edition);
   const actions=[...new Set(topics.flatMap(t=>t.records.map(r=>r.action)).filter(Boolean))];
-  return `<div class="metadata">${e(editionLabel(edition))} · ${e(time(publicationTime(edition)))} · ${edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}${topic.previously_reported?' · Previously covered':''}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4>${description(row)?`<p>${e(description(row))}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
+  return `<div class="metadata">${e(editionLabel(edition))} · ${e(time(publicationTime(edition)))} · ${edition.mode==='ollama-edited-reviewed'?'Edited and source-reviewed Ollama draft':edition.mode==='ollama-reviewed'?'Reviewed Ollama composition':edition.mode==='ollama-source-grounded'?'Ollama source-grounded composition':'Source-grounded fallback'}</div>${edition.plan.overview.map(p=>`<p class="report-overview">${e(prose(p))}</p>`).join('')}${topics.map(topic=>`<article class="report-topic"><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}${topic.previously_reported?' · Previously covered':''}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><details class="topic-evidence"><summary>Supporting evidence · ${topic.records.length}</summary>${topic.records.map(row=>`<article class="evidence"><div class="source-line">${e(names[row.source])}</div><h4>${e(row.value||row.title)}</h4>${description(row)?`<p>${e(description(row))}</p>`:''}<dl><dt>${row.source==='cisa-kev'?'Catalog added':'Source published'}</dt><dd>${e(date(row.published_at))}</dd>${row.modified_at?`<dt>Source modified</dt><dd>${e(time(row.modified_at))}</dd>`:''}${row.first_seen?`<dt>First collected / last seen</dt><dd>${e(time(row.first_seen))} / ${e(time(row.last_seen))}</dd>`:''}</dl>${sourceLink(row)}</article>`).join('')}${(topic.context_ids||[]).map(id=>{const obj=edition.input.context.find(o=>o.id===id);return obj?`<p>${link(obj.url,`${obj.external_id} · ${obj.name}`)}</p>`:''}).join('')}</details></article>`).join('')}${actions.length?`<details class="source-actions"><summary>Source defensive guidance</summary>${actions.map(action=>`<p>${e(action)}</p>`).join('')}</details>`:''}`;
 }
 const description = row => row.description==='Public CIRCL OSINT observation. Source attribution is not independent verification.'?'':row.description||row.excerpt||'';
 const sourceLink = row => link(row.source_url,isRawSource(row.source_url)?'Raw source data':'Original source','link');
@@ -83,28 +83,26 @@ function supportingEvidence(source) {
 
 const archives = () => visibleHistory(data);
 const editionLabel = edition => edition.publication_kind==='weekly'?'Weekly edition':edition.publication_kind==='update'?'Interim update':'Published edition';
-const collectionStatus = () => data.collection?`<p class="collection-status">Sources checked · ${e(time(data.collection.checked_at))}${data.collection.status==='quiet'?' · No significant updates':data.collection.status==='source-failure'?' · Sources unavailable; publication retained':''}</p>`:'';
-const interimUpdate = update => update?`<details class="interim-update" data-edition="${e(update.id)}"><summary>Update · ${e(date(publicationTime(update)))} · ${e(update.topics[0].headline)}</summary>${editionMarkup(update)}</details>`:'';
-function opening(edition,report,update=null) {
-  if(!edition){const digest=briefDigest(report);return `<div class="section-head"><h1>Brief</h1><time>${e(date(report?.generated_at))}</time></div>${report?.narrative?`<p class="brief-overview">${e(prose(report.narrative.plan.overview))}</p>`:''}${digest.length?`<div class="brief-findings">${digest.map(row=>topicMarkup(row)).join('')}</div>`:empty('No accepted public edition is available yet.')}${report?supportingEvidence(report):''}`;}
+function opening(edition) {
+  if(!edition)return `<div class="section-head"><h1>Weekly Brief</h1></div>${empty('No accepted weekly briefing is available yet.')}`;
   const topics=editorialTopics(edition);
-  const radar=topics.slice(1,4);
-  return `<div class="section-head"><h2>Brief</h2><span class="edition-date">${e(editionLabel(edition))} · <time datetime="${e(publicationTime(edition))}">${e(date(publicationTime(edition)))}</time>${edition.publication_kind==='weekly'?`<small>${e(time(edition.window_start))} – ${e(time(edition.window_end))}</small>`:''}</span></div>${interimUpdate(update)}<div class="edition-grid"><div class="editorial-lead"><h1>${e(topics[0]?.headline||'Brief')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}${edition.version===2&&topics[0]?`<p class="lead-development">${e(topics[0].summary)}</p>`:''}<div class="topic-sources">${readerLinks(topics.flatMap(t=>t.records),{lead:true})}</div></div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><div class="source-line">${e(date(topic.published_at))} · ${e(freshness[topic.freshness])}</div><h3>${e(topic.headline)}</h3><p>${e(topic.summary)}</p><div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</aside>`:''}</div>${supportingEvidence(edition)}`;
+  const radar=edition.version===3?topics:topics.slice(1,4);
+  const sentence=text=>{const first=text.match(/^.*?[.!?](?:[”"'])?(?=\s|$)/)?.[0]||text;return first.split(/\s+/).length<=38?first:'';};
+  return `<div class="section-head"><h2>Weekly Brief</h2><time class="edition-date">${e(weeklyPeriod(edition.window_start,edition.window_end))}</time></div><div class="edition-grid"><div class="editorial-lead"><h1>${e(edition.headline||topics[0]?.headline||'Weekly intelligence briefing')}</h1>${edition.plan.overview.map(p=>`<p class="brief-overview">${e(prose(p))}</p>`).join('')}</div>${radar.length?`<aside class="radar" aria-labelledby="radar-title"><h2 id="radar-title">On the radar</h2>${radar.map(topic=>`<article><h3>${e(topic.headline)}</h3>${sentence(topic.summary)?`<p>${e(sentence(topic.summary))}</p>`:''}<div class="topic-sources">${readerLinks(topic.records)}</div></article>`).join('')}</aside>`:''}</div>${supportingEvidence(edition)}`;
 }
 
 function render() {
-  const report=data.reports.find(r=>r.mode!=='quiet-day'&&(r.observations||r.items).length);
-  const {primary:edition,update}=publicationView(data);
+  const {primary:edition}=publicationView(data);
   const history=archives();
   const m=metrics(data,new Date().toISOString());
   const week=dailyKev(data.records,7,new Date().toISOString()).reduce((sum,row)=>sum+row.count,0);
   main.innerHTML=`${warnings()}<section id="search-results" class="search-results" hidden></section>
-    <section class="brief" id="brief" data-edition="${e(edition?.id||'')}">${collectionStatus()}${opening(edition,report,update)}</section>
+    <section class="brief" id="brief" data-edition="${e(edition?.id||'')}">${opening(edition)}</section>
     <section id="intelligence"><div class="section-head"><h2>Latest Intelligence</h2></div><div id="news-content"></div></section>
     <section class="metrics" aria-label="Collection statistics">${[[week,'KEV additions · 7d'],[m.iocs,'Unique public IOCs'],[m.advisories,'Source reports'],[history.length,'Archived briefs']].map(([count,label])=>`<div class="metric"><strong>${num(count)}</strong><span>${label}</span></div>`).join('')}</section>
     <section id="trends"><div class="section-head"><h2>Trends</h2><div class="segmented" aria-label="Chart period"><button data-period="7" aria-pressed="${period===7}">7D</button><button data-period="30" aria-pressed="${period===30}">30D</button></div></div>
       <div class="trend-grid"><div><div class="chart-head"><h3>KEV catalog additions</h3><span id="chart-total"></span></div><div id="trend"></div></div>
-      <div class="reporting-trend"><div class="chart-head"><h3>Source reports</h3><span id="reporting-total"></span></div><div id="reporting-trend"></div><small class="source-line">Reporting frequency · not attack volume</small></div><details class="collection-composition"><summary>Dataset composition · unique values by type</summary><div id="types" class="type-list"></div></details></div></section>
+      <details class="collection-composition"><summary>Dataset composition · unique values by type</summary><div id="types" class="type-list"></div></details></div></section>
       <details id="context" class="context"><summary>MITRE ATT&CK® context <small>${catalogEntries(data.stix.objects).length} catalog objects · ${data.stix.relationships.length} source relationships</small></summary>
         <p class="catalog-note">Catalog context, not incident activity. ${data.stix.collected_at?'Collected '+e(date(data.stix.collected_at))+'.':''}${data.stix.status==='cached'?' Source unavailable; retained data.':''}</p>
         <div class="filter-row"><label class="sr-only" for="catalog-search">Search catalog context</label><input id="catalog-search" type="search" placeholder="Technique, software, or group…"><label class="sr-only" for="catalog-type">Catalog type</label><select id="catalog-type"><option value="all">All types</option><option value="attack-pattern">Techniques</option><option value="intrusion-set">Groups</option><option value="malware">Malware</option><option value="tool">Tools</option></select></div><div id="catalog-results"></div></details>
@@ -123,20 +121,12 @@ function trend() {
   document.querySelector('#chart-total').textContent=`${rows.reduce((sum,r)=>sum+r.count,0)} / ${period} days`;
   document.querySelector('#trend').innerHTML=`<div class="bar-chart" role="group" aria-label="Daily KEV catalog additions">${rows.map(r=>`<div class="bar-slot"><button class="bar" data-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} catalog additions"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><div class="chart-axis"><span>${e(date(rows[0].date))}</span><span>${e(date(rows.at(-1).date))}</span></div><details class="chart-data"><summary>Chart data</summary><label class="chart-table-control"><input id="show-all-days" type="checkbox" ${showAllDays?'checked':''}> Show all days</label><div id="chart-table"></div></details>`;
   document.querySelectorAll('[data-height]').forEach(el=>el.style.height=`${el.dataset.height}%`);
-  chartTable();reportingChart();
+  chartTable();
 }
 
 function chartTable() {
   const rows=chartRows(dailyKev(data.records,period,new Date().toISOString()),showAllDays);
   document.querySelector('#chart-table').innerHTML=rows.length?`<table class="data-table"><caption class="sr-only">KEV additions by catalog date, UTC</caption><thead><tr><th scope="col">Date (UTC)</th><th scope="col">Additions</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.count}</td></tr>`).join('')}</tbody></table>`:empty('No KEV additions in this interval.');
-}
-
-function reportingChart() {
-  const result=reportingTrends(data.news,period,new Date().toISOString());
-  const max=Math.max(...result.series.map(r=>r.count),1);
-  document.querySelector('#reporting-total').textContent=`${result.total} / ${period} days`;
-  document.querySelector('#reporting-trend').innerHTML=`<div class="bar-chart reporting-bars" role="group" aria-label="Distinct source reports by publication date">${result.series.map(r=>`<div class="bar-slot"><button class="bar" data-report-height="${r.count/max*100}" aria-label="${r.date}: ${r.count} source reports"><span class="bar-tip">${e(date(r.date))}: ${r.count}</span></button></div>`).join('')}</div><details class="reporting-data"><summary>Reports by subject</summary><table class="data-table"><caption class="sr-only">Source reports in ${period} days; reporting frequency, not attacks</caption><thead><tr><th scope="col">Subject</th><th scope="col">Reports</th></tr></thead><tbody>${result.categories.map(([label,count])=>`<tr><td>${e(label)}</td><td>${count}</td></tr>`).join('')}</tbody></table></details>`;
-  document.querySelectorAll('[data-report-height]').forEach(el=>el.style.height=`${el.dataset.reportHeight}%`);
 }
 
 function typeChart() {
@@ -246,7 +236,7 @@ window.addEventListener('hashchange',()=>{if(data)anchor();});
 document.querySelector('nav').addEventListener('click',event=>{const a=event.target.closest('a');if(a&&a.hash===location.hash)anchor();});
 try {
   const response=await fetch('./snapshot.json',{cache:'no-cache'});if(!response.ok)throw new Error();data=await response.json();
-  if(![1,2,3,4,5].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
+  if(![1,2,3,4,5,6].includes(data.schema_version)||typeof data.synthetic!=='boolean'||!['records','news','reports','sources'].every(k=>Array.isArray(data[k])))throw new Error();
   data.stix ||= {objects:[],relationships:[],status:'unavailable',collected_at:null};
   render();if(location.hash)anchor();
 } catch {

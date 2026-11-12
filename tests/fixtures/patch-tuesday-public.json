@@ -1,0 +1,44 @@
+[
+  {
+    "id": "f802327bf7c7bbbc758db8e0",
+    "source": "sans-isc",
+    "source_url": "https://isc.sans.edu/diary/rss/33508",
+    "title": "Microsoft Patch Tuesday November 2026, (Tue, Nov 10th)",
+    "excerpt": "Microsoft continues its AI-induced patch surge, addressing 1,260 different vulnerabilities this month. 68 of these vulnerabilities are considered critical. 167 of the vulnerabilities are Chromium issues affecting Microsoft Edge.",
+    "published_at": "2026-11-11T18:28:43+00:00",
+    "category": "Vulnerability research",
+    "artwork": "advisory.svg",
+    "publisher": "SANS Technology Institute, Internet Storm Center",
+    "author": "",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "modified_at": null,
+    "first_seen": "2026-11-12T14:13:20+00:00",
+    "last_seen": "2026-11-12T14:13:20+00:00",
+    "content_changed_at": null,
+    "source_id": "https://isc.sans.edu/diary/rss/33508",
+    "references": [
+      "https://isc.sans.edu/diary/rss/33508"
+    ]
+  },
+  {
+    "id": "d88b3fdfb0c420e555dcd7c8",
+    "source": "cisco-talos",
+    "source_url": "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/",
+    "title": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities",
+    "excerpt": "Microsoft has released its monthly security update for November 2026, which includes 1328 vulnerabilities affecting a range of products, including 60 that Microsoft marked as \"critical.\" Out of 60 \"critical\" vulnerabilities, 45 are remote code execution (RCE) vulnerabilities.",
+    "published_at": "2026-11-11T01:41:17+00:00",
+    "category": "Vulnerability research",
+    "artwork": "advisory.svg",
+    "publisher": "Cisco Talos",
+    "author": "Cisco Talos",
+    "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
+    "modified_at": null,
+    "first_seen": "2026-11-12T14:13:20+00:00",
+    "last_seen": "2026-11-12T14:13:20+00:00",
+    "content_changed_at": null,
+    "source_id": "6af2f06a6f4a9600010b568b",
+    "references": [
+      "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/"
+    ]
+  }
+]
