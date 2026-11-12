@@ -4816,7 +4816,7 @@
       "publication_kind": "weekly",
       "generated_at": "2026-11-12T14:13:20+00:00",
       "published_at": "2026-11-12T14:46:06+00:00",
-      "revised_at": "2026-11-12T16:36:43+00:00",
+      "revised_at": "2026-11-12T18:43:08+00:00",
       "window_start": "2026-11-02T08:00:00+00:00",
       "window_end": "2026-11-09T08:00:00+00:00",
       "input_digest": "45719f922e4b74cff964f31e3d99d4256af1bfa4025e25d13c48d71d58f1045d",
@@ -4958,7 +4958,7 @@
           "freshness": "newly-published",
           "published_at": "2026-11-02T14:00:00+00:00",
           "context_ids": [],
-          "headline": "LLMJacking’s Billing Risk"
+          "headline": "LLMJacking Across Industries"
         },
         {
           "id": "fc59dc677ba83ade14f2cf4d",
@@ -4969,7 +4969,7 @@
           "freshness": "newly-published",
           "published_at": "2026-11-02T14:00:00+00:00",
           "context_ids": [],
-          "headline": "XCPE’s Affiliate Business"
+          "headline": "XCPE Attribution"
         },
         {
           "id": "6c85a28703e1a8c5fe9cfa13",
@@ -4980,35 +4980,34 @@
           "freshness": "newly-published",
           "published_at": "2026-11-08T15:44:33+00:00",
           "context_ids": [],
-          "headline": "SSH Attempts, Limited Visibility"
+          "headline": "Sshole Exploit Attempts"
         }
       ],
-      "headline": "Cloud Access Abuse and Exploit Scanning",
+      "headline": "LLM Hijacking Can Drive Rapid Cloud Bills",
       "plan": {
-        "headline": "Cloud Access Abuse and Exploit Scanning",
+        "headline": "LLM Hijacking Can Drive Rapid Cloud Bills",
         "overview": [
           [
             {
-              "text": "Access itself was a commodity in two reports published this week, although they described separate operations.",
-              "evidence_ids": [
-                "098ee6ddbe901d2f7b929ec0",
-                "c8647446e5ece432f600892e"
-              ]
-            },
-            {
-              "text": "Mandiant’s account of LLMJacking described intruders using enterprise access to language models across several providers.",
+              "text": "Enterprise access to language models can become a fast-moving financial liability when it is hijacked.",
               "evidence_ids": [
                 "098ee6ddbe901d2f7b929ec0"
               ]
             },
             {
-              "text": "The financial consequence can arrive quickly: fraudulent cloud charges may rise sharply within hours, rather than building through the slower consumption associated with cryptojacking.",
+              "text": "Mandiant described multiple LLMJacking incidents across cloud and model providers, with fraudulent charges capable of climbing sharply within hours.",
               "evidence_ids": [
                 "098ee6ddbe901d2f7b929ec0"
               ]
             },
             {
-              "text": "The incidents described occurred during 2026; their publication this week does not place all of that activity inside this reporting window.",
+              "text": "That speed distinguishes the abuse from the more gradual resource consumption of cryptojacking.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "For cloud teams, unexpected model-related charges are a concrete reason to investigate possible misuse of enterprise access.",
               "evidence_ids": [
                 "098ee6ddbe901d2f7b929ec0"
               ]
@@ -5016,49 +5015,21 @@
           ],
           [
             {
-              "text": "The distinction between reporting and event dates also matters for XCPE: Google’s account placed the disruption in the week before publication.",
+              "text": "Google and industry partners also dismantled the XCPE backdoor, which had enrolled more than 1.3 million set-top boxes.",
               "evidence_ids": [
                 "c8647446e5ece432f600892e"
               ]
             },
             {
-              "text": "The backdoor had drawn more than 1.3 million set-top boxes into a botnet before Google and industry partners dismantled it.",
+              "text": "The operator sold access to criminal affiliates and loaded their malware modules onto infected devices.",
               "evidence_ids": [
                 "c8647446e5ece432f600892e"
               ]
             },
             {
-              "text": "Its monetization extended beyond the original operator: access was sold to criminal affiliates, and their malware modules were loaded onto infected devices.",
+              "text": "The disruption targeted a business that turned control of those devices into a service for criminal affiliates.",
               "evidence_ids": [
                 "c8647446e5ece432f600892e"
-              ]
-            }
-          ],
-          [
-            {
-              "text": "The SSH reporting offered a narrower signal: SANS saw increased attempts against Sshole in its Cowrie honeypots.",
-              "evidence_ids": [
-                "4b7df559b706314dfcf9185f"
-              ]
-            },
-            {
-              "text": "That is evidence of activity in a limited observation set, rather than a measure of global attack frequency or proof that intruders succeeded.",
-              "evidence_ids": [
-                "4b7df559b706314dfcf9185f"
-              ]
-            },
-            {
-              "text": "Long passwords stood out from the usual brute-force traffic, but the sensors recorded only the first 255 characters.",
-              "evidence_ids": [
-                "4b7df559b706314dfcf9185f"
-              ]
-            },
-            {
-              "text": "Taken together, these accounts distinguish documented misuse of existing access, a reported botnet disruption, and a qualified signal of exploit attempts; they do not establish a shared campaign.",
-              "evidence_ids": [
-                "098ee6ddbe901d2f7b929ec0",
-                "c8647446e5ece432f600892e",
-                "4b7df559b706314dfcf9185f"
               ]
             }
           ]
@@ -5066,9 +5037,9 @@
         "topics": [
           {
             "topic_id": "052d67304b3e5147eb08144f",
-            "headline": "LLMJacking’s Billing Risk",
+            "headline": "LLMJacking Across Industries",
             "summary": {
-              "text": "Mandiant’s cases span several cloud and model providers, with rapid fraudulent billing as the immediate financial consequence.",
+              "text": "Cases included financial services, retail, technology and transportation organizations across North America, South America and Asia Pacific.",
               "evidence_ids": [
                 "098ee6ddbe901d2f7b929ec0"
               ]
@@ -5076,9 +5047,9 @@
           },
           {
             "topic_id": "fc59dc677ba83ade14f2cf4d",
-            "headline": "XCPE’s Affiliate Business",
+            "headline": "XCPE Attribution",
             "summary": {
-              "text": "The reported disruption affected a backdoor whose operator sold access and loaded affiliates’ malware onto devices.",
+              "text": "Google assessed with high confidence that Videostrong Technology Co. developed, deployed and operated the backdoor for financial gain.",
               "evidence_ids": [
                 "c8647446e5ece432f600892e"
               ]
@@ -5086,9 +5057,9 @@
           },
           {
             "topic_id": "6c85a28703e1a8c5fe9cfa13",
-            "headline": "SSH Attempts, Limited Visibility",
+            "headline": "Sshole Exploit Attempts",
             "summary": {
-              "text": "SANS’s password-length collection limit qualifies what its honeypots can show about the observed attempts.",
+              "text": "Long SSH passwords stood out in SANS’s Cowrie honeypots as attempts to exploit Sshole increased.",
               "evidence_ids": [
                 "4b7df559b706314dfcf9185f"
               ]
@@ -5097,7 +5068,7 @@
         ]
       },
       "mode": "ollama-edited-reviewed",
-      "approval_id": "5c9ef25f70107106c4fc0c33",
+      "approval_id": "e88287ee4e78df8f1e07468f",
       "evidence_digest": "177fc8507c63a3e2a89c70916e67fce73f3126a3b1c5911701d562d421b50d0d"
     },
     {
