@@ -15,7 +15,9 @@ from ti_brief.report import atomic_write
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--snapshot", type=Path, default=Path("data/publication/snapshot.json"))
+    parser.add_argument(
+        "--snapshot", type=Path, default=Path("data/publication/snapshot.json")
+    )
     parser.add_argument("--cache-dir", type=Path)
     parser.add_argument(
         "--editorial",
@@ -31,7 +33,9 @@ def main():
         os.umask(0o077)
     try:
         with run_lock(args.cache_dir / "compose.lock"):
-            snapshot = validate_snapshot(json.loads(args.snapshot.read_text(encoding="utf-8")))
+            snapshot = validate_snapshot(
+                json.loads(args.snapshot.read_text(encoding="utf-8"))
+            )
             if args.editorial:
                 from ti_brief.editorial import (
                     compose as compose_editorial,
@@ -40,8 +44,43 @@ def main():
                     DraftRequiresReview,
                 )
 
-                package = curate(snapshot)
+                if snapshot["schema_version"] == 5:
+                    from ti_brief.hybrid import candidate
+
+                    package = candidate(snapshot)
+                    if package is None:
+                        print(
+                            json.dumps(
+                                {
+                                    "status": "editorial-not-due",
+                                    "collection": snapshot["collection"]["status"],
+                                }
+                            )
+                        )
+                        return 0
+                else:
+                    package = curate(snapshot)
                 result = edition(package)
+                cache = args.cache_dir / (result["id"] + ".json")
+                if cache.exists():
+                    from ti_brief.editorial import validate_edition
+
+                    try:
+                        cached = validate_edition(
+                            json.loads(cache.read_text(encoding="utf-8"))
+                        )
+                        if cached["input_digest"] == result["input_digest"]:
+                            print(
+                                json.dumps(
+                                    {
+                                        "status": "editorial-already-composed",
+                                        "mode": cached["mode"],
+                                    }
+                                )
+                            )
+                            return 0
+                    except (OSError, ValueError, KeyError, TypeError):
+                        pass
                 try:
                     if Path("/proc/meminfo").exists():
                         mem = dict(
@@ -115,12 +154,20 @@ def main():
             )
             print(
                 json.dumps(
-                    {"status": "composed", "report": report["id"], "mode": narrative["mode"]}
+                    {
+                        "status": "composed",
+                        "report": report["id"],
+                        "mode": narrative["mode"],
+                    }
                 )
             )
             return 0
     except Exception as exc:
-        print(json.dumps({"status": "narrative-withheld", "error_type": type(exc).__name__}))
+        print(
+            json.dumps(
+                {"status": "narrative-withheld", "error_type": type(exc).__name__}
+            )
+        )
         return 1
 
 

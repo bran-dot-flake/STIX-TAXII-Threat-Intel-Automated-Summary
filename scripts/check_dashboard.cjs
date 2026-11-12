@@ -16,15 +16,16 @@ const output = process.argv[3];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto(base);
-    await page.getByRole('heading', { name: 'Daily Brief', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Brief', exact: true }).waitFor();
     const snapshot = await (await page.request.get(base + '/snapshot.json')).json();
     const analytics=await import('../website/analytics.js');
-    const expectedStories=analytics.additionalStories(snapshot.news,snapshot.exported_at,snapshot.editions?.[0]);
+    const selected=analytics.publicationView(snapshot).primary;
+    const expectedStories=analytics.additionalStories(snapshot.news,snapshot.exported_at,analytics.featuredPublication(snapshot));
     assert.equal(await page.locator('.sidebar').count(), 0);
     assert.equal(await page.locator('[data-news-filter],.news-filters').count(),0);
-    if(snapshot.editions?.length){
-      const edition=snapshot.editions[0];
-      assert.equal(await page.locator('.radar article').count(),edition.topics.length>1?Math.min(3,edition.topics.length-1):edition.topics.length);
+    if(selected){
+      const edition=selected;
+      assert.equal(await page.locator('.radar article').count(),Math.min(3,Math.max(0,edition.topics.length-1)));
       assert.deepEqual(await page.locator('.editorial-lead .brief-overview').allTextContents(),edition.plan.overview.map(p=>p.map(c=>c.text).join(' ')));
       for(const topic of edition.topics)assert((await page.locator('#brief').innerText()).includes(topic.headline));
       const supporting=page.locator('#brief > .supporting-evidence');
@@ -63,11 +64,19 @@ const output = process.argv[3];
     }else assert.equal(await page.locator('.brief-findings .finding').count(),(await import('../website/analytics.js')).briefDigest(snapshot.reports[0]).length);
     const actual = await page.locator('.metric strong').allTextContents();
     assert.equal(Number(actual[1].replaceAll(',', '')), new Set(snapshot.records.filter(r => r.kind !== 'vulnerability').map(r => r.kind + '|' + r.value)).size);
-    assert.equal(Number(actual[3]), snapshot.reports.length+(snapshot.editions||[]).length);
+    assert.equal(Number(actual[3]), analytics.visibleHistory(snapshot).length);
     await page.getByRole('button', { name: '7D', exact: true }).click();
-    assert.equal(await page.locator('.bar').count(), 7);
+    assert.equal(await page.locator('#trend .bar').count(), 7);
     await page.getByRole('button', { name: '30D', exact: true }).click();
-    assert.equal(await page.locator('.bar').count(), 30);
+    assert.equal(await page.locator('#trend .bar').count(), 30);
+    const reporting=analytics.reportingTrends(snapshot.news,30,new Date().toISOString());
+    assert.equal(await page.locator('#reporting-trend .bar').count(),30);
+    assert.equal(await page.locator('#reporting-total').innerText(),`${reporting.total} / 30 days`);
+    await page.locator('.reporting-data > summary').click();
+    const reportingSum=(await page.locator('.reporting-data tbody td:nth-child(2)').allTextContents()).reduce((n,s)=>n+Number(s),0);
+    assert.equal(reportingSum,reporting.total);
+    assert((await page.locator('.reporting-trend').innerText()).includes('not attack volume'));
+    await page.locator('.reporting-data > summary').click();
     const series=analytics.dailyKev(snapshot.records,30,new Date().toISOString());
     await page.locator('.chart-data > summary').click();
     assert.equal(await page.locator('#chart-table tbody tr').count(),series.filter(r=>r.count>0).length);
@@ -110,9 +119,10 @@ const output = process.argv[3];
     }
     await page.getByRole('link', { name: 'Archive', exact: true }).click();
     await page.locator('#archive[open]').waitFor();
-    if (snapshot.reports.length) {
-      await page.locator('#archive-select').selectOption(snapshot.reports.at(-1).id);
-      assert.equal(await page.locator('#archived-report .evidence').count(), (snapshot.reports.at(-1).observations||snapshot.reports.at(-1).items).length);
+    const acceptedReports=snapshot.reports.filter(r=>r.mode!=='quiet-day'&&(r.observations||r.items).length);
+    if (acceptedReports.length) {
+      await page.locator('#archive-select').selectOption(acceptedReports.at(-1).id);
+      assert.equal(await page.locator('#archived-report .evidence').count(), (acceptedReports.at(-1).observations||acceptedReports.at(-1).items).length);
       const groupedReport=snapshot.reports.find(r=>analytics.briefDigest(r).some(t=>t.records.length>1&&t.records[0]?.kind!=='vulnerability'));
       if(groupedReport)await page.locator('#archive-select').selectOption(groupedReport.id);
       const legacySupport=page.locator('#archived-report [data-supporting]').first();
@@ -193,29 +203,60 @@ const output = process.argv[3];
     }
     // Isolated presentation fixtures: source validation is exercised by Python.
     // Route overrides never modify the server, source data, or published edition.
-    if(snapshot.reports.length){
-      const legacy=structuredClone(snapshot);legacy.synthetic=true;legacy.editions=[];
+    if(acceptedReports.length){
+      const legacy=structuredClone(snapshot);legacy.synthetic=true;legacy.editions=[];legacy.reports=acceptedReports;
       await page.route('**/snapshot.json',route=>route.fulfill({json:legacy}));
-      await page.goto(base);await page.getByRole('heading',{name:'Daily Brief',exact:true}).waitFor();
+      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
       const supporting=page.locator('#brief > .supporting-evidence');
       await supporting.locator(':scope > summary').click();
       assert.equal(await supporting.locator('.evidence').count(),(legacy.reports[0].observations||legacy.reports[0].items).length);
       assert.equal(await supporting.locator('.brief-overview,.report-overview').count(),0);
       await page.unroute('**/snapshot.json');
     }
-    if(snapshot.editions?.length){
+    if(selected){
+      const fixture=structuredClone(snapshot);fixture.synthetic=true;
+      const weekly=structuredClone(selected);weekly.id='weekly-fixture';weekly.publication_kind='weekly';
+      const update=structuredClone(weekly);update.id='interim-fixture';update.publication_kind='update';
+      update.generated_at=new Date(Date.parse(weekly.generated_at)+3600000).toISOString();
+      update.published_at=new Date(Date.parse(analytics.publicationTime(weekly))+3600000).toISOString();
+      update.topics[0].headline='Synthetic significant interim development';
+      fixture.editions=[update,weekly];
+      await page.route('**/snapshot.json',route=>route.fulfill({json:fixture}));
+      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
+      assert.equal(await page.locator('.editorial-lead h1').innerText(),weekly.topics[0].headline);
+      assert((await page.locator('.edition-date').innerText()).includes('Weekly edition'));
+      assert.equal(await page.locator('.interim-update').count(),1);
+      await page.locator('.interim-update > summary').click();
+      assert((await page.locator('.interim-update .metadata').innerText()).includes('Interim update'));
+      await page.locator('.interim-update > summary').click();
+      for(const width of [390,768,1440]){
+        await page.setViewportSize({width,height:900});
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+      }
+      await page.unroute('**/snapshot.json');
+      fixture.editions=[];fixture.reports=[];fixture.news=[];
+      await page.route('**/snapshot.json',route=>route.fulfill({json:fixture}));
+      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
+      assert((await page.locator('#brief').innerText()).includes('No accepted public edition'));
+      assert.equal(await page.locator('.editorial-lead,.radar,.interim-update').count(),0);
+      await page.unroute('**/snapshot.json');
+    }
+    if(selected){
       const quiet=structuredClone(snapshot);quiet.synthetic=true;
-      quiet.editions[0].topics=[];quiet.editions[0].input={records:[],news:[],updates:[],context:[]};
-      quiet.editions[0].plan={overview:[[{fact_ids:['quiet'],text:'No source-dated developments in the available feeds.'}]],topics:[]};
+      const emptyEdition={...structuredClone(selected),id:'q',topics:[],input:{records:[],news:[],updates:[],context:[]},plan:{overview:[[{fact_ids:['quiet'],text:'No source-dated developments in the available feeds.'}]],topics:[]}};
+      quiet.editions.unshift(emptyEdition);
       quiet.news=[];
       await page.route('**/snapshot.json',route=>route.fulfill({json:quiet}));
-      await page.goto(base);await page.getByRole('heading',{name:'Daily Brief',exact:true}).waitFor();
-      assert.equal(await page.locator('.radar,.supporting-evidence,.story').count(),0);
+      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
+      assert.equal(await page.locator('.story').count(),0);
+      assert.equal(await page.locator('.editorial-lead h1').innerText(),selected.topics[0].headline);
+      assert(!(await page.locator('#brief').innerText()).includes('No source-dated developments'));
+      assert.equal(await page.locator('#archive-select option').count(),analytics.visibleHistory(quiet).length);
       const placeholders=structuredClone(snapshot);placeholders.synthetic=true;
       placeholders.news=expectedStories.slice(0,3).map((r,i)=>({...r,excerpt:i===0?'':i===1?'Source excerpt':'A short supported source observation.'}));
       await page.unroute('**/snapshot.json');
       await page.route('**/snapshot.json',route=>route.fulfill({json:placeholders}));
-      await page.goto(base);await page.getByRole('heading',{name:'Daily Brief',exact:true}).waitFor();
+      await page.goto(base);await page.getByRole('heading',{name:'Brief',exact:true}).waitFor();
       assert(!(await page.locator('#intelligence').innerText()).includes('Source excerpt'));
       assert.equal(await page.locator('.story-excerpt').count(),placeholders.news.length>2?1:0);
       await page.unroute('**/snapshot.json');

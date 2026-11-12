@@ -4,18 +4,18 @@ This record separates application acceptance from container startup and records 
 
 ## Current validation summary
 
-Last reviewed: **2026-11-11**. Historical figures below are acceptance samples, not current collection totals.
+Last reviewed: **2026-11-12**. Historical figures below are acceptance samples, not current collection totals.
 
 | Area | Verified evidence |
 | --- | --- |
 | MISP / OpenCTI | 41 source observations passed exact value/pattern and MISP-provenance read-back; private events and durable checkpoints retained. |
 | STIX / TAXII | 220 original objects in a bounded live pilot; source versions/relationships, resumable pages and incremental replay tested. A three-object OpenCTI bridge replay made zero additional writes. |
-| Reporting | Existing CPU-only Ollama produced a checked 143-word editorial overview. A prior systemd-managed private reporting run completed successfully. |
+| Reporting | A 321-word checked weekly edition was built from live source evidence. Two real CPU Ollama drafts failed the prose gate and retained fallback; the earlier 143-word model overview and private reporting run remain recorded below. |
 | Publication | HTTPS Pages deployment and original-source validation verified; the public dataset remains separate from private platform databases. |
-| Regression checks | 85 Python tests, 26 Node tests, repository-link/SVG checks and Chrome at 390/768/1440 passed locally; the [CI workflow](../.github/workflows/ci.yml) runs the same suites on supported Python versions. |
+| Regression checks | 107 Python tests (including optional STIX dependencies), 32 Node tests, repository-link/SVG checks and Chrome at 390/768/1440 passed locally; the [CI workflow](../.github/workflows/ci.yml) runs the same suites on supported Python versions. |
 | Resources / automation | Approximately 10 GiB guest RAM; two-thread CPU inference. The approved daily 08:00 UTC timer remains active. |
 
-**Limits:** bounded feed/catalog coverage; no inferred actor/technique relationships; no general verifier of unrestricted LLM prose. The newest editorial/publication stages were verified individually, while their complete updated scheduled sequence awaits its next daily activation. A backup restore and production-scale operation have not been demonstrated.
+**Limits:** bounded feed/catalog coverage; no inferred actor/technique relationships; no general verifier of unrestricted LLM prose. The November 12 daily service completed successfully before the hybrid upgrade. The new hybrid stages are tested separately; their complete updated scheduled sequence awaits its next daily activation. A backup restore and production-scale operation have not been demonstrated.
 
 Private run records, reports and journals remain in the lab, outside Git. The dated sections below retain failures, resource observations, acceptance commands and public Actions references. [Resource history](resources.md) · [Current operations](deployment.md).
 
@@ -168,3 +168,18 @@ All 160 current public ATT&CK entries had valid names/types/identifiers; 139 lac
 The existing compact header received serif masthead typography and thin rules; no font download, CDN or new visual panel was added. The README was reduced from 20,396 to approximately 8,700 bytes, preserving its centered title/rule/technology/badges/description/navigation/rule order. The dynamic CI badge references the actual workflow. A 1,280 × 290 SVG diagram separates independent original-source recollection from eligible private-lab context. The detailed Mermaid path is retained in deployment documentation. The diagram was rendered and inspected; current desktop/mobile screenshots were refreshed.
 
 Local checks passed 85 Python and 26 Node tests, the infrastructure validator, real/demo builds, and Chrome acceptance at 390/768/1440, including grouped and exact-identifier search, sparse catalog dialogs, all-days chart tables and the existing controls. Repository checks cover nine Markdown documents, local anchors/paths, four SVGs and exclusion of private/runtime paths. An additional tracked-file audit found no high-confidence private-key/token patterns or duplicate PNGs. The earlier news-index crop remains linked as historical evidence; legacy illustration assets remain referenced by the build/metadata contract. Existing operational/security material was retained in its focused documents, with stale batch-versus-editorial wording corrected. No runtime backend, schema, synchronization or model change was made.
+
+
+## Hybrid reporting acceptance — 2026-11-12
+
+Daily collection now prepares data independently of weekly/interim editorial selection. Local regression checks cover quiet-day retention and immutable publication dates, adjacent seven-day UTC boundaries, repeat-run identity, significant and routine developments, same-CVE article grouping, newly collected history, measured content changes versus timestamp edits, source outages, model rejection/unavailability, retry-cache reuse and failed-upload checkpoints. Synthetic tests use clearly fictional source records; they are not published as live intelligence.
+
+The three official research RSS adapters were tested against live SANS ISC, Cisco Talos and Google Threat Intelligence endpoints. An isolated source-only checkout under ignored `work/hybrid-acceptance/` on the VM successfully collected all six configured sources, with 148 public observations and 39 retained source reports in the November 12 acceptance snapshot. Those are bounded samples at that time, not permanent dashboard totals or complete publisher archives. No new platform integration is claimed for research RSS.
+
+A first real weekly draft from the existing CPU llama3.2 model was rejected for omitted lead facts and unsupported supporting wording; its checked fallback was retained. The rejected draft remains private under the acceptance cache. A narrowed output schema restricts overview and per-topic fact choices without relaxing the independent claim gate. Model retries are validation work, not automatic unbounded generation. A second real attempt with the narrower schema also required the checked fallback; the final schema additionally restricts each overview claim to one fact ID. No model wording was promoted by weakening validation. Model unloading was observed after the first attempt; about 3.7 GiB remained available during inference, returning above 6 GiB afterward. No host/VM memory, firewall, model, package or system-timer settings changed.
+
+Browser checks include original controls, grouped/exact search, sparse ATT&CK dialogs, source-chart totals, a retained briefing on a quiet day, weekly plus interim presentation, empty first publication and 390/768/1440 px layouts. Both real-data and synthetic builds passed without browser errors or horizontal overflow. Source-report counts use canonical URLs and source dates; no actor/malware attack-volume statistics are inferred.
+
+Private acceptance inputs, candidate caches and rejected drafts are under `work/hybrid-acceptance/` on the VM. They are not repository contents or Pages artifacts. The last full scheduled run before this change returned `Result=success`, `ExecMainStatus=0`; this does not claim a completed scheduled hybrid run.
+
+The final local suite passed 107 Python tests (no skips with the optional STIX dependencies), 32 Node tests, infrastructure validation and repository checks. Empty, synthetic and live-data builds passed Chrome at all three widths. The updated publication-date test covers a prepared snapshot crossing UTC midnight before upload. Current source-only deployment does not claim another complete systemd-managed hybrid cycle.

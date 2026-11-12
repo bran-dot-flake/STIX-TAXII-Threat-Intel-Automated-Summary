@@ -19,9 +19,11 @@ from .feeds import CIRCL, KEV, kev_records
 from .model import Record, canonical, utcnow
 from .report import atomic_write, evidence_digest, validate_selection
 from .stix_publication import empty_context, validate_context
+from .research import FEEDS as RESEARCH_FEEDS
 
 NEWS = "https://www.cisa.gov/cybersecurity-advisories/all.xml"
 SOURCE_NAMES = {"cisa-kev": "CISA KEV", "circl-osint": "CIRCL OSINT", "cisa-advisories": "CISA Advisories"}
+SOURCE_NAMES.update({key: spec["publisher"] for key, spec in RESEARCH_FEEDS.items()})
 SOURCE_URLS = {"cisa-kev": KEV, "circl-osint": CIRCL, "cisa-advisories": NEWS}
 KINDS = {"vulnerability", "ip-dst", "domain", "url", "md5", "sha1", "sha256"}
 RECORD_FIELDS = {"id", "source", "source_url", "kind", "value", "title", "description", "action", "published_at", "first_seen", "last_seen"}
@@ -77,6 +79,10 @@ def source_url(value, source):
         raise ValueError("Unapproved CIRCL URL")
     if source == "cisa-advisories" and not (p.hostname == "www.cisa.gov" and p.path.startswith("/news-events/")):
         raise ValueError("Unapproved news URL")
+    if source in RESEARCH_FEEDS and not (p.hostname == RESEARCH_FEEDS[source]["host"] and p.path.startswith("/") and len(p.path) > 1 and not re.search(r"[\\\s]|%2[fF]|%5[cC]", p.path)):
+        raise ValueError("Unapproved research URL")
+    if source=='google-gti' and not p.path.startswith('/blog/topics/threat-intelligence/'):
+        raise ValueError('Unapproved Google research path')
     if source not in SOURCE_NAMES:
         raise ValueError("Unknown public source")
     return value
@@ -228,6 +234,14 @@ def collect_public(http, previous=None, now=None):
                 if not fresh_news:
                     raise ValueError("No recent news")
                 news.extend(fresh_news)
+            elif source in RESEARCH_FEEDS:
+                from .research import items
+                fresh_news = items(http.request(RESEARCH_FEEDS[source]["url"]), source, now, previous["news"])
+                if not fresh_news:
+                    raise ValueError("No usable recent research metadata")
+                retained = {r["id"]: r for r in previous["news"] if r["source"] == source and now - timedelta(days=30) <= stamp(r["published_at"]) <= now}
+                retained.update({r["id"]: r for r in fresh_news})
+                news.extend(retained.values())
             else:
                 raw_records = list(kev_records(http.json(KEV), 90, now)) if source == "cisa-kev" else circl_public_records(http, now)
                 seen = {r["id"]: r["first_seen"] for r in previous["records"] if r["source"] == source}
@@ -255,8 +269,13 @@ def collect_public(http, previous=None, now=None):
         "exported_at": collected, "sources": statuses,
         "records": sorted({r["id"]: r for r in records}.values(), key=lambda r: (r["published_at"] or "", r["id"]), reverse=True),
         "news": news, "reports": previous["reports"], "stix":previous.get("stix",empty_context())}
-    result["schema_version"]=previous['schema_version'] if previous['schema_version'] in {3,4} else 2
-    if previous['schema_version']==4:result['editions']=previous['editions']
+    # Retain public research history independently of article publication.
+    result['news']=sorted({r['id']:r for r in result['news']}.values(),key=lambda r:(r['published_at'],r['id']),reverse=True)[:240]
+    result["schema_version"]=previous['schema_version'] if previous['schema_version'] in {3,4,5} else 2
+    if previous['schema_version'] in {4,5}:result['editions']=previous['editions']
+    if previous['schema_version']==5:
+        from .hybrid import prepare
+        prepare(result)
     validate_snapshot(result)
     return result, originals
 
@@ -275,6 +294,8 @@ def attach_briefs(snapshot, originals, reports_dir):
             raw = json.loads(path.read_text(encoding="utf-8"))
             if raw["status"] != "complete":
                 continue
+            if not raw.get('records'):
+                continue  # Collection success alone is not a public article.
             matched = [originals[r["id"]] for r in raw["records"]]
             if any(r.version != meta["version"] for r, meta in zip(matched, raw["records"])) or evidence_digest(matched) != raw["evidence_digest"]:
                 continue
@@ -343,16 +364,16 @@ def validate_item(row):
 
 def validate_snapshot(value, allow_synthetic=False):
     version=value.get("schema_version")
-    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3,4} else set()) | ({'editions'} if version==4 else set()))
-    if version not in {1,2,3,4} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
+    exact_fields(value, SNAPSHOT_FIELDS | ({"stix"} if version in {2,3,4,5} else set()) | ({'editions'} if version in {4,5} else set()) | ({'collection'} if version==5 else set()))
+    if version not in {1,2,3,4,5} or (value["synthetic"] is not False and not (allow_synthetic and value["synthetic"] is True)):
         raise ValueError("Unsupported or synthetic public snapshot")
-    if version in {2,3,4}:validate_context(value["stix"])
+    if version in {2,3,4,5}:validate_context(value["stix"])
     for field in ("collected_at", "exported_at"):
         if value[field] is not None:
             stamp(value[field])
     if not all(isinstance(value[k], list) for k in ("sources", "records", "news", "reports")):
         raise ValueError("Invalid publication collections")
-    if len(value["records"]) > 5000 or len(value["news"]) > 18 or len(value["reports"]) > 90 or len(value["sources"]) > 3:
+    if len(value["records"]) > 5000 or len(value["news"]) > 240 or len(value["reports"]) > 90 or len(value["sources"]) > len(SOURCE_NAMES):
         raise ValueError("Oversized publication")
     for collection in ("sources", "records", "news", "reports"):
         ids = [r["id"] for r in value[collection]]
@@ -372,18 +393,11 @@ def validate_snapshot(value, allow_synthetic=False):
         if stamp(row["first_seen"]) > stamp(row["last_seen"]):
             raise ValueError("Invalid observation interval")
     for row in value["news"]:
-        exact_fields(row, NEWS_FIELDS)
-        valid_id(row["id"])
-        if row["source"] != "cisa-advisories" or row["artwork"] not in {"advisory.svg", "exploitation.svg"} or row["category"] not in {"Exploitation watch", "Security advisory"}:
-            raise ValueError("Invalid editorial metadata")
-        source_url(row["source_url"], row["source"])
-        stamp(row["published_at"])
-        clean_text(row["title"], 300)
-        clean_text(row["excerpt"], 600)
-        if len(row["excerpt"].split()) > 45:
-            raise ValueError("Oversized news excerpt")
+        validate_news(row)
+        if value['exported_at'] and any(row.get(k) and stamp(row[k])>stamp(value['exported_at']) for k in ('published_at','modified_at','last_seen','content_changed_at')):
+            raise ValueError('Future public news')
     for row in value["reports"]:
-        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version in {3,4} else set()))
+        exact_fields(row, REPORT_FIELDS | ({'observations','narrative'} if version in {3,4,5} else set()))
         valid_id(row["id"])
         stamp(row["generated_at"])
         quiet = row["mode"] == "quiet-day" and row["evidence_count"] == 0 and row["items"] == []
@@ -393,7 +407,7 @@ def validate_snapshot(value, allow_synthetic=False):
             exact_fields(item, ITEM_FIELDS)
             validate_item(item)
             clean_text(item["excerpt"], 240)
-        if version in {3,4}:
+        if version in {3,4,5}:
             from .briefing_public import validate_observation
             from .narrative import validate_narrative
             observations=row['observations']
@@ -403,7 +417,7 @@ def validate_snapshot(value, allow_synthetic=False):
             if len(ids)!=len(set(ids)) or any(item['id'] not in ids for item in row['items']):raise ValueError('Invalid topic evidence identifiers')
             for observation in observations:validate_observation(observation,row['generated_at'])
             validate_narrative(row['narrative'],row)
-    if version==4:
+    if version in {4,5}:
         from .editorial import validate_edition
         editions=value['editions']
         if not isinstance(editions,list) or len(editions)>90:raise ValueError('Invalid editorial history')
@@ -411,11 +425,35 @@ def validate_snapshot(value, allow_synthetic=False):
         if len(ids)!=len(set(ids)):raise ValueError('Duplicate editorial editions')
         for edition in editions:
             validate_edition(edition)
+            if edition.get('version')==2 and edition.get('published_at') is None:raise ValueError('Unpublished editorial candidate')
             if stamp(edition['generated_at'])>stamp(value['exported_at']):raise ValueError('Future editorial edition')
-            if edition['generated_at']==value['exported_at']:
+            if edition.get('version')==1 and edition['generated_at']==value['exported_at']:
                 from .editorial import curate
                 if edition['input']!=curate(value):raise ValueError('Editorial input differs from the collected publication')
+            if edition.get('version')==2 and edition['generated_at']==value['exported_at']:
+                originals={r['id']:r for r in value['records']+value['news']}
+                for row in edition['input']['records']+edition['input']['news']:
+                    if originals.get(row['id'])!=row:raise ValueError('Hybrid evidence differs from collected publication')
+    if version==5:
+        from .hybrid import validate_collection
+        validate_collection(value)
     return value
+
+
+def validate_news(row):
+    if row.get('source') in RESEARCH_FEEDS:
+        from .research import validate
+        return validate(row)
+    exact_fields(row, NEWS_FIELDS)
+    valid_id(row['id'])
+    if row['source']!='cisa-advisories' or row['artwork'] not in {'advisory.svg','exploitation.svg'} or row['category'] not in {'Exploitation watch','Security advisory'}:
+        raise ValueError('Invalid editorial metadata')
+    source_url(row['source_url'],row['source'])
+    stamp(row['published_at'])
+    clean_text(row['title'],300)
+    clean_text(row['excerpt'],600)
+    if len(row['excerpt'].split())>45:raise ValueError('Oversized news excerpt')
+    return row
 
 
 def save_snapshot(path, snapshot):

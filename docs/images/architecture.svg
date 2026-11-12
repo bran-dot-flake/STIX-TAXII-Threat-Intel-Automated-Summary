@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="290" viewBox="0 0 1280 290" role="img" aria-labelledby="title desc">
 <title id="title">EMBER architecture</title>
-<desc id="desc">CISA and CIRCL feed private Python, MISP and OpenCTI correlation, and are independently recollected by the public exporter. Optional TAXII and versioned STIX context pass a source and marking gate. Curated public input goes to Ollama, then independent claim validation, public JSON and GitHub Actions deploy GitHub Pages. Private databases stay local.</desc>
+<desc id="desc">CISA and CIRCL feed private Python, MISP and OpenCTI correlation, and are independently recollected by the public exporter, alongside bounded SANS ISC, Cisco Talos and Google Threat Intelligence RSS metadata. Optional TAXII and versioned STIX context pass a source and marking gate. Curated public input goes to Ollama, then independent claim validation, public JSON and GitHub Actions deploy GitHub Pages. Private databases stay local.</desc>
 <defs>
  <style>
  .heading{font:700 17px 'Segoe UI',Arial,sans-serif;fill:#eee3d4}
@@ -27,7 +27,7 @@
  <text x="234" y="166" class="label">Private stores stay local</text>
  <rect class="node" x="472" y="66" width="185" height="120" rx="5" stroke="#aa6236"/>
  <text x="488" y="94" class="heading">Independent export</text>
- <text x="488" y="121" class="body">Original-source checks</text>
+ <text x="488" y="121" class="body">Source + RSS checks</text>
  <text x="488" y="146" class="body">Public evidence package</text>
  <text x="488" y="166" class="label">Marking / license gate</text>
  <rect class="node" x="681" y="66" width="160" height="120" rx="5" stroke="#9b6b36"/>
@@ -56,6 +56,7 @@
 </g>
 <text x="333" y="211" text-anchor="middle" class="label">Dashed: revalidated excerpts /</text>
 <text x="333" y="227" text-anchor="middle" class="label">approved STIX context only</text>
-<text x="337" y="259" text-anchor="middle" class="label" style="fill:#ee9468">CISA / CIRCL recollected independently</text>
+<text x="337" y="259" text-anchor="middle" class="label" style="fill:#ee9468">CISA / CIRCL + SANS / Talos / GTI</text>
+<text x="337" y="277" text-anchor="middle" class="label">Research RSS enters public export only</text>
 <text x="1254" y="259" text-anchor="end" class="label">Catalog bridge optional · no guessed relationships</text>
 </svg>

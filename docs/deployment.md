@@ -141,6 +141,7 @@ flowchart TB
     Timer -. enabled .-> TAXII
   end
   Feeds --> Public[Independent original-source recollection]
+  RSS[SANS ISC / Talos / Google GTI RSS] --> Public
   Batch -. exact versions / digest .-> Public
   STIX --> Gate[Original MITRE / marking / license gate]
   Gate --> Public
@@ -153,6 +154,10 @@ flowchart TB
 ```
 
 TAXII collection, the catalog bridge and publication are opt-in stages. Their absence does not turn private state into public data. When public publication is enabled, the staged job retains private exact-excerpt inference and replaces its redundant batch narrative with one publication-wide composition. Source/export contracts are in [publication](publication.md); grouping and model failure behavior are in [briefing](briefing.md).
+
+## Editorial schedule
+
+The daily system timer is unchanged. Application settings `TI_WEEKLY_DAY=0` (Monday), `TI_WEEKLY_HOUR_UTC=8` and `TI_UPDATE_LOOKBACK_HOURS=48` select completed weekly windows and significant interim developments. Quiet runs still publish refreshed data and skip editorial inference. No additional timer or privileged service is required. The first run can backfill the most recent completed weekly window; the actual publication date remains visible. A changed weekly schedule will wait for a non-overlapping full window. [Publication model](briefing.md#hybrid-publication) · [Feed and rights policy](publication.md#official-research-feeds-and-reuse-policy).
 
 ## Offline demonstration and operational entry points
 

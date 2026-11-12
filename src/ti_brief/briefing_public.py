@@ -94,5 +94,5 @@ def enrich_snapshot(snapshot, cache_dir=None):
             except (OSError, ValueError):
                 pass
         enrich(report, candidate)
-    snapshot["schema_version"] = 4 if snapshot.get('schema_version')==4 else 3
+    snapshot["schema_version"] = snapshot['schema_version'] if snapshot.get('schema_version') in {4,5} else 3
     return snapshot
