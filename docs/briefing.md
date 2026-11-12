@@ -1,30 +1,34 @@
 # Briefing, grounding, and chronology
 
-## Hybrid publication
+## Weekly publication
 
-Daily collection and editorial publication are separate. `hybrid.py` reviews only the independently collected public snapshot; it never imports arbitrary platform content. Data refreshes update the vulnerability register, search, source timestamps and deterministic trends even when no article is due.
+Daily collection refreshes the Latest Intelligence feed, search, vulnerability register, source health and statistics. The active public workflow in `executive.py` produces **weekly editions only**. It never promotes new private daily batches or creates interim articles. Historical batch and version-1/2 editions remain readable in the archive under their original validators.
 
-The primary edition covers a completed **seven-day UTC window**. Defaults are Monday 08:00 UTC through the next Monday 08:00 UTC, with a half-open `[start, end)` interval. The next daily job after that boundary produces the weekly briefing. A first installation may publish the latest completed window later; the website displays both its actual publication date and covered interval. It does not backdate the article. Fixed window IDs and accepted history make reruns idempotent. Schedule changes cannot create an overlapping weekly edition. Missed historical weeks are not automatically backfilled.
+The completed seven-day UTC window defaults to Monday 08:00 through the following Monday 08:00, half-open `[start, end)`. Configure `TI_WEEKLY_DAY` (Monday=0) and `TI_WEEKLY_HOUR_UTC`; the existing daily timer runs the next collection after that boundary. No additional service is needed. The first run may publish the latest completed window late, with its real publication time. It does not manufacture missed historical weeks. Accepted windows cannot overlap, and the same window ID cannot be published twice. A quiet or failed run retains the last accepted article.
 
-Between weekly editions, the default 48-hour source-date window can produce a short interim update. Explicit CVE exploitation/attempt reports, documented vulnerability chains, or source-reported campaign/malware observations can qualify. Routine CVEs, generic product promotions, catalog bulletins and negated activity claims do not qualify alone. These are editorial thresholds, not severity scores or evidence of local compromise. The first detailed exploitation report about a previously cataloged CVE can qualify; another unchanged article about that same CVE does not automatically qualify.
+The front page shows **Weekly Brief**, one compact period and one header update indicator. Exact evidence cutoff, original publication time, source publication/modification and any explicit revision time remain in the JSON and archive. A publication date is not an incident date.
 
-Exact original URLs group report indicators. Vulnerability articles with explicit matching CVE subjects can share a topic; actor/vendor names alone cannot merge campaigns. Accepted editions retain content fingerprints and story identities. A source modification timestamp **and** a measured content change can qualify an older article; collection clocks and metadata-only refreshes cannot. Weekly retrospectives include verified in-window modifications to older reports, labeled previously covered, without calling them newly discovered attacks. Current content with an explicit modification after the weekly cutoff is excluded from that closed window; it is not reconstructed or backdated. Source-updated prose retains both original publication and modification dates.
+## Evidence preparation
 
-Quiet collections create no editorial edition, do not invoke editorial Ollama, and do not replace a substantive briefing. Collection status and publication date are independent. The weekly edition stays prominent; a newer interim update is available in a compact expandable row. Legacy empty editions remain valid historical input but are hidden from the reader archive. New zero-record private batches are not promoted into public articles.
+Only independently sanitized public projections enter editorial selection. Up to three distinct developments, four research records, 36 relevant catalog observations and eight explicitly referenced ATT&CK objects are retained. Firsthand incident/telemetry reporting, concrete consequences, measured changes and useful source detail precede simple recency. A familiar CVE phrase alone provides no priority. Marketing and event promotions do not qualify. Catalog-only editions require an explicit documented vulnerability chain; routine additions continue updating the register without forcing prose.
 
-## Selection and composition
+Exact report URLs and explicit matching CVE subjects support grouping. Microsoft Patch Tuesday reports can share a verified month/year release identity, retaining both publishers and their separate totals. Shared actor, vendor or technique names never establish a common campaign. Only healthy sources can trigger a new edition. Old material requires both an in-window source modification and a measured substantive change; a new collection clock is insufficient. Content modified after cutoff is excluded rather than reconstructed as an earlier version.
 
-Selection is bounded to 36 public observations, four research/advisory records and eight explicitly cited ATT&CK references. Source diversity precedes remaining report selection, after significance and source-date gates. Marketing, podcast and conference items are excluded. Report dates, first collection, measured content changes, explicit modification and historical context remain distinct. An old report fetched today is not a new development. Source failures retain earlier accepted data and articles; only successfully checked sources can trigger new editorial work.
+Reviewed structured fact notes in `editorial_approvals.json` can clarify exact source versions before inference. They carry source-content digests, dated qualifications and hashed evidence spans. Unknown or changed sources use their original bounded, untrusted excerpts. Notes are evidence preparation, not prewritten sentence options. Source assertions are not independently proven ground truth.
 
-Weekly prose targets **300–450 words across overview and developments**, when the selected evidence supports that length. Shorter evidence produces a shorter edition. Interim editions are capped at 240 words. The executive overview uses actual source findings; their remaining context appears under the developments instead of repeating the same description. Attribution dates anchor relative phrases such as “last week.” Defensive review steps are explicitly editorial suggestions, not claims of local exposure or publisher endorsement.
+## Natural composition and independent review
 
-`editorial.py` retains the existing independent claim gate. The local model selects and arranges source-cited, meaning-preserving formulations; names, numbers, negation, conditions and uncertainty must remain supported. Arbitrary paraphrases, inferred actor/technique relationships and a second model's opinion are not treated as entailment. Unsupported overview prose is withheld. Unsupported supporting prose is replaced with a checked source summary, and the complete final plan is validated again. Rejected drafts stay in ignored `data/editorial/review/`. This remains a bounded claim language, not a general semantic verifier.
+The existing CPU-only Ollama receives selected evidence and writes a short headline, two or three cohesive overview paragraphs (target 200–300 words), and one concise radar sentence per development. It is free to paraphrase and organize ideas; the schema does not enumerate approved sentences. The prompt distinguishes attempts from compromise, publication from incident timing, assessed attribution from certainty, and thematic comparisons from shared campaigns. No paid API, extra model, package or service is required.
 
-Schema 5 adds collection state and version-2 hybrid editions, preserving legacy schema 1–4 and version-1 editorial validators. Each accepted edition binds its reporting window, public evidence, deterministic topics, continuity state and checked prose by digest. Historical input is copied, never aliased to mutable live rows. The evidence cutoff and actual publication timestamp are separate, including across UTC midnight. An accepted publication date is immutable. Local editorial checkpoints advance only after the public data commit succeeds; a hosting-dispatch failure is separately reported.
+Mechanical checks reject unknown identifiers, unsupported numbers/scales, unrelated citations, extra fields, missing developments, long copied passages, repeated wording and generic filler. These are **not semantic entailment**. A valid evidence ID, word overlap or another model's approval cannot verify arbitrary English.
+
+Novel prose therefore stays in ignored `data/editorial/review/` until explicit source review is recorded in the repository-owned registry. The writer cannot modify that registry. A receipt binds the exact plan and semantic evidence digest, each claim's text hash, review rationale and hashed source spans. Every cited source must have reviewed support. Review covers chronology, attribution, negation, uncertainty and interpretive conclusions as well as identifiers. The model cannot approve its own output. A reviewer must assess each actual claim; copying citations into a receipt is not an adequate review.
+
+Origins are honest: `ollama-reviewed` means an unchanged reviewed model plan; `ollama-edited-reviewed` means a model proposal was revised and source-reviewed; `deterministic-fallback` means an explicitly reviewed editorial plan. Codex-assisted review is labeled as such, not as user or human approval. No receipt is generated automatically by the scheduler.
+
+This conservative design limits fully unattended publication of **novel unrestricted analysis**: daily intelligence collection is automatic, but new free-form prose may need editorial review. An evidence-identical reviewed plan can be reused without inference as a readable fallback. If no acceptable reviewed prose exists, the last valid weekly stays visible; excerpt concatenation and empty daily articles are not substituted.
 
 ## Scheduled operation
-
-The existing daily systemd timer and private MISP/OpenCTI/STIX stages remain. Configure publication through `TI_WEEKLY_DAY` (Monday=0), `TI_WEEKLY_HOUR_UTC` and `TI_UPDATE_LOOKBACK_HOURS`; defaults are `0`, `8`, `48`. These are application settings; no new system timer or service is installed.
 
 ```sh
 PYTHONPATH=src python3 scripts/export_publication.py
@@ -32,7 +36,15 @@ PYTHONPATH=src python3 scripts/compose_brief.py --editorial
 PYTHONPATH=src python3 scripts/export_publication.py --publish-prepared
 ```
 
-Collection prepares a fixed public snapshot. Composition skips if nothing qualifies, reuses a matching checked cache on retries, and otherwise reuses the installed CPU Ollama model with two threads and a 4,096-token context. The 3,500 MiB available-memory guard and unload request remain. Unavailable inference uses the independently checked fallback. Prepared publication expires after 24 hours and never recollects evidence between composition and commit. Immediate `--publish` remains a deterministic-fallback path. Private excerpt generation remains independent.
+Collection prepares the sanitized snapshot; composition skips already accepted windows, reuses reviewed plans and avoids repeated inference for an unchanged pending proposal. Explicit `--retry-draft` permits a deliberate retry. The model retains two threads, a 4,096-token context, bounded output, `keep_alive=0` and the 3,500 MiB available-memory guard. Failures log retention rather than publishing invented fallbacks. A prepared snapshot expires after 24 hours. Publication never recollects evidence between composition and commit. Checkpoints advance only after the data commit succeeds; a separate hosting-dispatch failure is reported.
+
+An operator-requested correction can use `compose_brief.py --editorial --revise-latest` followed by `export_publication.py --publish-prepared --revise-latest`. This exceptional path uses the latest weekly's frozen source evidence, preserves its ID and original publication date, and records `revised_at`. Routine scheduled runs cannot revise accepted articles. Prior data commits retain earlier text; the archive does not add a duplicate week.
+
+## November 12 diagnosis and correction
+
+Both inspected CPU Ollama runs completed; the observed rejection was validation-related, not an assumed resource failure. One overview used story identifiers instead of required fact identifiers. Another attached lead IDs but failed the previous complete-sentence wording check. The old gate protected factual claims but prevented free paraphrase. Historical validators remain unchanged; version-3 editions use the new review-bound path.
+
+Two new free-form trials were also withheld: the first lost an attribution qualification and copied source lists; the structured-note retry repeated wording and mischaracterized SSH password observations. The corrected 225-word November 2–9 briefing was edited and reviewed claim by claim. It is **not evidence that the small local model autonomously passed semantic verification**. The accepted source excerpts and model proposals remain separate from the final reviewed prose.
 
 ## Preserved batch evidence contract
 
@@ -48,7 +60,7 @@ There is no general-purpose semantic verifier or claim that source assertions ar
 
 ## Time and selection
 
-The preserved private-batch and version-1 editorial reporting window is previous UTC midnight through generation, inclusive. Hybrid public editions use the separate weekly and interim windows above. Trend analysis uses seven or thirty UTC calendar days, independently of publication eligibility. Dates remain visible in expanded evidence.
+The preserved private-batch and version-1 editorial reporting window is previous UTC midnight through generation, inclusive. Current public editions use the completed weekly window above; historical version-2 editions retain their original windows. Trend analysis uses seven or thirty UTC calendar days, independently of publication eligibility. Dates remain visible in expanded evidence.
 
 | Classification | Required evidence |
 | --- | --- |

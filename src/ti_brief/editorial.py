@@ -809,6 +809,9 @@ def validate_input(package):
 
 
 def validate_edition(value):
+    if value.get('version')==3:
+        from .executive import validate_edition as validate_executive
+        return validate_executive(value)
     if value.get("version") == 2:
         from .hybrid import validate_edition as validate_hybrid
 

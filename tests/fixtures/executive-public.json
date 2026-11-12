@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-11-12T14:13:20+00:00",
+  "sources": [
+    {
+      "id": "cisa-kev",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    },
+    {
+      "id": "circl-osint",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    },
+    {
+      "id": "cisa-advisories",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    },
+    {
+      "id": "sans-isc",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    },
+    {
+      "id": "cisco-talos",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    },
+    {
+      "id": "google-gti",
+      "status": "ok",
+      "attempted_at": "2026-11-12T14:13:20+00:00",
+      "last_success_at": "2026-11-12T14:13:20+00:00"
+    }
+  ],
+  "records": [
+    {
+      "id": "fb18be59d718eca8706a1129",
+      "source": "cisa-kev",
+      "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "kind": "vulnerability",
+      "value": "CVE-2026-123158",
+      "title": "OpenBSD OpenSSH Unexpected Status Code or Return Value Vulnerability",
+      "description": "OpenBSD OpenSSH on Linux contains an unexpected status code or return value vulnerability that could allow for authentication bypass.",
+      "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
+      "published_at": "2026-11-09",
+      "first_seen": "2026-11-11T14:35:07+00:00",
+      "last_seen": "2026-11-12T14:13:20+00:00"
+    }
+  ],
+  "news": [
+    {
+      "id": "098ee6ddbe901d2f7b929ec0",
+      "source": "google-gti",
+      "source_url": "https://cloud.google.com/blog/topics/threat-intelligence/llmjacking-monetizing-compromised-cloud-models/",
+      "title": "The Rise of LLMJacking: How Threat Actors Monetize Compromised Cloud and Model Resources",
+      "excerpt": "Mandiant responded to multiple incidents in 2026 in which threat actors hijacked enterprise access to Large Language Models (LLMs), a tactic known as \"LLMJacking.\" Spanning a variety of cloud and LLM providers, these intrusions impacted organizations in North America, South America, and Asia Pacific across the financial services, retail, technology, and transportation sectors. Unlike the gradual resource consumption associated with cryptojacking, LLMJacking can generate large spikes in fraudulent cloud charges in a matter of hours.",
+      "published_at": "2026-11-02T14:00:00+00:00",
+      "category": "Campaign reporting",
+      "artwork": "advisory.svg",
+      "publisher": "Google Threat Intelligence Group",
+      "author": "Google Threat Intelligence Group",
+      "license": "https://policies.google.com/terms",
+      "modified_at": null,
+      "first_seen": "2026-11-12T14:13:20+00:00",
+      "last_seen": "2026-11-12T14:13:20+00:00",
+      "content_changed_at": null,
+      "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/llmjacking-monetizing-compromised-cloud-models/",
+      "references": [
+        "https://cloud.google.com/blog/topics/threat-intelligence/llmjacking-monetizing-compromised-cloud-models/"
+      ]
+    },
+    {
+      "id": "c8647446e5ece432f600892e",
+      "source": "google-gti",
+      "source_url": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
+      "title": "Shutting the Door on the XCPE Botnet",
+      "excerpt": "Last week, Google and industry partners dismantled the XCPE backdoor which enrolled more than 1.3 million set-top boxes into a botnet. We assess with high confidence that the backdoor and botnet were intentionally developed, deployed, and operated for financial gain by Videostrong Technology Co., an Android Original Equipment Manufacturer (OEM) and Original Design Manufacturer (ODM). Videostrong monetized the backdoor by selling access to criminal affiliates and loading those affiliates’ malware modules onto infected devices.",
+      "published_at": "2026-11-02T14:00:00+00:00",
+      "category": "Malware research",
+      "artwork": "advisory.svg",
+      "publisher": "Google Threat Intelligence Group",
+      "author": "Google Threat Intelligence Group",
+      "license": "https://policies.google.com/terms",
+      "modified_at": null,
+      "first_seen": "2026-11-12T14:13:20+00:00",
+      "last_seen": "2026-11-12T14:13:20+00:00",
+      "content_changed_at": null,
+      "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
+      "references": [
+        "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/"
+      ]
+    },
+    {
+      "id": "4b7df559b706314dfcf9185f",
+      "source": "sans-isc",
+      "source_url": "https://isc.sans.edu/diary/rss/33498",
+      "title": "Scans for Sshole Vulnerability (CVE-2026-123158), (Sun, Nov 8th)",
+      "excerpt": "Our honeypots use \"Cowrie\" to collect SSH data. With the emergence of the \"sshole\" vulnerability last week, we are now seeing an increase in attempts to exploit the vulnerability. Our data is a bit limited in this respect. Our honeypots collect only the first 255 characters of SSH passwords. Longer passwords are highly unusual and not used for the usual password brute-forcing we observe.",
+      "published_at": "2026-11-08T15:44:33+00:00",
+      "category": "Vulnerability research",
+      "artwork": "advisory.svg",
+      "publisher": "SANS Technology Institute, Internet Storm Center",
+      "author": "",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "modified_at": null,
+      "first_seen": "2026-11-12T14:13:20+00:00",
+      "last_seen": "2026-11-12T14:13:20+00:00",
+      "content_changed_at": null,
+      "source_id": "https://isc.sans.edu/diary/rss/33498",
+      "references": [
+        "https://isc.sans.edu/diary/rss/33498"
+      ]
+    }
+  ],
+  "updates": [],
+  "context": [],
+  "publication_kind": "weekly",
+  "window_start": "2026-11-02T08:00:00+00:00",
+  "window_end": "2026-11-09T08:00:00+00:00",
+  "covered_story_ids": [],
+  "executive_version": 1
+}

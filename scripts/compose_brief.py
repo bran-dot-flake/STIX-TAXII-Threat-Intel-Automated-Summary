@@ -13,6 +13,87 @@ from ti_brief.narrative import compose
 from ti_brief.report import atomic_write
 
 
+def compose_weekly(args, snapshot):
+    from ti_brief import executive
+    from ti_brief.editorial import digest
+
+    package = executive.candidate(snapshot, revision=args.revise_latest)
+    if package is None:
+        print(json.dumps({"status": "weekly-not-due"}))
+        return 0
+    key = digest("editorial:weekly:" + package["window_end"])[:24]
+    proof = executive.evidence_digest(package)
+    proposal = args.cache_dir / "review" / (key + "-" + proof[:16] + ".json")
+    result = executive.fallback(package)
+    if result is None and proposal.exists() and not args.retry_draft:
+        print(json.dumps({"status": "weekly-held-for-review", "edition": key}))
+        return 0
+    if result is None:
+        try:
+            if Path("/proc/meminfo").exists():
+                mem = dict(
+                    line.split(":", 1)
+                    for line in Path("/proc/meminfo").read_text().splitlines()
+                )
+                if int(mem["MemAvailable"].split()[0]) < 3500 * 1024:
+                    raise RuntimeError(
+                        "Insufficient available memory for editorial inference"
+                    )
+            result = executive.compose(
+                Http(timeout=900, retries=0),
+                os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434"),
+                required("OLLAMA_MODEL"),
+                package,
+            )
+        except executive.NeedsReview as exc:
+            atomic_write(
+                proposal,
+                json.dumps(
+                    {
+                        "status": "requires-review",
+                        "reason": str(exc),
+                        "diagnostics": exc.diagnostics,
+                        "package": package,
+                        "draft": exc.draft,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+            )
+            print(
+                json.dumps(
+                    {
+                        "status": "weekly-held-for-review",
+                        "edition": key,
+                        "reason": str(exc),
+                    }
+                )
+            )
+            return 0
+        except (RuntimeError, ValueError, KeyError, TypeError) as exc:
+            print(
+                json.dumps(
+                    {"status": "weekly-retained", "error_type": type(exc).__name__}
+                )
+            )
+            return 0
+    atomic_write(
+        args.cache_dir / (key + ".json"),
+        json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+    )
+    print(
+        json.dumps(
+            {
+                "status": "weekly-composed",
+                "mode": result["mode"],
+                "topics": len(result["topics"]),
+            }
+        )
+    )
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -24,7 +105,19 @@ def main():
         action="store_true",
         help="Compose the publication-wide edition, independent of the private batch",
     )
+    parser.add_argument(
+        "--revise-latest",
+        action="store_true",
+        help="Explicit editorial revision using the latest weekly edition frozen evidence",
+    )
+    parser.add_argument(
+        "--retry-draft",
+        action="store_true",
+        help="Explicitly replace a pending unreviewed proposal",
+    )
     args = parser.parse_args()
+    if (args.revise_latest or args.retry_draft) and not args.editorial:
+        parser.error("Revision/retry applies only to --editorial")
     args.cache_dir = args.cache_dir or Path(
         "data/editorial" if args.editorial else "data/narrative"
     )
@@ -37,107 +130,7 @@ def main():
                 json.loads(args.snapshot.read_text(encoding="utf-8"))
             )
             if args.editorial:
-                from ti_brief.editorial import (
-                    compose as compose_editorial,
-                    edition,
-                    curate,
-                    DraftRequiresReview,
-                )
-
-                if snapshot["schema_version"] == 5:
-                    from ti_brief.hybrid import candidate
-
-                    package = candidate(snapshot)
-                    if package is None:
-                        print(
-                            json.dumps(
-                                {
-                                    "status": "editorial-not-due",
-                                    "collection": snapshot["collection"]["status"],
-                                }
-                            )
-                        )
-                        return 0
-                else:
-                    package = curate(snapshot)
-                result = edition(package)
-                cache = args.cache_dir / (result["id"] + ".json")
-                if cache.exists():
-                    from ti_brief.editorial import validate_edition
-
-                    try:
-                        cached = validate_edition(
-                            json.loads(cache.read_text(encoding="utf-8"))
-                        )
-                        if cached["input_digest"] == result["input_digest"]:
-                            print(
-                                json.dumps(
-                                    {
-                                        "status": "editorial-already-composed",
-                                        "mode": cached["mode"],
-                                    }
-                                )
-                            )
-                            return 0
-                    except (OSError, ValueError, KeyError, TypeError):
-                        pass
-                try:
-                    if Path("/proc/meminfo").exists():
-                        mem = dict(
-                            line.split(":", 1)
-                            for line in Path("/proc/meminfo").read_text().splitlines()
-                        )
-                        if int(mem["MemAvailable"].split()[0]) < 3500 * 1024:
-                            raise RuntimeError(
-                                "Insufficient available memory for editorial inference"
-                            )
-                    result = compose_editorial(
-                        Http(timeout=900, retries=0),
-                        os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434"),
-                        required("OLLAMA_MODEL"),
-                        package,
-                    )
-                except DraftRequiresReview as exc:
-                    atomic_write(
-                        args.cache_dir
-                        / "review"
-                        / f"{result['id']}-{result['input_digest'][:16]}.json",
-                        json.dumps(
-                            {
-                                "status": "requires-review",
-                                "input_digest": result["input_digest"],
-                                "draft": exc.draft,
-                            },
-                            ensure_ascii=False,
-                            indent=2,
-                        ),
-                    )
-                    if exc.accepted is not None:
-                        result = exc.accepted
-                except (RuntimeError, ValueError, KeyError, TypeError) as exc:
-                    print(
-                        json.dumps(
-                            {
-                                "stage": "editorial",
-                                "status": "source-grounded-fallback",
-                                "error_type": type(exc).__name__,
-                            }
-                        )
-                    )
-                atomic_write(
-                    args.cache_dir / (result["id"] + ".json"),
-                    json.dumps(result, ensure_ascii=False, indent=2) + "\n",
-                )
-                print(
-                    json.dumps(
-                        {
-                            "status": "editorial-composed",
-                            "mode": result["mode"],
-                            "topics": len(result["topics"]),
-                        }
-                    )
-                )
-                return 0
+                return compose_weekly(args, snapshot)
             enrich_snapshot(snapshot)
             if not snapshot["reports"]:
                 raise ValueError("No public edition available")

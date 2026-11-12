@@ -12,17 +12,7 @@
   --sans: "Segoe UI", Arial, sans-serif;
 }
 
-.collection-status { margin: 0 0 10px; color: var(--muted); font: 10px/1.5 var(--mono); }
 .edition-date { color: var(--muted); font: 10px/1.6 var(--mono); text-align: right; }
-.edition-date small { display: block; font: inherit; }
-.lead-development { margin-top: 15px; font: 15px/1.65 var(--serif); }
-.interim-update { margin: 0 0 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
-.interim-update > summary { color: var(--orange); font: 11px/1.6 var(--mono); }
-.reporting-trend { margin-top: 20px; }
-.reporting-bars { height: 66px; }
-.reporting-bars .bar { background: #aa774f; }
-.reporting-data { margin: 7px 0; }
-.reporting-data > summary { font: 10px/1.6 var(--mono); color: var(--muted); }
 footer #attribution span { display: inline-block; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); }
@@ -351,3 +341,25 @@ dialog dd { margin: 0; overflow-wrap: anywhere; }
   .brand { font-size: 24px; }
   .supporting-evidence,.evidence-group { scroll-margin-top: 140px; }
 }
+
+@font-face {
+  font-family: "EMBER Newsreader";
+  src: url("./assets/fonts/newsreader-latin-700.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+.editorial-lead h1 {
+  font-family: "EMBER Newsreader", Georgia, serif;
+  font-size: clamp(30px, 3.1vw, 40px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+  max-width: 24ch;
+  margin: 1px 0 16px;
+}
+.editorial-lead .brief-overview { max-width: 65ch; line-height: 1.65; margin-bottom: 13px; }
+.edition-grid { align-items: start; }
+.radar h3 { font-size: 17px; }
+.radar article+article { margin-top: 9px; padding-top: 9px; }
+@media (max-width: 640px) { .editorial-lead h1 { font-size: 31px; } }

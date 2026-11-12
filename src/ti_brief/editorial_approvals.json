@@ -1,0 +1,406 @@
+{
+  "version": 1,
+  "fact_notes": [
+    {
+      "source_digest": "6cea341a88f465c97ba76deda810f07ae8d7afab45b37798ca0bb39478b3a6ef",
+      "reviewer": "Codex-assisted source review",
+      "reviewed_at": "2026-11-12T16:28:37+00:00",
+      "facts": [
+        "Mandiant: multiple incidents during 2026; enterprise LLM access hijacked across cloud/model providers",
+        "Financial consequence: potentially large fraudulent cloud charges within hours; faster consumption than cryptojacking"
+      ],
+      "qualifications": [
+        "November 2 is the report date, not an incident date; do not describe all incidents as newly occurring this week",
+        "No initial-access mechanism or shared campaign established in this excerpt"
+      ],
+      "spans": [
+        {
+          "start": 0,
+          "end": 537,
+          "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+        }
+      ]
+    },
+    {
+      "source_digest": "5c3d1049ab829c10cfab5badcddafade5aba896eec3d92586d45910f9bd35ead",
+      "reviewer": "Codex-assisted source review",
+      "reviewed_at": "2026-11-12T16:28:37+00:00",
+      "facts": [
+        "Google and industry partners: XCPE backdoor dismantled; botnet enrollment greater than 1.3 million set-top boxes",
+        "Monetization: access sold to criminal affiliates; affiliates malware modules loaded onto infected devices"
+      ],
+      "qualifications": [
+        "Disruption occurred the week before the November 2 publication, not during this reporting window; describe it as reporting published this week",
+        "Omit manufacturer attribution; excerpt qualifies it as a high-confidence assessment, not an established fact",
+        "No relationship established to LLMJacking or SSH scanning"
+      ],
+      "spans": [
+        {
+          "start": 0,
+          "end": 531,
+          "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+        }
+      ]
+    },
+    {
+      "source_digest": "954f576d48a88fca9fa3e5bf9a3657b48642d492aa6987659cdc681c241ab143",
+      "reviewer": "Codex-assisted source review",
+      "reviewed_at": "2026-11-12T16:28:37+00:00",
+      "facts": [
+        "SANS Cowrie SSH honeypots: increase in attempts to exploit Sshole; source published November 8",
+        "Collection limit: first 255 SSH password characters; unusually long passwords differ from usual brute forcing"
+      ],
+      "qualifications": [
+        "Limited observations; attempts do not establish successful compromise or a global increase in attacks",
+        "No incident count, affected enterprise count, or recommended mitigation established by this excerpt"
+      ],
+      "spans": [
+        {
+          "start": 0,
+          "end": 390,
+          "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "id": "5c9ef25f70107106c4fc0c33",
+      "evidence_digest": "177fc8507c63a3e2a89c70916e67fce73f3126a3b1c5911701d562d421b50d0d",
+      "plan": {
+        "headline": "Cloud Access Abuse and Exploit Scanning",
+        "overview": [
+          [
+            {
+              "text": "Access itself was a commodity in two reports published this week, although they described separate operations.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0",
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "Mandiant’s account of LLMJacking described intruders using enterprise access to language models across several providers.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "The financial consequence can arrive quickly: fraudulent cloud charges may rise sharply within hours, rather than building through the slower consumption associated with cryptojacking.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "The incidents described occurred during 2026; their publication this week does not place all of that activity inside this reporting window.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            }
+          ],
+          [
+            {
+              "text": "The distinction between reporting and event dates also matters for XCPE: Google’s account placed the disruption in the week before publication.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "The backdoor had drawn more than 1.3 million set-top boxes into a botnet before Google and industry partners dismantled it.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "Its monetization extended beyond the original operator: access was sold to criminal affiliates, and their malware modules were loaded onto infected devices.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            }
+          ],
+          [
+            {
+              "text": "The SSH reporting offered a narrower signal: SANS saw increased attempts against Sshole in its Cowrie honeypots.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "That is evidence of activity in a limited observation set, rather than a measure of global attack frequency or proof that intruders succeeded.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "Long passwords stood out from the usual brute-force traffic, but the sensors recorded only the first 255 characters.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "Taken together, these accounts distinguish documented misuse of existing access, a reported botnet disruption, and a qualified signal of exploit attempts; they do not establish a shared campaign.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0",
+                "c8647446e5ece432f600892e",
+                "4b7df559b706314dfcf9185f"
+              ]
+            }
+          ]
+        ],
+        "topics": [
+          {
+            "topic_id": "052d67304b3e5147eb08144f",
+            "headline": "LLMJacking’s Billing Risk",
+            "summary": {
+              "text": "Mandiant’s cases span several cloud and model providers, with rapid fraudulent billing as the immediate financial consequence.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            }
+          },
+          {
+            "topic_id": "fc59dc677ba83ade14f2cf4d",
+            "headline": "XCPE’s Affiliate Business",
+            "summary": {
+              "text": "The reported disruption affected a backdoor whose operator sold access and loaded affiliates’ malware onto devices.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            }
+          },
+          {
+            "topic_id": "6c85a28703e1a8c5fe9cfa13",
+            "headline": "SSH Attempts, Limited Visibility",
+            "summary": {
+              "text": "SANS’s password-length collection limit qualifies what its honeypots can show about the observed attempts.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            }
+          }
+        ]
+      },
+      "origin": "ollama-edited",
+      "reviewer": "Codex-assisted source review and editorial revision (not user approval)",
+      "reviewed_at": "2026-11-12T16:28:37+00:00",
+      "claims": [
+        {
+          "claim_digest": "139ec3513a9f8a169561335667b1d27956625b95cfd350f51c71a291bd417846",
+          "kind": "interpretation",
+          "rationale": "Both accounts describe monetized access; the excerpts identify different resources and provide no relationship between operations.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            },
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "ad7263eefaaf92190f06b3340263f79b5651e0f710bae29c9535c625ee7bcc61",
+          "kind": "fact",
+          "rationale": "Mandiant describes multiple 2026 incidents involving enterprise LLM access and a variety of providers; no entry mechanism is asserted.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "c316e56a6e4c71c3b3826063211f2ff62ce9636d6da3287de0e603012bee182b",
+          "kind": "fact",
+          "rationale": "The excerpt explicitly contrasts rapid fraudulent charges within hours with gradual cryptojacking consumption; this preserves a possible consequence rather than a universal outcome.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "206a0c3965d13e13733456d60905008801613dce904c008330fff4caed5be19c",
+          "kind": "interpretation",
+          "rationale": "Source publication is inside the fixed week, but the incidents are dated only to the year; no individual incident is backdated into that week.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "c0e65cecf42ba56caa7b9a453d72cd935e35ad5453dc880dd13eddb4e7713339",
+          "kind": "fact",
+          "rationale": "The XCPE excerpt begins Last week; the November 2 publication anchors that relative timing before this reporting window.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "a7227ed4e60e19f9a5eb29ca8593552731e4c676256313a8aa7bc46928a5333a",
+          "kind": "fact",
+          "rationale": "The source states more than 1.3 million enrolled set-top boxes and attributes dismantling to Google and partners; no manufacturer attribution is repeated.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "615c569c6af7ecb83d5cd89e97d4952e51b4a9ff4a2b5d71ffc9b73e4db1b667",
+          "kind": "fact",
+          "rationale": "The source describes selling access to criminal affiliates and loading their malware modules; this does not assert new malware capabilities.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "c0c00aa8fa1bb2313f84c719b92e79efef08f6006a8062fb17ad0a9c84610f0c",
+          "kind": "fact",
+          "rationale": "SANS identifies its Cowrie SSH honeypots and an increase in exploitation attempts; the statement is scoped to those observations.",
+          "spans": [
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        },
+        {
+          "claim_digest": "ff37e9e1bc1b0537ba2cc18487e99dd3b60da0fbd188ced44fb66c9a7d60c5d9",
+          "kind": "interpretation",
+          "rationale": "SANS explicitly calls the data limited and describes attempts, providing neither a global denominator nor confirmed compromises.",
+          "spans": [
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        },
+        {
+          "claim_digest": "ace91d7fe1ec970c8a32d463068d8795e18e19b006eaa7363510aa151dff8a81",
+          "kind": "fact",
+          "rationale": "The excerpt says longer passwords differ from usual brute forcing and limits collection to the first 255 password characters; it does not call those attempts brute-force attacks.",
+          "spans": [
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        },
+        {
+          "claim_digest": "eac780085c58a7f60a479f932ed53feb87b390b0f33da47dd17677a330e131f2",
+          "kind": "interpretation",
+          "rationale": "This comparison summarizes the distinct source findings and their confidence limits, without inferring a common actor, trend, campaign or defensive instruction.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            },
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            },
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        },
+        {
+          "claim_digest": "21c6dc52ffcd62175e07bac4a4c4a8e1cc34c22070178f43d83ded28f52be695",
+          "kind": "fact",
+          "rationale": "The source covers multiple providers and potentially large charges within hours; immediate means the short financial timescale described, not a dated incident.",
+          "spans": [
+            {
+              "id": "098ee6ddbe901d2f7b929ec0",
+              "field": "excerpt",
+              "start": 0,
+              "end": 537,
+              "digest": "fec5703630964395877b5e27ded652794454ca6e6f93712f757a6fa58d6fe742"
+            }
+          ]
+        },
+        {
+          "claim_digest": "a2ff20344c875c1d828793fecbb14f2139855f57c3d4b6eeb8a8bab02694e29b",
+          "kind": "fact",
+          "rationale": "This preserves the reported operation and affiliate monetization mechanism, without repeating the confidence-sensitive manufacturer assessment.",
+          "spans": [
+            {
+              "id": "c8647446e5ece432f600892e",
+              "field": "excerpt",
+              "start": 0,
+              "end": 531,
+              "digest": "67a40e779c8c294eae406cea8eb7b88e426bc6322bb96877db68d92b9f3b22ef"
+            }
+          ]
+        },
+        {
+          "claim_digest": "24888ddf2c37f3c5b8fb6b106a310abb9be1b312ebcc811e9febc1275834c110",
+          "kind": "interpretation",
+          "rationale": "The source explicitly qualifies its visibility by password-length truncation and limited data; no broader exploitation conclusion is asserted.",
+          "spans": [
+            {
+              "id": "4b7df559b706314dfcf9185f",
+              "field": "excerpt",
+              "start": 0,
+              "end": 390,
+              "digest": "5d383c08f92866787d919bbc865bb3f7068ad8d1a48ffa3af494fb0fb07ad7bd"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

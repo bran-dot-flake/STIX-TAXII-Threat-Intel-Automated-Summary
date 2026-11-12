@@ -19,4 +19,4 @@ ti-brief = "ti_brief.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-ti_brief = ["demo.json"]
+ti_brief = ["demo.json", "editorial_approvals.json"]
