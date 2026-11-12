@@ -18,6 +18,7 @@ from ti_brief.publish import DEFAULT_REPOSITORY, publish, read_remote
 from ti_brief.stix_publication import project_context
 from ti_brief.briefing_public import enrich_snapshot
 from ti_brief.executive import prepare, refresh
+from ti_brief.artwork import enrich as enrich_artwork
 
 
 def main():
@@ -79,6 +80,7 @@ def main():
                 )
                 # Accepted editorial state advances only after the public data
                 # commit succeeds. A failed upload leaves the collected file intact.
+                enrich_artwork(previous)
                 commit = publish(previous, repo)
                 save_snapshot(args.output, previous)
                 print(
@@ -114,6 +116,7 @@ def main():
                 if snapshot["stix"]["collected_at"]:
                     snapshot["stix"]["status"] = "cached"
             prepare(snapshot)
+            enrich_artwork(snapshot)
             save_snapshot(args.output, snapshot)
             result = {
                 "status": "exported",
@@ -130,6 +133,7 @@ def main():
                         timespec="seconds"
                     ),
                 )
+                enrich_artwork(snapshot)
                 result.update(
                     status="published-to-data-branch", commit=publish(snapshot, repo)
                 )

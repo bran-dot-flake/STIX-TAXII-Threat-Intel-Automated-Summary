@@ -46,11 +46,17 @@ def build(source, output, demo=False):
         snapshot["stix"] = snapshot.get("stix", empty_context())
         enrich_snapshot(snapshot)
         refresh(snapshot, config={"weekday": 2, "hour": 0, "update_hours": 48})
+        from ti_brief.artwork import enrich as enrich_artwork
+
+        enrich_artwork(snapshot)
         validate_snapshot(snapshot, allow_synthetic=True)
     if source and not snapshot["records"] and not snapshot["news"]:
         raise ValueError("Live build requires a nonempty validated publication")
     # Refuse stale, unrelated output files: artifact upload copies this directory.
-    allowed = {*ASSETS, "snapshot.json", "build.json", ".nojekyll"}
+    from ti_brief.artwork import asset_path
+
+    artworks = {asset_path(a): a["svg"] for a in snapshot.get("illustrations", [])}
+    allowed = {*ASSETS, *artworks, "snapshot.json", "build.json", ".nojekyll"}
     if output.exists():
         for path in output.rglob("*"):
             if path.is_symlink() or (
@@ -63,6 +69,10 @@ def build(source, output, demo=False):
         target = output / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / "website" / name, target)
+    for name, svg in artworks.items():
+        target = output / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(svg, encoding="utf-8")
     (output / "snapshot.json").write_text(
         json.dumps(snapshot, ensure_ascii=False), encoding="utf-8"
     )
