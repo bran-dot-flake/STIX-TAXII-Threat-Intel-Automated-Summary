@@ -1,5 +1,5 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "synthetic": false,
   "collected_at": "2026-11-12T14:13:20+00:00",
   "exported_at": "2026-11-12T14:13:20+00:00",
@@ -4811,14 +4811,15 @@
   },
   "editions": [
     {
-      "version": 2,
+      "version": 3,
       "id": "8336a53a052b1eb30ee0093b",
       "publication_kind": "weekly",
       "generated_at": "2026-11-12T14:13:20+00:00",
       "published_at": "2026-11-12T14:46:06+00:00",
+      "revised_at": "2026-11-12T16:36:43+00:00",
       "window_start": "2026-11-02T08:00:00+00:00",
       "window_end": "2026-11-09T08:00:00+00:00",
-      "input_digest": "be348da82549264482bd1795c5792416011224213b5f844cb2ce1b85466d81fd",
+      "input_digest": "45719f922e4b74cff964f31e3d99d4256af1bfa4025e25d13c48d71d58f1045d",
       "input": {
         "generated_at": "2026-11-12T14:13:20+00:00",
         "sources": [
@@ -4861,84 +4862,6 @@
         ],
         "records": [
           {
-            "id": "4268b109f310bb23d49c894a",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2026-102895",
-            "title": "GPUStack Improper Authentication Vulnerability",
-            "description": "GPUStack contains an improper authentication vulnerability which could allow unauthenticated administrative access, including user and model changes, persistent administrator API-key creation, disclosure of worker and cloud-provider secrets, and code execution through POST /v2/inference-backends/from-yaml.",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-09",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
-            "id": "54b8a6c400b55a39f7fd0417",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2026-119977",
-            "title": "WordPress WordPress Core Time-of-check Time-of-use (TOCTOU) Race Condition Vulnerability",
-            "description": "WordPress WordPress Core contains a time-of-check time-of-use (TOCTOU) race condition vulnerability that could allow unauthenticated attackers to execute code on the server during the upgrade window. This is due to predictable, web-accessible staging paths used during full-package core upgrades.",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-03",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
-            "id": "97165fba576c41de6a39555f",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2026-123218",
-            "title": "IBM Aspera Faspex Incorrect Authorization Vulnerability",
-            "description": "IBM Aspera Faspex contains an incorrect authorization vulnerability that could allow an authenticated user to craft a specific message to bypass authorization, causing privilege escalations.",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-09",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
-            "id": "9e9b73466e3056d21a523819",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2026-116779",
-            "title": "SignalWire FreeSwitch Code Injection Vulnerability",
-            "description": "SignalWire FreeSwitch contains a code injection vulnerability that permits configuration and credential disclosure, arbitrary call control, and command execution.",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-09",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
-            "id": "c8744fddf7fa8ed091bdee13",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2026-19868",
-            "title": "SonicWall SonicOS SSLVPN Use of Single-factor Authentication Vulnerability",
-            "description": "SonicWall SonicOS SSLVPN contains a use of single-factor authentication vulnerability that may allow a user with valid credentials for an alternate authentication method to bypass SAML authentication controls. Successful exploitation may also bypass SAML-enforced multi-factor authentication (MFA).",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-06",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
-            "id": "f50d407b108944b46e89fdae",
-            "source": "cisa-kev",
-            "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-            "kind": "vulnerability",
-            "value": "CVE-2024-27834",
-            "title": "Apple Multiple Products Improper Authentication Vulnerability",
-            "description": "Apple iOS, iPadOS, macOS, Safari, tvOS and watchOS 10.5 contain an improper authentication vulnerability which could allow an attacker with arbitrary read and write capability to bypass pointer authentication.",
-            "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-            "published_at": "2026-11-04",
-            "first_seen": "2026-11-11T14:35:07+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00"
-          },
-          {
             "id": "fb18be59d718eca8706a1129",
             "source": "cisa-kev",
             "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
@@ -4953,27 +4876,6 @@
           }
         ],
         "news": [
-          {
-            "id": "4b7df559b706314dfcf9185f",
-            "source": "sans-isc",
-            "source_url": "https://isc.sans.edu/diary/rss/33498",
-            "title": "Scans for Sshole Vulnerability (CVE-2026-123158), (Sun, Nov 8th)",
-            "excerpt": "Our honeypots use \"Cowrie\" to collect SSH data. With the emergence of the \"sshole\" vulnerability last week, we are now seeing an increase in attempts to exploit the vulnerability. Our data is a bit limited in this respect. Our honeypots collect only the first 255 characters of SSH passwords. Longer passwords are highly unusual and not used for the usual password brute-forcing we observe.",
-            "published_at": "2026-11-08T15:44:33+00:00",
-            "category": "Vulnerability research",
-            "artwork": "advisory.svg",
-            "publisher": "SANS Technology Institute, Internet Storm Center",
-            "author": "",
-            "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
-            "modified_at": null,
-            "first_seen": "2026-11-12T14:13:20+00:00",
-            "last_seen": "2026-11-12T14:13:20+00:00",
-            "content_changed_at": null,
-            "source_id": "https://isc.sans.edu/diary/rss/33498",
-            "references": [
-              "https://isc.sans.edu/diary/rss/33498"
-            ]
-          },
           {
             "id": "098ee6ddbe901d2f7b929ec0",
             "source": "google-gti",
@@ -4996,16 +4898,6 @@
             ]
           },
           {
-            "id": "2e68c4969154600586c3fd75",
-            "source": "cisa-advisories",
-            "source_url": "https://www.cisa.gov/news-events/alerts/2026/11/06/cisa-adds-one-known-exploited-vulnerability-catalog",
-            "title": "CISA Adds One Known Exploited Vulnerability to Catalog",
-            "excerpt": "CISA has added one new vulnerability to its Known Exploited Vulnerabilities (KEV) Catalog , based on evidence of active exploitation.",
-            "published_at": "2026-11-06T12:00:00+00:00",
-            "category": "Exploitation watch",
-            "artwork": "exploitation.svg"
-          },
-          {
             "id": "c8647446e5ece432f600892e",
             "source": "google-gti",
             "source_url": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
@@ -5025,6 +4917,27 @@
             "references": [
               "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/"
             ]
+          },
+          {
+            "id": "4b7df559b706314dfcf9185f",
+            "source": "sans-isc",
+            "source_url": "https://isc.sans.edu/diary/rss/33498",
+            "title": "Scans for Sshole Vulnerability (CVE-2026-123158), (Sun, Nov 8th)",
+            "excerpt": "Our honeypots use \"Cowrie\" to collect SSH data. With the emergence of the \"sshole\" vulnerability last week, we are now seeing an increase in attempts to exploit the vulnerability. Our data is a bit limited in this respect. Our honeypots collect only the first 255 characters of SSH passwords. Longer passwords are highly unusual and not used for the usual password brute-forcing we observe.",
+            "published_at": "2026-11-08T15:44:33+00:00",
+            "category": "Vulnerability research",
+            "artwork": "advisory.svg",
+            "publisher": "SANS Technology Institute, Internet Storm Center",
+            "author": "",
+            "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            "modified_at": null,
+            "first_seen": "2026-11-12T14:13:20+00:00",
+            "last_seen": "2026-11-12T14:13:20+00:00",
+            "content_changed_at": null,
+            "source_id": "https://isc.sans.edu/diary/rss/33498",
+            "references": [
+              "https://isc.sans.edu/diary/rss/33498"
+            ]
           }
         ],
         "updates": [],
@@ -5032,38 +4945,12 @@
         "publication_kind": "weekly",
         "window_start": "2026-11-02T08:00:00+00:00",
         "window_end": "2026-11-09T08:00:00+00:00",
-        "covered_story_ids": [
-          "03da522c093004fba2bf7e2c",
-          "42f6397184f96210e17ea8f1",
-          "5971d6c618200cc5eeb52c70",
-          "5f7183c322407266e31c58d5",
-          "6fdf93a6409e564da7276fd7",
-          "8af3754f6ab29d2481af6676"
-        ]
+        "covered_story_ids": [],
+        "executive_version": 1
       },
       "topics": [
         {
-          "id": "6c85a28703e1a8c5fe9cfa13",
-          "headline": "Scans for Sshole Vulnerability (CVE-2026-123158)",
-          "summary_facts": [
-            "story:6c85a28703e1a8c5fe9cfa13"
-          ],
-          "evidence_ids": [
-            "4b7df559b706314dfcf9185f",
-            "fb18be59d718eca8706a1129"
-          ],
-          "kind": "advisory",
-          "freshness": "newly-published",
-          "published_at": "2026-11-08T15:44:33+00:00",
-          "context_ids": [],
-          "previously_reported": false
-        },
-        {
           "id": "052d67304b3e5147eb08144f",
-          "headline": "LLMJacking: How Threat Actors Monetize Compromised Cloud and Model Resources",
-          "summary_facts": [
-            "story:052d67304b3e5147eb08144f"
-          ],
           "evidence_ids": [
             "098ee6ddbe901d2f7b929ec0"
           ],
@@ -5071,14 +4958,10 @@
           "freshness": "newly-published",
           "published_at": "2026-11-02T14:00:00+00:00",
           "context_ids": [],
-          "previously_reported": false
+          "headline": "LLMJacking’s Billing Risk"
         },
         {
           "id": "fc59dc677ba83ade14f2cf4d",
-          "headline": "Shutting the Door on the XCPE Botnet",
-          "summary_facts": [
-            "story:fc59dc677ba83ade14f2cf4d"
-          ],
           "evidence_ids": [
             "c8647446e5ece432f600892e"
           ],
@@ -5086,111 +4969,136 @@
           "freshness": "newly-published",
           "published_at": "2026-11-02T14:00:00+00:00",
           "context_ids": [],
-          "previously_reported": false
+          "headline": "XCPE’s Affiliate Business"
         },
         {
-          "id": "ecc713076aaaba8b15bc5fdc",
-          "headline": "CISA adds exploited vulnerabilities",
-          "summary_facts": [
-            "story:ecc713076aaaba8b15bc5fdc"
-          ],
+          "id": "6c85a28703e1a8c5fe9cfa13",
           "evidence_ids": [
-            "4268b109f310bb23d49c894a",
-            "54b8a6c400b55a39f7fd0417",
-            "97165fba576c41de6a39555f",
-            "9e9b73466e3056d21a523819",
-            "c8744fddf7fa8ed091bdee13",
-            "f50d407b108944b46e89fdae"
+            "4b7df559b706314dfcf9185f"
           ],
-          "kind": "catalog",
-          "freshness": "catalog-added",
-          "published_at": "2026-11-09",
+          "kind": "advisory",
+          "freshness": "newly-published",
+          "published_at": "2026-11-08T15:44:33+00:00",
           "context_ids": [],
-          "previously_reported": false
+          "headline": "SSH Attempts, Limited Visibility"
         }
       ],
+      "headline": "Cloud Access Abuse and Exploit Scanning",
       "plan": {
+        "headline": "Cloud Access Abuse and Exploit Scanning",
         "overview": [
           [
             {
-              "fact_ids": [
-                "lead:6c85a28703e1a8c5fe9cfa13"
-              ],
-              "text": "SANS Technology Institute, Internet Storm Center (2026-11-08) reports: With the emergence of the \"sshole\" vulnerability last week, we are now seeing an increase in attempts to exploit the vulnerability. Our data is a bit limited in this respect."
+              "text": "Access itself was a commodity in two reports published this week, although they described separate operations.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0",
+                "c8647446e5ece432f600892e"
+              ]
             },
             {
-              "fact_ids": [
-                "lead:052d67304b3e5147eb08144f"
-              ],
-              "text": "Google Threat Intelligence Group (2026-11-02) reports: Mandiant responded to multiple incidents in 2026 in which threat actors hijacked enterprise access to Large Language Models (LLMs), a tactic known as \"LLMJacking.\""
+              "text": "Mandiant’s account of LLMJacking described intruders using enterprise access to language models across several providers.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "The financial consequence can arrive quickly: fraudulent cloud charges may rise sharply within hours, rather than building through the slower consumption associated with cryptojacking.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
+            },
+            {
+              "text": "The incidents described occurred during 2026; their publication this week does not place all of that activity inside this reporting window.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
             }
           ],
           [
             {
-              "fact_ids": [
-                "review:behavior"
-              ],
-              "text": "Defensive review: compare the source reports' documented behavior with relevant endpoint telemetry before treating a reported technique as local activity."
+              "text": "The distinction between reporting and event dates also matters for XCPE: Google’s account placed the disruption in the week before publication.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
             },
             {
-              "fact_ids": [
-                "review:kev"
-              ],
-              "text": "For the KEV additions, check affected products against asset inventory and follow the cited vendor mitigation guidance. Catalog dates identify additions, not the start of attacks."
+              "text": "The backdoor had drawn more than 1.3 million set-top boxes into a botnet before Google and industry partners dismantled it.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            },
+            {
+              "text": "Its monetization extended beyond the original operator: access was sold to criminal affiliates, and their malware modules were loaded onto infected devices.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
+            }
+          ],
+          [
+            {
+              "text": "The SSH reporting offered a narrower signal: SANS saw increased attempts against Sshole in its Cowrie honeypots.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "That is evidence of activity in a limited observation set, rather than a measure of global attack frequency or proof that intruders succeeded.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "Long passwords stood out from the usual brute-force traffic, but the sensors recorded only the first 255 characters.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
+            },
+            {
+              "text": "Taken together, these accounts distinguish documented misuse of existing access, a reported botnet disruption, and a qualified signal of exploit attempts; they do not establish a shared campaign.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0",
+                "c8647446e5ece432f600892e",
+                "4b7df559b706314dfcf9185f"
+              ]
             }
           ]
         ],
         "topics": [
           {
-            "topic_id": "6c85a28703e1a8c5fe9cfa13",
-            "summary": {
-              "fact_ids": [
-                "story:6c85a28703e1a8c5fe9cfa13"
-              ],
-              "text": "SANS Technology Institute, Internet Storm Center (2026-11-08) reports: Our honeypots use \"Cowrie\" to collect SSH data. Our honeypots collect only the first 255 characters of SSH passwords. Longer passwords are highly unusual and not used for the usual password brute-forcing we observe."
-            }
-          },
-          {
             "topic_id": "052d67304b3e5147eb08144f",
+            "headline": "LLMJacking’s Billing Risk",
             "summary": {
-              "fact_ids": [
-                "story:052d67304b3e5147eb08144f"
-              ],
-              "text": "Google Threat Intelligence Group (2026-11-02) reports: Spanning a variety of cloud and LLM providers, these intrusions impacted organizations in North America, South America, and Asia Pacific across the financial services, retail, technology, and transportation sectors. Unlike the gradual resource consumption associated with cryptojacking, LLMJacking can generate large spikes in fraudulent cloud charges in a matter of hours."
+              "text": "Mandiant’s cases span several cloud and model providers, with rapid fraudulent billing as the immediate financial consequence.",
+              "evidence_ids": [
+                "098ee6ddbe901d2f7b929ec0"
+              ]
             }
           },
           {
             "topic_id": "fc59dc677ba83ade14f2cf4d",
+            "headline": "XCPE’s Affiliate Business",
             "summary": {
-              "fact_ids": [
-                "story:fc59dc677ba83ade14f2cf4d"
-              ],
-              "text": "Google Threat Intelligence Group (2026-11-02) reports: Last week, Google and industry partners dismantled the XCPE backdoor which enrolled more than 1.3 million set-top boxes into a botnet. We assess with high confidence that the backdoor and botnet were intentionally developed, deployed, and operated for financial gain by Videostrong Technology Co., an Android Original Equipment Manufacturer (OEM) and Original Design Manufacturer (ODM). Videostrong monetized the backdoor by selling access to criminal affiliates and loading those affiliates’ malware modules onto infected devices."
+              "text": "The reported disruption affected a backdoor whose operator sold access and loaded affiliates’ malware onto devices.",
+              "evidence_ids": [
+                "c8647446e5ece432f600892e"
+              ]
             }
           },
           {
-            "topic_id": "ecc713076aaaba8b15bc5fdc",
+            "topic_id": "6c85a28703e1a8c5fe9cfa13",
+            "headline": "SSH Attempts, Limited Visibility",
             "summary": {
-              "fact_ids": [
-                "story:ecc713076aaaba8b15bc5fdc"
-              ],
-              "text": "The reviewed CISA KEV additions date from 2026-11-03 through 2026-11-09. They include GPUStack Improper Authentication; WordPress WordPress Core Time-of-check Time-of-use (TOCTOU) Race Condition; IBM Aspera Faspex Incorrect Authorization."
+              "text": "SANS’s password-length collection limit qualifies what its honeypots can show about the observed attempts.",
+              "evidence_ids": [
+                "4b7df559b706314dfcf9185f"
+              ]
             }
           }
         ]
       },
-      "mode": "deterministic-fallback",
-      "story_versions": {
-        "e7699b1281b3538c14b17919": "2013e6b19b19624ceb0de4aa9a6f8b766ea437467f6655134c2e9293bd408722",
-        "16fd223985b3379cb75fd93c": "42e1754fd3896c5b674deae204c95ec6fe624ce9fbbd867195aa226ede3ac315",
-        "aedbbeff99f5fa5303544859": "f3bbb7c199249bea5ae2d3d41ba89acdc06080226bf8e0284e20eab4d861f446",
-        "2f2b0fee9191b35e341aa913": "0cece48c06479751bbb0091e7245b2508241cae254ba10cbb948fba12c49d0de",
-        "7e8b3bccb941e4cf29362413": "f12f80bc6aea4df99f8f2db0b3061e7f5e17f15001c6c0b257afaeeec6831ec2",
-        "0577c2b7505f5b417742b939": "2e4e1260f78a6165dd175f8584d184b5ac7e9b3b6a96923b1106f70c990f8c7c",
-        "6c85a28703e1a8c5fe9cfa13": "b0f11ec358ecdda7c55dda39014c5b44af774c371f0ff24dbb1ad6ea117359c2",
-        "052d67304b3e5147eb08144f": "8a0a4dbb8546939bd32d89204e329d39842b5a23d812cd446e8e60e498439278",
-        "fc59dc677ba83ade14f2cf4d": "f3f7262a913ed9409d8a71df1bc7604cf67916d129cf89ff91f708830a0798b8"
-      }
+      "mode": "ollama-edited-reviewed",
+      "approval_id": "5c9ef25f70107106c4fc0c33",
+      "evidence_digest": "177fc8507c63a3e2a89c70916e67fce73f3126a3b1c5911701d562d421b50d0d"
     },
     {
       "version": 1,
