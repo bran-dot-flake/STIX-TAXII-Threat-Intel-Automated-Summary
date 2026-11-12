@@ -1,5 +1,5 @@
 {
-  "schema_version": 6,
+  "schema_version": 7,
   "synthetic": false,
   "collected_at": "2026-11-12T14:13:20+00:00",
   "exported_at": "2026-11-12T14:13:20+00:00",
@@ -5405,8 +5405,19 @@
   ],
   "collection": {
     "checked_at": "2026-11-12T14:13:20+00:00",
-    "status": "published",
+    "status": "quiet",
     "last_substantive_at": "2026-11-12T14:46:06+00:00",
     "weekly_window_end": "2026-11-09T08:00:00+00:00"
-  }
+  },
+  "illustrations": [
+    {
+      "version": 1,
+      "edition_id": "8336a53a052b1eb30ee0093b",
+      "lead_digest": "ad3bc24689e908f68fe589e40c7dc6e3ce709a8474586fd318c6456a09613a76",
+      "kind": "llm",
+      "alt": "Conceptual illustration of cloud AI, an access key and rising costs.",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 400\" fill=\"none\" stroke=\"#e9e7dd\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M 125 300 C 50 300 45 195 110 175 C 110 110 175 90 220 120 C 275 25 420 60 425 170 C 510 180 505 300 430 300\" stroke=\"#e9e7dd\" /><rect x=\"225\" y=\"170\" width=\"88\" height=\"80\" rx=\"9\" /><path d=\"M 240 154 V 170 M 240 250 V 267\" stroke=\"#e9e7dd\" /><path d=\"M 269 154 V 170 M 269 250 V 267\" stroke=\"#e9e7dd\" /><path d=\"M 298 154 V 170 M 298 250 V 267\" stroke=\"#e9e7dd\" /><path d=\"M 209 185 H 225 M 313 185 H 329\" stroke=\"#e9e7dd\" /><path d=\"M 209 210 H 225 M 313 210 H 329\" stroke=\"#e9e7dd\" /><path d=\"M 209 235 H 225 M 313 235 H 329\" stroke=\"#e9e7dd\" /><path d=\"M 269 187 L 277 203 L 293 210 L 277 218 L 269 234 L 261 218 L 245 210 L 261 203 Z\" stroke=\"#e9e7dd\" /><circle cx=\"119\" cy=\"300\" r=\"22\" stroke=\"#ee9468\" /><path d=\"M 141 300 H 205 M 173 300 V 314 M 192 300 V 322\" stroke=\"#ee9468\" /><path d=\"M 360 315 L 418 260 L 465 277 L 550 112 M 514 124 L 550 112 L 560 151\" stroke=\"#ee9468\" /></svg>",
+      "digest": "3cfa12c0edf29cca84120f25df3de91ba08ef4c2d78d6e09c8832b18dc9e5fec"
+    }
+  ]
 }
