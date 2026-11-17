@@ -5173,12 +5173,12 @@
   },
   "editions": [
     {
-      "version": 4,
+      "version": 5,
       "id": "278feb464f8292986facbdd1",
       "publication_kind": "weekly",
       "generated_at": "2026-11-17T18:55:41+00:00",
       "published_at": "2026-11-17T18:56:06+00:00",
-      "revised_at": null,
+      "revised_at": "2026-11-17T19:10:28+00:00",
       "window_start": "2026-11-09T08:00:00+00:00",
       "window_end": "2026-11-16T08:00:00+00:00",
       "input_digest": "7db381211dd61839510dca9fb455ac18499679e3ce213f8ceed326e355ed001a",
@@ -5289,13 +5289,25 @@
           "headline": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities"
         }
       ],
-      "headline": "Microsoft Patch Tuesday — November 2026",
+      "headline": "Remote Code Execution Dominates Microsoft’s November Critical Fixes",
       "plan": {
-        "headline": "Microsoft Patch Tuesday — November 2026",
+        "headline": "Remote Code Execution Dominates Microsoft’s November Critical Fixes",
         "overview": [
           [
             {
-              "text": "Cisco Talos’s Microsoft update coverage lists 1,328 vulnerabilities, including 60 critical issues and 45 critical remote code execution vulnerabilities.",
+              "text": "Critical code execution flaws account for much of the highest-severity work in Microsoft’s latest patch cycle, giving security teams a clearer focus than the headline vulnerability count alone.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8"
+              ]
+            },
+            {
+              "text": "Cisco Talos identifies 45 remote code execution vulnerabilities among 60 critical issues—more than half of that critical subset.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8"
+              ]
+            },
+            {
+              "text": "That concentration makes the affected products an important starting point for assessing the release against an organization’s own systems.",
               "evidence_ids": [
                 "d88b3fdfb0c420e555dcd7c8"
               ]
@@ -5303,8 +5315,22 @@
           ],
           [
             {
-              "text": "SANS ISC’s Microsoft update coverage lists 1,260 vulnerabilities and 68 critical issues; it identifies 167 Chromium issues affecting Microsoft Edge.",
+              "text": "The workload also extends to the browser estate: SANS ISC identifies 167 Chromium issues affecting Microsoft Edge.",
               "evidence_ids": [
+                "f802327bf7c7bbbc758db8e0"
+              ]
+            },
+            {
+              "text": "For leaders, the distinction matters: critical code execution exposure and a broad browser update backlog call for different inventory and rollout decisions.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8",
+                "f802327bf7c7bbbc758db8e0"
+              ]
+            },
+            {
+              "text": "These release figures describe vulnerabilities, not confirmed compromises; they establish the scope of patch assessment rather than an organization’s incident status.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8",
                 "f802327bf7c7bbbc758db8e0"
               ]
             }
@@ -5323,7 +5349,7 @@
           }
         ]
       },
-      "mode": "deterministic-factual",
+      "mode": "fact-bound-executive",
       "approval_id": null,
       "evidence_digest": "3af8bf6c4558882c22b53ecbcbfe25ffc322c54bdc2c61844343108ec9eccb13"
     },
@@ -5924,7 +5950,7 @@
     {
       "version": 1,
       "edition_id": "278feb464f8292986facbdd1",
-      "lead_digest": "0e3b5995cfe369a79265a6e938afabad6bc9e933e79f9ea3e10edb8948ad02a0",
+      "lead_digest": "8e349b5920a7f7562a9d27ddd86fc73a2784cbec3e67af12d4e81c67192a3ea4",
       "kind": "exploitation",
       "alt": "Conceptual illustration of an exposed system and a security weakness.",
       "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 400\" fill=\"none\" stroke=\"#e9e7dd\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"155\" y=\"90\" width=\"300\" height=\"215\" rx=\"9\" /><path d=\"M 195 330 H 415 M 305 305 V 330 M 170 270 H 440\" stroke=\"#e9e7dd\" /><path d=\"M 320 125 L 285 185 L 320 195 L 290 246\" stroke=\"#ee9468\" /><circle cx=\"465\" cy=\"120\" r=\"38\" stroke=\"#ee9468\" /><path d=\"M 465 99 V 124 M 465 138 V 140\" stroke=\"#ee9468\" /></svg>",
