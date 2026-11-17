@@ -395,3 +395,6 @@ html.modal-open { overflow: hidden; }
 @media(max-width:650px) { .lead-body.illustrated { display: block; } .weekly-illustration { display: none; } }
 
 .radar-items:has(>article:only-child) { grid-template-columns: 1fr; }
+
+/* Feed cards must shrink around long research titles and technical terms. */
+.story { min-width: 0; overflow-wrap: anywhere; }

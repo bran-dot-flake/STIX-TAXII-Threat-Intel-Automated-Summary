@@ -212,9 +212,31 @@ export function usefulExcerpt(row) {
   return text;
 }
 
+// Balance the opening six cards without discarding or merging distinct reports.
+// Only recent alternatives compete; stale research cannot displace current news.
+export function balancedStories(stories,asOf) {
+  const end=Date.parse(asOf),recent=stories.filter(r=>end-Date.parse(r.published_at)<=14*86400000);
+  const remaining=[...stories],chosen=[],counts=new Map(),families=new Set();
+  const family=r=>r.source==='cisa-advisories'?(r.title||'').split(/\s+/)[0].toLowerCase():null;
+  while(chosen.length<6&&remaining.length){
+    const candidates=recent.filter(r=>remaining.includes(r));
+    const pool=candidates.length?candidates:remaining;
+    const available=pool.filter(r=>(counts.get(r.source)||0)<2);
+    const diverse=available.filter(r=>!family(r)||!families.has(family(r)));
+    let choices=diverse.length?diverse:available.length?available:pool;
+    if(!chosen.length){
+      const research=choices.filter(r=>r.source!=='cisa-advisories'&&end-Date.parse(r.published_at)<=2*86400000);
+      if(research.length)choices=research;
+    }
+    const row=choices[0];chosen.push(row);remaining.splice(remaining.indexOf(row),1);
+    counts.set(row.source,(counts.get(row.source)||0)+1);if(family(row))families.add(family(row));
+  }
+  return [...chosen,...remaining];
+}
+
 export function additionalStories(news,asOf,edition,category='all') {
   const categoryRows=news.filter(row=>category==='all'||row.category===category);
-  if(!edition)return editorialStories(categoryRows,asOf);
+  if(!edition)return balancedStories(editorialStories(categoryRows,asOf),asOf);
   const ids=new Set(edition.topics.flatMap(t=>t.evidence_ids));
   const featured=editionEvidence(edition).filter(r=>ids.has(r.id));
   const articles=featured.filter(r=>!r.kind);
@@ -227,7 +249,7 @@ export function additionalStories(news,asOf,edition,category='all') {
   const end=Date.parse(asOf),start=new Date(end);start.setUTCDate(start.getUTCDate()-1);start.setUTCHours(0,0,0,0);
   const current=row=>Date.parse(row.published_at)>=start.getTime()&&Date.parse(row.published_at)<=end;
   const related=row=>(catalog&&row.category==='Exploitation watch')||(row.title+' '+row.excerpt).match(/CVE-\d{4}-\d{4,7}/gi)?.some(id=>cves.has(id.toUpperCase()));
-  return editorialStories(distinct,asOf).sort((a,b)=>Number(current(b))-Number(current(a))||Number(Boolean(related(a)))-Number(Boolean(related(b))));
+  return balancedStories(editorialStories(distinct,asOf).sort((a,b)=>Number(current(b))-Number(current(a))||Number(Boolean(related(a)))-Number(Boolean(related(b)))),asOf);
 }
 
 export function briefDigest(report) {

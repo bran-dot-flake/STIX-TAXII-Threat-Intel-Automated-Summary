@@ -765,7 +765,7 @@ def refresh(
     from .editorial import validate_edition as validate_any_edition
 
     if factual:
-        from .factual import edition as factual_edition
+        from .synthesis import automatic as factual_edition
 
         result = factual_edition(package)
     else:

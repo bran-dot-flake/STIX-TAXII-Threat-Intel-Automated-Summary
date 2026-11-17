@@ -18,6 +18,12 @@ Set `TI_WEEKLY_COMPOSITION=reviewed` only to restore the optional prose workflow
 
 Daily collection publishes fresh news, trends, statistics, vulnerability data and search **before** weekly composition. `export_publication.py --publish --data-only` retains frozen weekly editions. After composition, `--publish-prepared --only-new-weekly` publishes again only when an edition actually changed. A failed or withheld draft therefore cannot stop daily updates or create daily archive entries.
 
+## Executive voice and source balance
+
+Automatic composition first reuses an independently reviewed, evidence-identical executive plan when available. Version 5 adds a bounded executive synthesis for recognized Microsoft release facts: a takeaway headline, the concentration of critical code execution issues, and clearly editorial implications for inventory and rollout. Its majority claim requires checked source quantities, not keyword matching. Every sentence and citation is recomputed; negated, unfamiliar or insufficient evidence cannot unlock that analysis. Historical version 4 remains unchanged. Other story types retain conservative factual rendering until reviewed synthesis is available; this is not a general semantic verifier.
+
+The Latest Intelligence opening six cards balance recent publishers and avoid repeating CISA title families when alternatives exist. Recent research can lead ahead of product-advisory batches; older research cannot displace fresh advisories just to fill a quota. Reports are reordered, never silently removed or merged. All remain available through More Intelligence and search. CISA is an advisory source, not a representative sample of the entire threat landscape.
+
 ## Evidence preparation
 
 Only independently sanitized public projections enter editorial selection. Up to three distinct developments, four research records, 36 relevant catalog observations and eight explicitly referenced ATT&CK objects are retained. Firsthand incident/telemetry reporting, concrete consequences, measured changes and useful source detail precede simple recency. A familiar CVE phrase alone provides no priority. Marketing and event promotions do not qualify. Catalog-only editions require an explicit documented vulnerability chain; routine additions continue updating the register without forcing prose.

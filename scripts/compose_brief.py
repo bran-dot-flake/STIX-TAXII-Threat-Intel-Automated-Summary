@@ -25,7 +25,7 @@ def compose_weekly(args, snapshot):
     proof = executive.evidence_digest(package)
     proposal = args.cache_dir / "review" / (key + "-" + proof[:16] + ".json")
     if os.environ.get("TI_WEEKLY_COMPOSITION", "factual") == "factual":
-        from ti_brief.factual import edition as factual_edition
+        from ti_brief.synthesis import automatic as factual_edition
 
         result = factual_edition(package)
     else:

@@ -809,6 +809,9 @@ def validate_input(package):
 
 
 def validate_edition(value):
+    if value.get("version")==5:
+        from .synthesis import validate_edition as validate_synthesis
+        return validate_synthesis(value)
     if value.get("version")==4:
         from .factual import validate_edition as validate_factual
         return validate_factual(value)
