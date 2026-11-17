@@ -53,6 +53,11 @@ def prose_draft(plan):
 
 
 class ExecutiveTests(unittest.TestCase):
+    def setUp(self):
+        self.mode = patch.dict("os.environ", {"TI_WEEKLY_COMPOSITION": "reviewed"})
+        self.mode.start()
+        self.addCleanup(self.mode.stop)
+
     def test_completed_windows_configurable_and_adjacent(self):
         now = datetime.fromisoformat(package()["generated_at"])
         a, b = e.weekly_window(now, CONFIG)
@@ -258,9 +263,11 @@ class ExecutiveTests(unittest.TestCase):
         self.assertEqual({r["source"] for r in p["news"]}, {"sans-isc", "cisco-talos"})
         self.assertTrue(any("1,260" in r["excerpt"] for r in p["news"]))
         self.assertTrue(any("1328" in r["excerpt"] for r in p["news"]))
-        self.assertIsNone(
-            e.fallback(p)
-        )  # conflicting counts are not synthesized without source review
+        with patch.object(e, "registry", return_value=[]):
+            self.assertIsNone(
+                e.fallback(p)
+            )  # counts alone cannot approve unreviewed prose
+
         rows[1]["title"] = "Microsoft Patch Tuesday for October 2026"
         self.assertNotEqual(e.story_key(rows[0]), e.story_key(rows[1]))
         rows[1]["title"] = "Microsoft cloud campaign"

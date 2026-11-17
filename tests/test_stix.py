@@ -428,7 +428,7 @@ class StixTests(unittest.TestCase):
             self.assertEqual(daily_staged.main(["--manage-project"]), 0)
             self.assertEqual(invoke.call_count, 5)
             self.assertEqual(
-                invoke.call_args.args[0][1:], ["scripts/export_publication.py", "--publish-prepared"]
+                invoke.call_args.args[0][1:], ["scripts/export_publication.py", "--publish-prepared", "--only-new-weekly"]
             )
 
     def test_scheduler_help_has_no_collection_or_environment_side_effects(self):

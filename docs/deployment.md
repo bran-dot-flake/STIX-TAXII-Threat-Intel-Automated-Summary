@@ -146,14 +146,16 @@ flowchart TB
   STIX --> Gate[Original MITRE / marking / license gate]
   Gate --> Public
   Public --> Package[Sanitized editorial evidence]
-  Package --> Ollama[Local narrative composition]
-  Ollama --> Claims[Independent claim validation / fallback]
-  Claims --> JSON[Public JSON / intel-data branch]
+  Package --> Facts[Deterministic factual weekly digest]
+  Package -. optional private prose .-> Ollama[Local narrative composition]
+  Ollama --> Claims[Independent source-bound review]
+  Facts --> JSON[Public JSON / intel-data branch]
+  Claims --> JSON
   JSON --> Actions[GitHub Actions validation]
   Actions --> Pages[Static GitHub Pages publication]
 ```
 
-TAXII collection, the catalog bridge and publication are opt-in stages. Their absence does not turn private state into public data. When public publication is enabled, the staged job retains private exact-excerpt inference and replaces its redundant batch narrative with one publication-wide composition. Source/export contracts are in [publication](publication.md); grouping and model failure behavior are in [briefing](briefing.md).
+TAXII collection, the catalog bridge and publication are opt-in stages. Their absence does not turn private state into public data. When public publication is enabled, the staged job retains private exact-excerpt inference. Daily public data publishes first; automatic factual weekly composition follows, with a second public commit only for a changed weekly edition. `TI_WEEKLY_COMPOSITION=factual` is the default; `reviewed` restores optional gated model prose. Source/export contracts are in [publication](publication.md); grouping and model failure behavior are in [briefing](briefing.md).
 
 ## Editorial schedule
 

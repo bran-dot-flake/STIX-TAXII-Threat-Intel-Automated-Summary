@@ -809,6 +809,9 @@ def validate_input(package):
 
 
 def validate_edition(value):
+    if value.get("version")==4:
+        from .factual import validate_edition as validate_factual
+        return validate_factual(value)
     if value.get('version')==3:
         from .executive import validate_edition as validate_executive
         return validate_executive(value)

@@ -24,7 +24,12 @@ def compose_weekly(args, snapshot):
     key = digest("editorial:weekly:" + package["window_end"])[:24]
     proof = executive.evidence_digest(package)
     proposal = args.cache_dir / "review" / (key + "-" + proof[:16] + ".json")
-    result = executive.fallback(package)
+    if os.environ.get("TI_WEEKLY_COMPOSITION", "factual") == "factual":
+        from ti_brief.factual import edition as factual_edition
+
+        result = factual_edition(package)
+    else:
+        result = executive.fallback(package)
     if result is None and proposal.exists() and not args.retry_draft:
         print(json.dumps({"status": "weekly-held-for-review", "edition": key}))
         return 0
