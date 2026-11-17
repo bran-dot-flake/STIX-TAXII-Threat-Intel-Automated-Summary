@@ -254,3 +254,19 @@ test('chart details use the exact deduplicated KEV records behind each count',()
  }
  assert.deepEqual(kevRecords(rows,7,'2026-11-12','2026-11-10').map(r=>r.id),['a']);
 });
+
+
+test('front-page source diversity survives a flood of same-vendor advisories',()=>{
+  const rows=Array.from({length:15},(_,i)=>({id:'s'+i,title:'Siemens product '+i,source:'cisa-advisories',source_url:'https://www.cisa.gov/news-events/ics-advisories/'+i,published_at:'2026-11-17T12:00:00Z',category:'Security advisory',excerpt:'Could execute arbitrary code.'}));
+  for(const source of ['google-gti','sans-isc','cisco-talos'])for(let i=0;i<2;i++)rows.push({id:source+i,title:'Research '+source+i,source,source_url:'https://example.com/'+source+i,published_at:'2026-11-16T12:00:00Z',category:'Campaign reporting',excerpt:'Research findings.'});
+  const original=JSON.stringify(rows),result=additionalStories(rows,'2026-11-17T18:00:00Z');
+  assert.notEqual(result[0].source,'cisa-advisories');
+  assert(result.slice(0,6).filter(r=>r.source==='cisa-advisories').length<=2);
+  assert(new Set(result.slice(0,6).map(r=>r.source)).size>=3);
+  assert.equal(result.length,rows.length);assert.equal(new Set(result.map(r=>r.id)).size,rows.length);
+  assert.equal(JSON.stringify(rows),original);
+});
+test('old research cannot displace fresh advisories merely for diversity',()=>{
+  const rows=[{id:'fresh',source:'cisa-advisories',title:'Current advisory',source_url:'https://example.com/a',published_at:'2026-11-17T12:00:00Z'}, {id:'old',source:'google-gti',title:'Old research',source_url:'https://example.com/b',published_at:'2026-09-01T12:00:00Z'}];
+  assert.equal(additionalStories(rows,'2026-11-17T18:00:00Z')[0].id,'fresh');
+});

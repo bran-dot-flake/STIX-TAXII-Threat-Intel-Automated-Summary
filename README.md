@@ -25,7 +25,7 @@
 
 ## Overview
 
-EMBER collects intelligence daily and publishes one evidence-grounded weekly executive briefing. CISA, CIRCL and MITRE ATT&CK® support the private MISP/OpenCTI lab; official SANS ISC, Cisco Talos and Google Threat Intelligence RSS feeds broaden the public editorial coverage. Automatic weekly digests use attributed, deterministic source facts. The existing CPU-only Ollama model remains available for private drafts; novel prose requires independent review. Daily refreshes keep searchable intelligence and statistics current while the latest accepted weekly briefing stays visible.
+EMBER collects intelligence daily and publishes one evidence-grounded weekly executive briefing. CISA, CIRCL and MITRE ATT&CK® support the private MISP/OpenCTI lab; official SANS ISC, Cisco Talos and Google Threat Intelligence RSS feeds broaden the public editorial coverage. Weekly briefs combine source facts with bounded executive synthesis; independently reviewed prose takes precedence when available. The existing CPU-only Ollama model remains available for private drafts; novel prose requires independent review. Daily refreshes keep searchable intelligence and statistics current while the latest accepted weekly briefing stays visible.
 
 The project explores the engineering needed to make that workflow dependable: interoperable STIX/TAXII ingestion, source-aware correlation, independent read-back, bounded local inference and a deliberate public/private boundary. The static site stays available when the lab is offline; fresh intelligence resumes when collection returns.
 
@@ -43,7 +43,7 @@ Python normalizes CISA KEV additions and a bounded CIRCL sample, writes source-a
 
 ### Analysis and reporting
 
-Completed seven-day UTC windows drive the weekly edition. Exact report references, CVEs and identified Microsoft releases group related coverage without merging unrelated campaigns. The default weekly digest renders factual statements directly from validated source evidence, without model inference. Optional Ollama prose stays behind source-bound editorial review. Unverified drafts stay private, and publication retains the last accepted briefing. Evidence and previous weekly editions remain available. [Reporting and grounding](docs/briefing.md).
+Completed seven-day UTC windows drive the weekly edition. Exact report references, CVEs and identified Microsoft releases group related coverage without merging unrelated campaigns. The default weekly workflow uses validated source evidence for factual reporting and supported executive takeaways, without model inference. Optional Ollama prose stays behind source-bound editorial review. Unverified drafts stay private, and publication retains the last accepted briefing. Evidence and previous weekly editions remain available. [Reporting and grounding](docs/briefing.md).
 
 ### Publication
 

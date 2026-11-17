@@ -105,7 +105,7 @@ class FactualTests(unittest.TestCase):
     def test_automatic_publication_is_idempotent_and_preserves_history(self):
         s = snapshot()
         with patch.object(
-            e, "fallback", side_effect=AssertionError("No prose approvals")
+            e, "fallback", return_value=None
         ):
             e.refresh(s, factual=True)
         validate_snapshot(s)

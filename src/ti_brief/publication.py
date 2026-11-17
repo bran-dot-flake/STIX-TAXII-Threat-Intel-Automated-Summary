@@ -429,12 +429,12 @@ def validate_snapshot(value, allow_synthetic=False):
         if len(ids)!=len(set(ids)):raise ValueError('Duplicate editorial editions')
         for edition in editions:
             validate_edition(edition)
-            if edition.get('version') in {2,3,4} and edition.get('published_at') is None:raise ValueError('Unpublished editorial candidate')
+            if edition.get('version') in {2,3,4,5} and edition.get('published_at') is None:raise ValueError('Unpublished editorial candidate')
             if stamp(edition['generated_at'])>stamp(value['exported_at']):raise ValueError('Future editorial edition')
             if edition.get('version')==1 and edition['generated_at']==value['exported_at']:
                 from .editorial import curate
                 if edition['input']!=curate(value):raise ValueError('Editorial input differs from the collected publication')
-            if edition.get('version') in {2,3,4} and edition['generated_at']==value['exported_at']:
+            if edition.get('version') in {2,3,4,5} and edition['generated_at']==value['exported_at']:
                 originals={r['id']:r for r in value['records']+value['news']}
                 for row in edition['input']['records']+edition['input']['news']:
                     if originals.get(row['id'])!=row:raise ValueError('Hybrid evidence differs from collected publication')
