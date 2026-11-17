@@ -5173,6 +5173,161 @@
   },
   "editions": [
     {
+      "version": 4,
+      "id": "278feb464f8292986facbdd1",
+      "publication_kind": "weekly",
+      "generated_at": "2026-11-17T18:55:41+00:00",
+      "published_at": "2026-11-17T18:56:06+00:00",
+      "revised_at": null,
+      "window_start": "2026-11-09T08:00:00+00:00",
+      "window_end": "2026-11-16T08:00:00+00:00",
+      "input_digest": "7db381211dd61839510dca9fb455ac18499679e3ce213f8ceed326e355ed001a",
+      "input": {
+        "generated_at": "2026-11-17T18:55:41+00:00",
+        "sources": [
+          {
+            "id": "cisa-kev",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          },
+          {
+            "id": "circl-osint",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          },
+          {
+            "id": "cisa-advisories",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          },
+          {
+            "id": "sans-isc",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          },
+          {
+            "id": "cisco-talos",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          },
+          {
+            "id": "google-gti",
+            "status": "ok",
+            "attempted_at": "2026-11-17T18:55:41+00:00",
+            "last_success_at": "2026-11-17T18:55:41+00:00"
+          }
+        ],
+        "records": [],
+        "news": [
+          {
+            "id": "f802327bf7c7bbbc758db8e0",
+            "source": "sans-isc",
+            "source_url": "https://isc.sans.edu/diary/rss/33508",
+            "title": "Microsoft Patch Tuesday November 2026, (Tue, Nov 10th)",
+            "excerpt": "Microsoft continues its AI-induced patch surge, addressing 1,260 different vulnerabilities this month. 68 of these vulnerabilities are considered critical. 167 of the vulnerabilities are Chromium issues affecting Microsoft Edge.",
+            "published_at": "2026-11-11T18:28:43+00:00",
+            "category": "Vulnerability research",
+            "artwork": "advisory.svg",
+            "publisher": "SANS Technology Institute, Internet Storm Center",
+            "author": "",
+            "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            "modified_at": null,
+            "first_seen": "2026-11-12T14:13:20+00:00",
+            "last_seen": "2026-11-17T18:55:41+00:00",
+            "content_changed_at": null,
+            "source_id": "https://isc.sans.edu/diary/rss/33508",
+            "references": [
+              "https://isc.sans.edu/diary/rss/33508"
+            ]
+          },
+          {
+            "id": "d88b3fdfb0c420e555dcd7c8",
+            "source": "cisco-talos",
+            "source_url": "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/",
+            "title": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities",
+            "excerpt": "Microsoft has released its monthly security update for November 2026, which includes 1328 vulnerabilities affecting a range of products, including 60 that Microsoft marked as \"critical.\" Out of 60 \"critical\" vulnerabilities, 45 are remote code execution (RCE) vulnerabilities.",
+            "published_at": "2026-11-11T01:41:17+00:00",
+            "category": "Vulnerability research",
+            "artwork": "advisory.svg",
+            "publisher": "Cisco Talos",
+            "author": "Cisco Talos",
+            "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
+            "modified_at": null,
+            "first_seen": "2026-11-12T14:13:20+00:00",
+            "last_seen": "2026-11-17T18:55:41+00:00",
+            "content_changed_at": null,
+            "source_id": "6af2f06a6f4a9600010b568b",
+            "references": [
+              "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/"
+            ]
+          }
+        ],
+        "updates": [],
+        "context": [],
+        "publication_kind": "weekly",
+        "window_start": "2026-11-09T08:00:00+00:00",
+        "window_end": "2026-11-16T08:00:00+00:00",
+        "covered_story_ids": [],
+        "executive_version": 1
+      },
+      "topics": [
+        {
+          "id": "555860c6b837f98879b83b33",
+          "evidence_ids": [
+            "d88b3fdfb0c420e555dcd7c8",
+            "f802327bf7c7bbbc758db8e0"
+          ],
+          "kind": "advisory",
+          "freshness": "newly-published",
+          "published_at": "2026-11-11T18:28:43+00:00",
+          "context_ids": [],
+          "headline": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities"
+        }
+      ],
+      "headline": "Microsoft Patch Tuesday — November 2026",
+      "plan": {
+        "headline": "Microsoft Patch Tuesday — November 2026",
+        "overview": [
+          [
+            {
+              "text": "Cisco Talos’s Microsoft update coverage lists 1,328 vulnerabilities, including 60 critical issues and 45 critical remote code execution vulnerabilities.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8"
+              ]
+            }
+          ],
+          [
+            {
+              "text": "SANS ISC’s Microsoft update coverage lists 1,260 vulnerabilities and 68 critical issues; it identifies 167 Chromium issues affecting Microsoft Edge.",
+              "evidence_ids": [
+                "f802327bf7c7bbbc758db8e0"
+              ]
+            }
+          ]
+        ],
+        "topics": [
+          {
+            "topic_id": "555860c6b837f98879b83b33",
+            "headline": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities",
+            "summary": {
+              "text": "Cisco Talos’s Microsoft update coverage lists 1,328 vulnerabilities, including 60 critical issues and 45 critical remote code execution vulnerabilities.",
+              "evidence_ids": [
+                "d88b3fdfb0c420e555dcd7c8"
+              ]
+            }
+          }
+        ]
+      },
+      "mode": "deterministic-factual",
+      "approval_id": null,
+      "evidence_digest": "3af8bf6c4558882c22b53ecbcbfe25ffc322c54bdc2c61844343108ec9eccb13"
+    },
+    {
       "version": 3,
       "id": "8336a53a052b1eb30ee0093b",
       "publication_kind": "weekly",
@@ -5768,6 +5923,15 @@
   "illustrations": [
     {
       "version": 1,
+      "edition_id": "278feb464f8292986facbdd1",
+      "lead_digest": "0e3b5995cfe369a79265a6e938afabad6bc9e933e79f9ea3e10edb8948ad02a0",
+      "kind": "exploitation",
+      "alt": "Conceptual illustration of an exposed system and a security weakness.",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 400\" fill=\"none\" stroke=\"#e9e7dd\" stroke-width=\"5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"155\" y=\"90\" width=\"300\" height=\"215\" rx=\"9\" /><path d=\"M 195 330 H 415 M 305 305 V 330 M 170 270 H 440\" stroke=\"#e9e7dd\" /><path d=\"M 320 125 L 285 185 L 320 195 L 290 246\" stroke=\"#ee9468\" /><circle cx=\"465\" cy=\"120\" r=\"38\" stroke=\"#ee9468\" /><path d=\"M 465 99 V 124 M 465 138 V 140\" stroke=\"#ee9468\" /></svg>",
+      "digest": "60fe697cbf240535a0a93cd2ae08d55b63cb83389978dbb4e401efdd1c2b0689"
+    },
+    {
+      "version": 1,
       "edition_id": "8336a53a052b1eb30ee0093b",
       "lead_digest": "ad3bc24689e908f68fe589e40c7dc6e3ce709a8474586fd318c6456a09613a76",
       "kind": "llm",
@@ -5778,8 +5942,8 @@
   ],
   "collection": {
     "checked_at": "2026-11-17T18:55:41+00:00",
-    "status": "ready",
-    "last_substantive_at": "2026-11-12T14:46:06+00:00",
+    "status": "published",
+    "last_substantive_at": "2026-11-17T18:56:06+00:00",
     "weekly_window_end": "2026-11-16T08:00:00+00:00"
   }
 }
