@@ -2,11 +2,21 @@
 
 ## Weekly publication
 
-Daily collection refreshes the Latest Intelligence feed, search, vulnerability register, source health and statistics. The active public workflow in `executive.py` produces **weekly editions only**. It never promotes new private daily batches or creates interim articles. Historical batch and version-1/2 editions remain readable in the archive under their original validators.
+Daily collection refreshes the Latest Intelligence feed, search, vulnerability register, source health and statistics. The active public workflow in `executive.py` produces **weekly editions only**. It never promotes new private daily batches or creates interim articles. Historical batch and version-1/2/3 editions retain their original validators. The public archive lists previous weekly snapshots only.
 
 The completed seven-day UTC window defaults to Monday 08:00 through the following Monday 08:00, half-open `[start, end)`. Configure `TI_WEEKLY_DAY` (Monday=0) and `TI_WEEKLY_HOUR_UTC`; the existing daily timer runs the next collection after that boundary. No additional service is needed. The first run may publish the latest completed window late, with its real publication time. It does not manufacture missed historical weeks. Accepted windows cannot overlap, and the same window ID cannot be published twice. A quiet or failed run retains the last accepted article.
 
 The front page shows **Weekly Brief** and one compact period. It has no header collection timestamp. The lead and supporting evidence precede a compact horizontal radar strip (stacked on mobile). Exact evidence cutoff, original publication time, source publication/modification and any explicit revision time remain in the JSON and archive. A publication date is not an incident date.
+
+## Automatic factual editions (version 4)
+
+`TI_WEEKLY_COMPOSITION=factual` is the default. Weekly publication needs no model call, API key, or prose approval. The version-4 renderer uses explicitly attributed source titles for unrecognized stories. Exact source-specific Microsoft update sentence patterns preserve publisher totals, units and critical/RCE subset relationships; differing publisher counts remain separate. CISA catalog statements describe catalog membership and addition dates only. Truncated excerpts ending in a colon cannot drive the weekly selection, but remain searchable in the daily feed.
+
+The validator recomputes the entire edition from its frozen, validated source package. Changed text, quantities, evidence IDs or extra fields are rejected. This verifies faithful rendering, not the truth of a publisher's assertion. Version-4 rendering is frozen for historical validation; future rendering changes require a new edition version. Existing reviewed version-3 editions remain intact.
+
+Set `TI_WEEKLY_COMPOSITION=reviewed` only to restore the optional prose workflow below. A stronger hosted model could improve drafts, but neither additional RAM nor a model change replaces factual validation. No OpenAI API calls are enabled by this change.
+
+Daily collection publishes fresh news, trends, statistics, vulnerability data and search **before** weekly composition. `export_publication.py --publish --data-only` retains frozen weekly editions. After composition, `--publish-prepared --only-new-weekly` publishes again only when an edition actually changed. A failed or withheld draft therefore cannot stop daily updates or create daily archive entries.
 
 ## Evidence preparation
 

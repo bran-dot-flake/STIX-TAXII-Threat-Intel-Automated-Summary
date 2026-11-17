@@ -393,3 +393,5 @@ html.modal-open { overflow: hidden; }
 .kev-all { padding-left: 20px; }
 .kev-all li { padding: 6px 0; }
 @media(max-width:650px) { .lead-body.illustrated { display: block; } .weekly-illustration { display: none; } }
+
+.radar-items:has(>article:only-child) { grid-template-columns: 1fr; }

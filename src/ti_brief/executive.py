@@ -109,6 +109,10 @@ def relevance(row):
 
 
 def meaningful(row):
+    # A feed fragment introducing omitted material is not a supported finding.
+    # Keep it in daily news/search, but do not ask the writer to fill its gaps.
+    if not row.get("excerpt", "").strip() or row["excerpt"].rstrip().endswith(":"):
+        return False
     text = row.get("title", "") + " " + row.get("excerpt", "")
     if re.search(
         r"webinar|register now|sponsored|podcast|join us|conference", text, re.I
@@ -742,16 +746,30 @@ def prepare(snapshot, config=None):
             1
         ].isoformat(),
     }
-    snapshot["schema_version"] = 7 if snapshot.get("schema_version")==7 else 6
+    snapshot["schema_version"] = 7 if snapshot.get("schema_version") == 7 else 6
     return package
 
 
-def refresh(snapshot, cache_dir=None, config=None, published_at=None, revision=False):
+def refresh(
+    snapshot,
+    cache_dir=None,
+    config=None,
+    published_at=None,
+    revision=False,
+    factual=False,
+):
     package = candidate(snapshot, config, revision=revision)
     prepare(snapshot, config)
     if package is None:
         return snapshot
-    result = fallback(package) if revision else None
+    from .editorial import validate_edition as validate_any_edition
+
+    if factual:
+        from .factual import edition as factual_edition
+
+        result = factual_edition(package)
+    else:
+        result = fallback(package) if revision else None
     key = digest("editorial:weekly:" + package["window_end"])[:24]
     if cache_dir and result is None:
         try:
@@ -777,7 +795,7 @@ def refresh(snapshot, cache_dir=None, config=None, published_at=None, revision=F
         publication_time(old) if old else (published_at or snapshot["exported_at"])
     )
     result["revised_at"] = (published_at or snapshot["exported_at"]) if old else None
-    validate_edition(result)
+    validate_any_edition(result)
     history[key] = result
     snapshot["editions"] = sorted(history.values(), key=publication_time, reverse=True)[
         :90

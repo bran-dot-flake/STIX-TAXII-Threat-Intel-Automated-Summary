@@ -87,13 +87,13 @@ def main(argv=None):
             except Exception as exc:
                 print(json.dumps({'stage':'stix-opencti','status':'failed','error_type':type(exc).__name__}))
         if os.environ.get("TI_PUBLICATION_ENABLED") == "true":
-            invoke([sys.executable, "scripts/export_publication.py"])
+            invoke([sys.executable, "scripts/export_publication.py", "--publish", "--data-only"])
             try:
                 if os.environ.get('TI_NARRATIVE_ENABLED','true').lower()=='true':
                     invoke([sys.executable,'scripts/compose_brief.py','--editorial','--cache-dir','data/editorial'])
             except Exception as exc:
-                print(json.dumps({'stage':'editorial','status':'source-grounded-fallback','error_type':type(exc).__name__}))
-            invoke([sys.executable, "scripts/export_publication.py", "--publish-prepared"])
+                print(json.dumps({'stage':'editorial','status':'retained-for-review','error_type':type(exc).__name__}))
+            invoke([sys.executable, "scripts/export_publication.py", "--publish-prepared", "--only-new-weekly"])
 
 
 if __name__ == "__main__":

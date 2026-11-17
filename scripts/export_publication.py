@@ -2,6 +2,7 @@
 """Independent public-source export; optional outbound-only GitHub publication."""
 
 import argparse
+import copy
 import json
 import os
 from pathlib import Path
@@ -43,7 +44,21 @@ def main():
         action="store_true",
         help="Explicitly replace the latest weekly article using its frozen evidence and a checked review; preserve publication date",
     )
+    parser.add_argument(
+        "--data-only",
+        action="store_true",
+        help="Publish daily source data without generating or changing weekly editions",
+    )
+    parser.add_argument(
+        "--only-new-weekly",
+        action="store_true",
+        help="Skip prepared publication if no weekly edition changed",
+    )
     args = parser.parse_args()
+    if args.data_only and not args.publish:
+        parser.error("--data-only requires --publish")
+    if args.only_new_weekly and not args.publish_prepared:
+        parser.error("--only-new-weekly requires --publish-prepared")
     if args.revise_latest and not args.publish_prepared:
         parser.error("--revise-latest requires --publish-prepared")
     load_env(Path(".env"))
@@ -69,6 +84,7 @@ def main():
                     <= 86400
                 ):
                     raise ValueError("Prepared public snapshot expired")
+                old_editions = copy.deepcopy(previous.get("editions", []))
                 enrich_snapshot(previous)
                 refresh(
                     previous,
@@ -77,10 +93,26 @@ def main():
                         timespec="seconds"
                     ),
                     revision=args.revise_latest,
+                    factual=os.environ.get("TI_WEEKLY_COMPOSITION", "factual")
+                    == "factual",
                 )
                 # Accepted editorial state advances only after the public data
                 # commit succeeds. A failed upload leaves the collected file intact.
                 enrich_artwork(previous)
+                if (
+                    args.only_new_weekly
+                    and previous.get("editions", []) == old_editions
+                ):
+                    save_snapshot(args.output, previous)
+                    print(
+                        json.dumps(
+                            {
+                                "status": "weekly-unchanged-daily-already-published",
+                                "collection": previous.get("collection"),
+                            }
+                        )
+                    )
+                    return 0
                 commit = publish(previous, repo)
                 save_snapshot(args.output, previous)
                 print(
@@ -126,13 +158,16 @@ def main():
                 "sources": snapshot["sources"],
             }
             if args.publish:
-                refresh(
-                    snapshot,
-                    Path("data/editorial"),
-                    published_at=datetime.now(timezone.utc).isoformat(
-                        timespec="seconds"
-                    ),
-                )
+                if not args.data_only:
+                    refresh(
+                        snapshot,
+                        Path("data/editorial"),
+                        published_at=datetime.now(timezone.utc).isoformat(
+                            timespec="seconds"
+                        ),
+                        factual=os.environ.get("TI_WEEKLY_COMPOSITION", "factual")
+                        == "factual",
+                    )
                 enrich_artwork(snapshot)
                 result.update(
                     status="published-to-data-branch", commit=publish(snapshot, repo)

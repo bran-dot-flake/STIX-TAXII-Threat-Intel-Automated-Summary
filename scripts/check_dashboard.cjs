@@ -201,7 +201,11 @@ const output = process.argv[3];
     assert.equal(await page.locator('#context .catalog-note:not(.mitre-credit)').count(),0);
     const counted=[...series].filter(r=>r.count>0).sort((a,b)=>b.count-a.count)[0];
     if(counted){
-      const bar=page.locator(`[data-kev-date="${counted.date}"]`);await bar.hover();
+      const bar=page.locator(`[data-kev-date="${counted.date}"]`);
+      await bar.scrollIntoViewIfNeeded();
+      // Let the scroll listener finish hiding the old unpinned popover before hover.
+      await page.waitForTimeout(250);
+      await bar.hover();
       await page.locator('#kev-popover:not([hidden])').waitFor();
       const members=analytics.kevRecords(snapshot.records,30,new Date().toISOString(),counted.date);
       assert.deepEqual(await page.locator('#kev-popover [data-evidence]').allTextContents(),members.slice(0,5).map(r=>r.value));
@@ -231,7 +235,7 @@ const output = process.argv[3];
       assert.equal(await page.locator('#sources-dialog').evaluate(n=>n.scrollWidth>n.clientWidth),false,'License dialog fits at '+width);
       await page.keyboard.press('Escape');
       if(selected){
-        const radar=await page.locator('.radar').boundingBox();
+        const radar=await page.locator('.radar').count()?await page.locator('.radar').boundingBox():null;
         const evidence=await page.locator('#brief > .supporting-evidence').boundingBox();
         if(radar&&evidence)assert(radar.y>=evidence.y+evidence.height,'Radar follows the main article and evidence');
         const boxes=await page.locator('.radar article').evaluateAll(nodes=>nodes.map(n=>({x:n.getBoundingClientRect().x,y:n.getBoundingClientRect().y})));
