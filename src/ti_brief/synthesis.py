@@ -45,7 +45,7 @@ def plan(package):
     # Derive the release month from the title identity, never the collection clock.
     month = factual.plan(package)["headline"].split("— ")[-1].split()[0]
     original["headline"] = (
-        f"Code Execution Flaws Dominate Microsoft’s {month} Critical Fixes"
+        f"Remote Code Execution Dominates Microsoft’s {month} Critical Fixes"
     )
     original["overview"] = [
         [
