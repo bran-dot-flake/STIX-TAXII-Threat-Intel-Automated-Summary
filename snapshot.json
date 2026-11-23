@@ -5326,6 +5326,131 @@
   },
   "editions": [
     {
+      "version": 4,
+      "id": "9cbe367cbaecd25395c091b8",
+      "publication_kind": "weekly",
+      "generated_at": "2026-11-23T08:07:22+00:00",
+      "published_at": "2026-11-23T08:07:36+00:00",
+      "revised_at": null,
+      "window_start": "2026-11-16T08:00:00+00:00",
+      "window_end": "2026-11-23T08:00:00+00:00",
+      "input_digest": "cf0e7634d6f4138505468555e6735eb14cf1d12365d07b201212356f50d7d730",
+      "input": {
+        "generated_at": "2026-11-23T08:07:22+00:00",
+        "sources": [
+          {
+            "id": "cisa-kev",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          },
+          {
+            "id": "circl-osint",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          },
+          {
+            "id": "cisa-advisories",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          },
+          {
+            "id": "sans-isc",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          },
+          {
+            "id": "cisco-talos",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          },
+          {
+            "id": "google-gti",
+            "status": "ok",
+            "attempted_at": "2026-11-23T08:07:22+00:00",
+            "last_success_at": "2026-11-23T08:07:22+00:00"
+          }
+        ],
+        "records": [],
+        "news": [
+          {
+            "id": "1742a693aba8e2002103c362",
+            "source": "sans-isc",
+            "source_url": "https://isc.sans.edu/diary/rss/33522",
+            "title": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710), (Mon, Nov 16th)",
+            "excerpt": "This weekend, we started seeing requests for /mcp-rest/test/tools/list hitting our honeypots. These requests appear to attempt to exploit CVE-2026-42271 and CVE-2026-48710. Horizon3.ai published a short write-up about how these vulnerabilities can be chained to achieve remote code execution without authentication [Horizon3]",
+            "published_at": "2026-11-16T13:11:04+00:00",
+            "category": "Vulnerability research",
+            "artwork": "advisory.svg",
+            "publisher": "SANS Technology Institute, Internet Storm Center",
+            "author": "",
+            "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+            "modified_at": null,
+            "first_seen": "2026-11-17T08:06:28+00:00",
+            "last_seen": "2026-11-23T08:07:22+00:00",
+            "content_changed_at": null,
+            "source_id": "https://isc.sans.edu/diary/rss/33522",
+            "references": [
+              "https://isc.sans.edu/diary/rss/33522"
+            ]
+          }
+        ],
+        "updates": [],
+        "context": [],
+        "publication_kind": "weekly",
+        "window_start": "2026-11-16T08:00:00+00:00",
+        "window_end": "2026-11-23T08:00:00+00:00",
+        "covered_story_ids": [],
+        "executive_version": 1
+      },
+      "topics": [
+        {
+          "id": "42de52296d209832a40ee7d7",
+          "evidence_ids": [
+            "1742a693aba8e2002103c362"
+          ],
+          "kind": "advisory",
+          "freshness": "newly-published",
+          "published_at": "2026-11-16T13:11:04+00:00",
+          "context_ids": [],
+          "headline": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)"
+        }
+      ],
+      "headline": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)",
+      "plan": {
+        "headline": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)",
+        "overview": [
+          [
+            {
+              "text": "SANS ISC published a report titled “Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)”.",
+              "evidence_ids": [
+                "1742a693aba8e2002103c362"
+              ]
+            }
+          ]
+        ],
+        "topics": [
+          {
+            "topic_id": "42de52296d209832a40ee7d7",
+            "headline": "Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)",
+            "summary": {
+              "text": "SANS ISC published a report titled “Scans for LiteLLM/Starlette (CVE-2026-42271, CVE-2026-48710)”.",
+              "evidence_ids": [
+                "1742a693aba8e2002103c362"
+              ]
+            }
+          }
+        ]
+      },
+      "mode": "deterministic-factual",
+      "approval_id": null,
+      "evidence_digest": "120ca24893321e8e9dffb1544778da4a1578651d55415f0d9b8d20a2f159768f"
+    },
+    {
       "version": 5,
       "id": "278feb464f8292986facbdd1",
       "publication_kind": "weekly",
@@ -6121,8 +6246,8 @@
   ],
   "collection": {
     "checked_at": "2026-11-23T08:07:22+00:00",
-    "status": "ready",
-    "last_substantive_at": "2026-11-17T18:56:06+00:00",
+    "status": "published",
+    "last_substantive_at": "2026-11-23T08:07:36+00:00",
     "weekly_window_end": "2026-11-23T08:00:00+00:00"
   }
 }
