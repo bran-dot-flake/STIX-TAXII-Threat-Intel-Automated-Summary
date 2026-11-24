@@ -1,47 +1,73 @@
 {
   "schema_version": 7,
   "synthetic": false,
-  "collected_at": "2026-11-23T08:07:22+00:00",
-  "exported_at": "2026-11-23T08:07:22+00:00",
+  "collected_at": "2026-11-24T08:08:55+00:00",
+  "exported_at": "2026-11-24T08:08:55+00:00",
   "sources": [
     {
       "id": "cisa-kev",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "circl-osint",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "cisa-advisories",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "sans-isc",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "cisco-talos",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "google-gti",
       "status": "ok",
-      "attempted_at": "2026-11-23T08:07:22+00:00",
-      "last_success_at": "2026-11-23T08:07:22+00:00"
+      "attempted_at": "2026-11-24T08:08:55+00:00",
+      "last_success_at": "2026-11-24T08:08:55+00:00"
     }
   ],
   "records": [
+    {
+      "id": "7d96d713dc8c4e9ef986c8d0",
+      "source": "cisa-kev",
+      "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "kind": "vulnerability",
+      "value": "CVE-2026-134624",
+      "title": "N-able MailAssure (SpamExperts) Server-Side Request Forgery (SSRF) Vulnerability",
+      "description": "N-able MailAssure (SpamExperts) contains a server-side request forgery vulnerability in the LDAP synchronization connection check that allows an authenticated API user to connect to arbitrary internal hosts and ports, determine which are reachable, and send crafted data to internal services.",
+      "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
+      "published_at": "2026-11-23",
+      "first_seen": "2026-11-24T08:08:55+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00"
+    },
+    {
+      "id": "79f7f3d9545fe69e8e9b24d4",
+      "source": "cisa-kev",
+      "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "kind": "vulnerability",
+      "value": "CVE-2026-133968",
+      "title": "Project MONAI MONAI Label Path Traversal Vulnerability",
+      "description": "Project MONAI MONAI Label contains a path traversal vulnerability that allows an unauthenticated remote attacker to write arbitrary files outside the intended datastore directory, potentially resulting in remote code execution.",
+      "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
+      "published_at": "2026-11-23",
+      "first_seen": "2026-11-24T08:08:55+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00"
+    },
     {
       "id": "f7afe9f739757023a562fb44",
       "source": "cisa-kev",
@@ -53,7 +79,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-20",
       "first_seen": "2026-11-21T08:09:04+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f198cac345623ec10e1f6d83",
@@ -66,7 +92,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-20",
       "first_seen": "2026-11-21T08:09:04+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "a33868e576cdf7db46ba1c4c",
@@ -79,7 +105,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines",
       "published_at": "2026-11-20",
       "first_seen": "2026-11-21T08:09:04+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "591031dc79f1e606c2b38bd8",
@@ -92,7 +118,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-20",
       "first_seen": "2026-11-21T08:09:04+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d6509f22d031f88b305e482a",
@@ -105,7 +131,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-18",
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "c7517a67988eea1fe60edd1b",
@@ -118,7 +144,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-18",
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "a9265bf6d3b7bc033cb929b7",
@@ -131,7 +157,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-18",
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "3b909a3e42f5d9061b9ca244",
@@ -144,7 +170,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-18",
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b46377e18ead0c0150e631d3",
@@ -157,7 +183,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-17",
       "first_seen": "2026-11-17T18:55:41+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "48fe41f041a9ba8625de0333",
@@ -170,7 +196,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-13",
       "first_seen": "2026-11-14T08:08:51+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "141819b72291fc8e028654df",
@@ -183,7 +209,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-13",
       "first_seen": "2026-11-14T08:08:51+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "cea934ce87e42249edfabb78",
@@ -196,7 +222,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b193fc7d58051f7385d04007",
@@ -209,7 +235,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9135bdaf8352835d47e7206a",
@@ -222,7 +248,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "68f85310275d859436ffdc54",
@@ -235,7 +261,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "625de03b9c92af210e5a5949",
@@ -248,7 +274,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "14c4f6698b77b4b0fc153fed",
@@ -261,7 +287,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "fb18be59d718eca8706a1129",
@@ -274,7 +300,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9e9b73466e3056d21a523819",
@@ -287,7 +313,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "97165fba576c41de6a39555f",
@@ -300,7 +326,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4268b109f310bb23d49c894a",
@@ -313,7 +339,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "c8744fddf7fa8ed091bdee13",
@@ -326,7 +352,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-06",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f50d407b108944b46e89fdae",
@@ -339,7 +365,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-04",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "54b8a6c400b55a39f7fd0417",
@@ -352,7 +378,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-11-03",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "fea8e4139cafc8c35d289cdf",
@@ -365,7 +391,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f81cf373484c823319b42926",
@@ -378,7 +404,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f3d99df40b083cd4b07b4ce5",
@@ -391,7 +417,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b90e79030ee4ec730d033638",
@@ -404,7 +430,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9b8e02bd58d318488858a376",
@@ -417,7 +443,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8fe6681ee76135e6d1dd4665",
@@ -430,7 +456,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8f29bb5c4b20a311d6490db8",
@@ -443,7 +469,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "86d148ec6054f501ced304d5",
@@ -456,7 +482,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "735875c1e837d72a82d9e093",
@@ -469,7 +495,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "622d08cd61afe6a78ff90c6d",
@@ -482,7 +508,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "5a33b1e3f7d93412e022bc64",
@@ -495,7 +521,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "598a593bd2dd6b12e8c3d1ef",
@@ -508,7 +534,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4e0206f943d4d3dc0705f9a6",
@@ -521,7 +547,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "48acbe7ac7c5f3001678420d",
@@ -534,7 +560,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "3b548b674832acce7545b76f",
@@ -547,7 +573,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "3513c5b45c084a1eec495a34",
@@ -560,7 +586,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "26b06964573b378f3cffb6fc",
@@ -573,7 +599,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "25fd54db550c400557178ae8",
@@ -586,7 +612,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "185ab4038686589673820cda",
@@ -599,7 +625,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "08bf1b0784eabfe883b7a89b",
@@ -612,7 +638,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-11-01T00:23:22+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f3126e0af1f3e52161aa6ef5",
@@ -625,7 +651,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-30",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "a955cf136d72656ae98b9135",
@@ -638,7 +664,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-30",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "fd2660ccbe53494e8f7bdce4",
@@ -651,7 +677,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-29",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b44e70787fe1e03687f2706e",
@@ -664,7 +690,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-29",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "938f80e6b826b3914aa18345",
@@ -677,7 +703,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-28",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8f277cab6b597733d752291f",
@@ -690,7 +716,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-28",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "e2bc89839ab9746b63b425c4",
@@ -703,7 +729,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9a3bc4d800fb12039ed3b777",
@@ -716,7 +742,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4e628e18ab9932a1c4aaaf54",
@@ -729,7 +755,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "1083fecfdcdeee6a2421a282",
@@ -742,7 +768,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f78936585161d313c65084d9",
@@ -755,7 +781,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-23",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7e67e64c540a695150472b69",
@@ -768,7 +794,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-23",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "effb413095b2e25912d0c40b",
@@ -781,7 +807,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d9bc898aedec288fc0270c9a",
@@ -794,7 +820,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b4740072828c302ce14f461e",
@@ -807,7 +833,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "a3f983d86a160487b1722d49",
@@ -820,7 +846,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9a75fc28b192c9d490152bff",
@@ -833,7 +859,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "90a4a60d8ce930540920d255",
@@ -846,7 +872,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8e9f4e2ea18415b7cb0a710d",
@@ -859,7 +885,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "89fcc1f49a47666b4ebbdfaf",
@@ -872,7 +898,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "5cc4fed54171e553e3264732",
@@ -885,7 +911,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "417fd2f86ec1b66d9923f710",
@@ -898,7 +924,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "2f753148970ff4c84df778bd",
@@ -911,7 +937,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "2e6b6241a28367c678439f13",
@@ -924,7 +950,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "17776ad2693a5e8873f1309a",
@@ -937,7 +963,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "10783719eb628aaf1559bb9a",
@@ -950,7 +976,7 @@
       "action": "Review indicator against local telemetry before taking action.",
       "published_at": "2026-10-21T02:17:23+00:00",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "df68ba389ce218954cc44653",
@@ -963,7 +989,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "acdf0d7531a4da1b2b0b9111",
@@ -976,7 +1002,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "690d16ea19df2fa7a9e8395c",
@@ -989,7 +1015,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "52439db93eb4777a8250cac2",
@@ -1002,7 +1028,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "40fc0862805a7f833bf5db93",
@@ -1015,7 +1041,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "0b189fb9b1188029453d4789",
@@ -1028,7 +1054,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-20",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "fac62b347b16a05c16b13bdb",
@@ -1041,7 +1067,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-16",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "10037c11f46a8eba48e120ba",
@@ -1054,7 +1080,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-16",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "71cb3b0204824c02f7329bac",
@@ -1067,7 +1093,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-15",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f0db4fdb6d5013b27a42d3c7",
@@ -1080,7 +1106,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-14",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d8e8bbbd37bb22f0d7298fa9",
@@ -1093,7 +1119,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-14",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "be74a5fdc79193f5da8d9fbd",
@@ -1106,7 +1132,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-14",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7922ef5f83a128ba0f192a93",
@@ -1119,7 +1145,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-14",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "2df6bfb957d3ada9774b3860",
@@ -1132,7 +1158,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-13",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "2202e3bef3cf0f318a7e8913",
@@ -1145,7 +1171,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-13",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "c27f070343ab03160b195c8c",
@@ -1158,7 +1184,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8fc180ea7d3cb857aa1c6c24",
@@ -1171,7 +1197,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "72b860f11e503f76f6e326e0",
@@ -1184,7 +1210,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "656ce059371fe413e0330ba1",
@@ -1197,7 +1223,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "292a2687cd7aafa51e1fdb77",
@@ -1210,7 +1236,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "9634b51ca1bbbde84f8a6443",
@@ -1223,7 +1249,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-04",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "aa98f956d30ff59334d5e2d6",
@@ -1236,7 +1262,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7a5f9954135bf543f0503126",
@@ -1249,7 +1275,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "068e2399661d73ac20e2bb86",
@@ -1262,7 +1288,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-10-01",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "c57887f4c2baa2fe698a7c79",
@@ -1275,7 +1301,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-30",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "65cbf9a6b6654fcca9cb16b0",
@@ -1288,7 +1314,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-29",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "f53b408957d541c45631c8db",
@@ -1301,7 +1327,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "657518d21bd6acb19c2f7d02",
@@ -1314,7 +1340,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "ecaf516c5a00aaabc2df9b8c",
@@ -1327,7 +1353,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-25",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "996e94d000959affa25f195a",
@@ -1340,7 +1366,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-25",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "19b47aa9439c00c9c1ca2107",
@@ -1353,7 +1379,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-25",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "795adc77f4bffb4c4f130293",
@@ -1366,7 +1392,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-24",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "46e3b351d3322268b0f3465e",
@@ -1379,7 +1405,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-24",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d556aa98838e7aa9235ade0f",
@@ -1392,7 +1418,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-22",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b238282ea816859d82067da3",
@@ -1405,7 +1431,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-22",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "949696409ef86d1074dfe5aa",
@@ -1418,7 +1444,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-22",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7c878a273511e4e752e56cc6",
@@ -1431,7 +1457,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-22",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "808a1b2d884608d8207b3b8e",
@@ -1444,7 +1470,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-21",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d1af9f2fb3c025252b0f019c",
@@ -1457,7 +1483,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-18",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "6a030917fb625b9eb0e5e262",
@@ -1470,7 +1496,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-18",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4b7b2e999730cb93c31858d7",
@@ -1483,7 +1509,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-18",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b305257a51d17e853a49c5fe",
@@ -1496,7 +1522,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-16",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "3fa5ac1428b881478bbbcf62",
@@ -1509,7 +1535,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-16",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "23374bce3163a22e93029314",
@@ -1522,7 +1548,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-16",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "6e4ccef38671a9be3ab1aa0b",
@@ -1535,7 +1561,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-14",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "edb174d77baba9ec3eccde38",
@@ -1548,7 +1574,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-11",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b94b67b04cf3bdb64b65b6db",
@@ -1561,7 +1587,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-11",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b71f32faca18462040416450",
@@ -1574,7 +1600,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-11",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "3681203b0658205ac35b425d",
@@ -1587,7 +1613,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-11",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "1623e831bea700969da3e757",
@@ -1600,7 +1626,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "0c8225b628000c6e4e4a376e",
@@ -1613,7 +1639,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-10",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "e97b4bb4b823e82438d9d8c2",
@@ -1626,7 +1652,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d19a11c16d78b0d13b4bd244",
@@ -1639,7 +1665,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "c5d3680bccdad503a77d9621",
@@ -1652,7 +1678,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "8d6f6eac77405bf960a99446",
@@ -1665,7 +1691,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-09",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d7ef04f1abd994c9f05b4116",
@@ -1678,7 +1704,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "844b13132f7fc12b16767e7f",
@@ -1691,7 +1717,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "74bc399bba90e67729fce681",
@@ -1704,7 +1730,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "65c74f13411aef6335bcf236",
@@ -1717,7 +1743,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-08",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7cf9aa3fb0494786755e8235",
@@ -1730,7 +1756,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-04",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "d8ecb1f6627e8e22d180234e",
@@ -1743,7 +1769,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7663108b86a4457ea3b32bad",
@@ -1756,7 +1782,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4ed659578bb5934fb4e61026",
@@ -1769,7 +1795,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4d3b8633eca2076b1b9fc5d2",
@@ -1782,7 +1808,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "4724746e761fd2053d91a7f3",
@@ -1795,7 +1821,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "44cfcb8b6db497b6e0043722",
@@ -1808,7 +1834,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "0a49f745dbbfeb700bf4912a",
@@ -1821,7 +1847,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-09-02",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "6d6a8512cbdfb32f105273b1",
@@ -1834,7 +1860,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-31",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "04fd05828e3eef71d10a481a",
@@ -1847,7 +1873,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-31",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "b52b0124c2ab3ed70d66d17d",
@@ -1860,7 +1886,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "a7704ae437ca90dbf6059d5d",
@@ -1873,7 +1899,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "7c07b33dc96ced9d087263ec",
@@ -1886,7 +1912,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-27",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "954e2f550444ed0fb036bc42",
@@ -1899,7 +1925,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "62c8953a54db75b33322b42e",
@@ -1912,7 +1938,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "5c9b12bc31475ba2fc3b09ce",
@@ -1925,7 +1951,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "2e907e906b061de8543ae1c6",
@@ -1938,7 +1964,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "0fba90682bed35ec09cd2990",
@@ -1951,7 +1977,7 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     },
     {
       "id": "04d4cb8da2d8d4ce2b38ca1c",
@@ -1964,23 +1990,20 @@
       "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
       "published_at": "2026-08-26",
       "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
-    },
-    {
-      "id": "3d588c28c694ec307ec66af8",
-      "source": "cisa-kev",
-      "source_url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
-      "kind": "vulnerability",
-      "value": "CVE-2026-60004",
-      "title": "Gitea Code Injection Vulnerability",
-      "description": "Gitea contains a code injection vulnerability that allows an attacker with repository write access to send a malicious patch to the diffpatch API endpoint to plant an executable Git hook and run shell commands as the Gitea service account.",
-      "action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
-      "published_at": "2026-08-25",
-      "first_seen": "2026-11-11T14:35:07+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00"
+      "last_seen": "2026-11-24T08:08:55+00:00"
     }
   ],
   "news": [
+    {
+      "id": "75ea09ea3e752e0248bf3682",
+      "source": "cisa-advisories",
+      "source_url": "https://www.cisa.gov/news-events/alerts/2026/11/23/cisa-adds-two-known-exploited-vulnerabilities-catalog",
+      "title": "CISA Adds Two Known Exploited Vulnerabilities to Catalog",
+      "excerpt": "CISA has added two new vulnerabilities to its Known Exploited Vulnerabilities (KEV) Catalog , based on evidence of active exploitation.",
+      "published_at": "2026-11-23T12:00:00+00:00",
+      "category": "Exploitation watch",
+      "artwork": "exploitation.svg"
+    },
     {
       "id": "b22eec5809ce5c9c44d601fc",
       "source": "cisa-advisories",
@@ -2005,7 +2028,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-20T08:10:12+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6afe073c9433b60001713f12",
       "references": [
@@ -2026,7 +2049,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-20T08:10:12+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere/",
       "references": [
@@ -2077,7 +2100,7 @@
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
       "modified_at": null,
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://isc.sans.edu/diary/rss/33532",
       "references": [
@@ -2108,7 +2131,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-19T08:10:27+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6af42ca66df0700001a1f52c",
       "references": [
@@ -2129,7 +2152,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-18T08:09:35+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": "2026-11-19T08:10:27+00:00",
       "source_id": "6afc9f9589fda40001d45534",
       "references": [
@@ -2150,7 +2173,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-17T18:55:41+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/cold-relic-a-case-study-in-impersonation-and-compromise/",
       "references": [
@@ -2258,16 +2281,6 @@
       "artwork": "advisory.svg"
     },
     {
-      "id": "37902359fb183e1569911a82",
-      "source": "cisa-advisories",
-      "source_url": "https://www.cisa.gov/news-events/alerts/2026/11/17/cisa-adds-one-known-exploited-vulnerability-catalog",
-      "title": "CISA Adds One Known Exploited Vulnerability to Catalog",
-      "excerpt": "CISA has added one new vulnerability to its Known Exploited Vulnerabilities (KEV) Catalog , based on evidence of active exploitation.",
-      "published_at": "2026-11-17T12:00:00+00:00",
-      "category": "Exploitation watch",
-      "artwork": "exploitation.svg"
-    },
-    {
       "id": "2b90ef71fb0880376bf8f6be",
       "source": "cisa-advisories",
       "source_url": "https://www.cisa.gov/news-events/alerts/2026/11/17/critical-java-vulnerability-requires-immediate-patching",
@@ -2301,7 +2314,7 @@
       "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
       "modified_at": null,
       "first_seen": "2026-11-17T18:55:41+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://isc.sans.edu/diary/rss/33526",
       "references": [
@@ -2322,7 +2335,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-17T08:06:28+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/agentic-threat-activity-crosses-a-significant-threshold/",
       "references": [
@@ -2364,7 +2377,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-14T08:08:51+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6af61536012a6800019c5875",
       "references": [
@@ -2439,7 +2452,7 @@
       "source": "cisco-talos",
       "source_url": "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/",
       "title": "Microsoft Patch Tuesday for November 2026 — Snort rules and prominent vulnerabilities",
-      "excerpt": "Microsoft has released its monthly security update for November 2026, which includes 1328 vulnerabilities affecting a range of products, including 60 that Microsoft marked as \"critical.\" Out of 60 \"critical\" vulnerabilities, 45 are remote code execution (RCE) vulnerabilities.",
+      "excerpt": "Microsoft has released its monthly security update for November 2026, which includes 1095 vulnerabilities affecting a range of products, including 64 that Microsoft marked as \"critical.\" Out of 64 \"critical\" vulnerabilities, 48 are remote code execution (RCE) vulnerabilities.",
       "published_at": "2026-11-11T01:41:17+00:00",
       "category": "Vulnerability research",
       "artwork": "advisory.svg",
@@ -2448,8 +2461,8 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
-      "content_changed_at": null,
+      "last_seen": "2026-11-24T08:08:55+00:00",
+      "content_changed_at": "2026-11-24T08:08:55+00:00",
       "source_id": "6af2f06a6f4a9600010b568b",
       "references": [
         "https://blog.talosintelligence.com/microsoft-patch-tuesday-for-november-2026/"
@@ -2532,7 +2545,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/shutting-the-door-on-the-xcpe-botnet/",
       "references": [
@@ -2553,7 +2566,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/llmjacking-monetizing-compromised-cloud-models/",
       "references": [
@@ -2574,7 +2587,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6ae49fc11bed380001492138",
       "references": [
@@ -2595,7 +2608,7 @@
       "license": "https://policies.google.com/terms",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "https://cloud.google.com/blog/topics/threat-intelligence/artex-and-friends-enter-agentic-offensive-frameworks/",
       "references": [
@@ -2616,7 +2629,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6ae0b3e793b06300015486c2",
       "references": [
@@ -2637,7 +2650,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6aba18cddb2bd20001a361e6",
       "references": [
@@ -2658,7 +2671,7 @@
       "license": "https://www.cisco.com/c/en/us/about/legal/terms-conditions.html",
       "modified_at": null,
       "first_seen": "2026-11-12T14:13:20+00:00",
-      "last_seen": "2026-11-23T08:07:22+00:00",
+      "last_seen": "2026-11-24T08:08:55+00:00",
       "content_changed_at": null,
       "source_id": "6ae0e55693b063000154870f",
       "references": [
@@ -3129,7 +3142,7 @@
   ],
   "stix": {
     "source": "mitre-enterprise",
-    "collected_at": "2026-11-23T08:02:29+00:00",
+    "collected_at": "2026-11-24T08:03:43+00:00",
     "status": "ok",
     "objects": [
       {
@@ -4141,6 +4154,18 @@
         ]
       },
       {
+        "id": "attack-pattern--a2029942-0a85-4947-b23c-ca434698171d",
+        "type": "attack-pattern",
+        "name": "GUI Input Capture",
+        "external_id": "T1056.002",
+        "url": "https://attack.mitre.org/techniques/T1056/002/",
+        "modified": "2026-05-12T15:12:00.706Z",
+        "tactics": [
+          "collection",
+          "credential-access"
+        ]
+      },
+      {
         "id": "attack-pattern--a29aa77c-a88d-4f19-bab9-7751941b2e2d",
         "type": "attack-pattern",
         "name": "Network Device Firewall",
@@ -4883,444 +4908,434 @@
         "url": "https://attack.mitre.org/software/S9065/",
         "modified": "2026-10-02T12:11:29.664Z",
         "tactics": []
-      },
-      {
-        "id": "tool--999c4e6e-b8dc-4b4f-8d6e-1b829f29997e",
-        "type": "tool",
-        "name": "MailSniper",
-        "external_id": "S0413",
-        "url": "https://attack.mitre.org/software/S0413/",
-        "modified": "2024-10-14T22:11:30.271Z",
-        "tactics": []
       }
     ],
     "relationships": [
       {
-        "id": "relationship--15a63ae2-08d7-4771-9537-276835d7513f",
-        "relationship_type": "uses",
         "modified": "2026-11-02T21:09:13.904Z",
         "source_ref": "malware--0a6ec267-83a9-41a5-98c7-57c3ff81e11f",
-        "target_ref": "attack-pattern--f5946b5e-9408-485f-a7f7-b5efc88909b6"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--f5946b5e-9408-485f-a7f7-b5efc88909b6",
+        "id": "relationship--15a63ae2-08d7-4771-9537-276835d7513f"
       },
       {
-        "id": "relationship--047f365d-28bd-4db5-96a2-408b97a42c32",
-        "relationship_type": "uses",
         "modified": "2026-10-14T18:25:05.294Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--120d5519-3098-4e1c-9191-2aa61232f073"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--120d5519-3098-4e1c-9191-2aa61232f073",
+        "id": "relationship--047f365d-28bd-4db5-96a2-408b97a42c32"
       },
       {
-        "id": "relationship--114934d2-1f35-461f-9a18-1ae434695b30",
-        "relationship_type": "uses",
         "modified": "2026-10-08T22:19:20.252Z",
         "source_ref": "malware--bcd0f2cd-0b21-4109-8310-8a90be320514",
-        "target_ref": "attack-pattern--3ccef7ae-cb5e-48f6-8302-897105fbf55c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3ccef7ae-cb5e-48f6-8302-897105fbf55c",
+        "id": "relationship--114934d2-1f35-461f-9a18-1ae434695b30"
       },
       {
-        "id": "relationship--1df35a7c-a7e9-45cb-b569-422e88f6c029",
-        "relationship_type": "uses",
         "modified": "2026-10-01T22:06:05.914Z",
         "source_ref": "malware--53450019-1b2f-4912-bb3a-004bb1d7f177",
-        "target_ref": "attack-pattern--3c4a2599-71ee-4405-ba1e-0e28414b4bc5"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3c4a2599-71ee-4405-ba1e-0e28414b4bc5",
+        "id": "relationship--1df35a7c-a7e9-45cb-b569-422e88f6c029"
       },
       {
-        "id": "relationship--09a27a67-29f5-4ecf-ac38-b0acd0041105",
-        "relationship_type": "uses",
         "modified": "2026-10-01T21:53:17.547Z",
         "source_ref": "malware--86adfd9a-6092-4714-9c5a-a05c5e3f63b5",
-        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1",
+        "id": "relationship--09a27a67-29f5-4ecf-ac38-b0acd0041105"
       },
       {
-        "id": "relationship--12ac0bbc-25b8-4f37-a9b8-d9f41538ae84",
-        "relationship_type": "uses",
         "modified": "2026-10-01T21:50:42.355Z",
         "source_ref": "malware--86adfd9a-6092-4714-9c5a-a05c5e3f63b5",
-        "target_ref": "attack-pattern--0d91b3c0-5e50-47c3-949a-2a796f04d144"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--0d91b3c0-5e50-47c3-949a-2a796f04d144",
+        "id": "relationship--12ac0bbc-25b8-4f37-a9b8-d9f41538ae84"
       },
       {
-        "id": "relationship--0b6d7542-bf54-4a14-a1e8-55a39c99ce02",
-        "relationship_type": "uses",
         "modified": "2026-10-01T21:32:38.427Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--e0033c16-a07e-48aa-8204-7c3ca669998c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--e0033c16-a07e-48aa-8204-7c3ca669998c",
+        "id": "relationship--0b6d7542-bf54-4a14-a1e8-55a39c99ce02"
       },
       {
-        "id": "relationship--01e2c7fd-2fca-4ba0-81cb-ad0a3db779a9",
-        "relationship_type": "uses",
         "modified": "2026-10-01T21:24:05.114Z",
         "source_ref": "malware--e6de8db2-092a-476c-a683-ad6e042a3265",
-        "target_ref": "attack-pattern--1c4e5d32-1fe9-4116-9d9d-59e3925bd6a2"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--1c4e5d32-1fe9-4116-9d9d-59e3925bd6a2",
+        "id": "relationship--01e2c7fd-2fca-4ba0-81cb-ad0a3db779a9"
       },
       {
-        "id": "relationship--1cfd8afe-772b-45ee-9c3d-58188b709bf4",
-        "relationship_type": "uses",
         "modified": "2026-10-01T21:00:43.554Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--9fa07bef-9c81-421e-a8e5-ad4366c5a925"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--9fa07bef-9c81-421e-a8e5-ad4366c5a925",
+        "id": "relationship--1cfd8afe-772b-45ee-9c3d-58188b709bf4"
       },
       {
-        "id": "relationship--1df1d28c-9de3-4d1b-8c86-ac50175a1e69",
-        "relationship_type": "uses",
         "modified": "2026-10-01T19:30:16.745Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--f870408c-b1cd-49c7-a5c7-0ef0fc496cc6"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--f870408c-b1cd-49c7-a5c7-0ef0fc496cc6",
+        "id": "relationship--1df1d28c-9de3-4d1b-8c86-ac50175a1e69"
       },
       {
-        "id": "relationship--13db5e06-ca37-4cdc-81a0-972ede455234",
-        "relationship_type": "uses",
         "modified": "2026-10-01T19:29:13.147Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--0ff4bd68-aebb-4039-9e00-9f92c705edf4"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--0ff4bd68-aebb-4039-9e00-9f92c705edf4",
+        "id": "relationship--13db5e06-ca37-4cdc-81a0-972ede455234"
       },
       {
-        "id": "relationship--13bcc487-1088-4f58-8d06-025a1c0522ed",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:36:34.756Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--391d824f-0ef1-47a0-b0ee-c59a75e27670"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--391d824f-0ef1-47a0-b0ee-c59a75e27670",
+        "id": "relationship--13bcc487-1088-4f58-8d06-025a1c0522ed"
       },
       {
-        "id": "relationship--0a04902b-be91-45d9-94de-3ccc3b7c6cbd",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:30:01.506Z",
         "source_ref": "malware--8460166d-ba74-405b-9944-c6f0365bc085",
-        "target_ref": "attack-pattern--f24faf46-3b26-4dbb-98f2-63460498e433"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--f24faf46-3b26-4dbb-98f2-63460498e433",
+        "id": "relationship--0a04902b-be91-45d9-94de-3ccc3b7c6cbd"
       },
       {
-        "id": "relationship--1a82f449-eb3f-4b9a-9eaa-f30a66f1d0ef",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:25:59.976Z",
         "source_ref": "malware--8460166d-ba74-405b-9944-c6f0365bc085",
-        "target_ref": "attack-pattern--04fd5427-79c7-44ea-ae13-11b24778ff1c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--04fd5427-79c7-44ea-ae13-11b24778ff1c",
+        "id": "relationship--1a82f449-eb3f-4b9a-9eaa-f30a66f1d0ef"
       },
       {
-        "id": "relationship--038059c4-ff9c-4d4e-982e-632e1f27d254",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:23:46.413Z",
         "source_ref": "intrusion-set--318cf2c8-160b-4de7-be51-ecc3ded2705f",
-        "target_ref": "attack-pattern--7bdca9d5-d500-4d7d-8c52-5fd47baf4c0c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--7bdca9d5-d500-4d7d-8c52-5fd47baf4c0c",
+        "id": "relationship--038059c4-ff9c-4d4e-982e-632e1f27d254"
       },
       {
-        "id": "relationship--0e6418d5-a827-4a88-adb2-af4f26b4502b",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:22:11.464Z",
         "source_ref": "malware--8460166d-ba74-405b-9944-c6f0365bc085",
-        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104",
+        "id": "relationship--0e6418d5-a827-4a88-adb2-af4f26b4502b"
       },
       {
-        "id": "relationship--1f5fcc10-0902-4395-8dff-0353f7ae6189",
-        "relationship_type": "uses",
         "modified": "2026-10-01T18:15:06.347Z",
         "source_ref": "malware--8460166d-ba74-405b-9944-c6f0365bc085",
-        "target_ref": "attack-pattern--7bc57495-ea59-4380-be31-a64af124ef18"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--7bc57495-ea59-4380-be31-a64af124ef18",
+        "id": "relationship--1f5fcc10-0902-4395-8dff-0353f7ae6189"
       },
       {
-        "id": "relationship--12a69be7-09b4-4188-9b78-a035d0b622ee",
-        "relationship_type": "uses",
         "modified": "2026-10-01T17:34:02.266Z",
         "source_ref": "malware--ab183324-4634-45bc-98af-9458bb94bcef",
-        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1",
+        "id": "relationship--12a69be7-09b4-4188-9b78-a035d0b622ee"
       },
       {
-        "id": "relationship--1508970d-75b0-4a48-aba1-258439f4f349",
-        "relationship_type": "uses",
         "modified": "2026-10-01T17:32:13.851Z",
         "source_ref": "malware--ab183324-4634-45bc-98af-9458bb94bcef",
-        "target_ref": "attack-pattern--e3a12395-188d-4051-9a16-ea8e14d07b88"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--e3a12395-188d-4051-9a16-ea8e14d07b88",
+        "id": "relationship--1508970d-75b0-4a48-aba1-258439f4f349"
       },
       {
-        "id": "relationship--14098193-5125-4aef-8684-2cddb8755b1e",
-        "relationship_type": "uses",
         "modified": "2026-10-01T15:26:05.165Z",
         "source_ref": "malware--8b325e28-6ea1-4094-929b-966d5db4ee4c",
-        "target_ref": "attack-pattern--df8b2a25-8bdf-4856-953c-a04372b1c161"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--df8b2a25-8bdf-4856-953c-a04372b1c161",
+        "id": "relationship--14098193-5125-4aef-8684-2cddb8755b1e"
       },
       {
-        "id": "relationship--151d1f28-13c0-4186-a636-f3131b6a6869",
-        "relationship_type": "uses",
         "modified": "2026-10-01T13:05:51.037Z",
         "source_ref": "malware--8c8b765a-fba0-4551-ae83-b12e2a8b8937",
-        "target_ref": "attack-pattern--58a3e6aa-4453-4cc8-a51f-4befe80b31a8"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--58a3e6aa-4453-4cc8-a51f-4befe80b31a8",
+        "id": "relationship--151d1f28-13c0-4186-a636-f3131b6a6869"
       },
       {
-        "id": "relationship--1c327eb2-e0af-45c2-a9ea-784252ad34b0",
-        "relationship_type": "uses",
         "modified": "2026-09-30T21:20:22.500Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--cba37adb-d6fb-4610-b069-dd04c0643384"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--cba37adb-d6fb-4610-b069-dd04c0643384",
+        "id": "relationship--1c327eb2-e0af-45c2-a9ea-784252ad34b0"
       },
       {
-        "id": "relationship--1997b1ee-3028-4871-8f78-b55a840e5809",
-        "relationship_type": "uses",
         "modified": "2026-09-30T21:00:10.097Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--3ee16395-03f0-4690-a32e-69ce9ada0f9e"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3ee16395-03f0-4690-a32e-69ce9ada0f9e",
+        "id": "relationship--1997b1ee-3028-4871-8f78-b55a840e5809"
       },
       {
-        "id": "relationship--064cfeb5-9ddb-4dd2-ada4-cf9e65601dc5",
+        "modified": "2026-09-30T20:16:07.611Z",
+        "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
         "relationship_type": "uses",
+        "target_ref": "attack-pattern--a2029942-0a85-4947-b23c-ca434698171d",
+        "id": "relationship--1ad3d8aa-34af-464a-9033-f8d022f8f2f9"
+      },
+      {
         "modified": "2026-09-30T20:05:01.133Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104",
+        "id": "relationship--064cfeb5-9ddb-4dd2-ada4-cf9e65601dc5"
       },
       {
-        "id": "relationship--0d6bcabd-39bd-458b-8efc-5d409d9c2339",
-        "relationship_type": "uses",
         "modified": "2026-09-30T19:28:25.021Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--1c4e5d32-1fe9-4116-9d9d-59e3925bd6a2"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--1c4e5d32-1fe9-4116-9d9d-59e3925bd6a2",
+        "id": "relationship--0d6bcabd-39bd-458b-8efc-5d409d9c2339"
       },
       {
-        "id": "relationship--0321e766-10c1-4215-9fd6-7f712b642dca",
-        "relationship_type": "uses",
         "modified": "2026-09-30T19:04:00.629Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--43e7dc91-05b2-474c-b9ac-2ed4fe101f4d"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--43e7dc91-05b2-474c-b9ac-2ed4fe101f4d",
+        "id": "relationship--0321e766-10c1-4215-9fd6-7f712b642dca"
       },
       {
-        "id": "relationship--161225df-de21-4715-b4f3-c324c05ff590",
-        "relationship_type": "uses",
         "modified": "2026-09-30T19:02:52.005Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--d63a3fb8-9452-4e9d-a60a-54be68d5998c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--d63a3fb8-9452-4e9d-a60a-54be68d5998c",
+        "id": "relationship--161225df-de21-4715-b4f3-c324c05ff590"
       },
       {
-        "id": "relationship--0df39903-1a20-4f9d-ba60-503a1639adce",
-        "relationship_type": "uses",
         "modified": "2026-09-30T18:35:01.549Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--7655ac3b-dfde-49c5-a967-242856174434"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--7655ac3b-dfde-49c5-a967-242856174434",
+        "id": "relationship--0df39903-1a20-4f9d-ba60-503a1639adce"
       },
       {
-        "id": "relationship--082485ea-c90a-49c6-af4a-fbb5e5b96757",
-        "relationship_type": "uses",
         "modified": "2026-09-30T17:37:36.198Z",
         "source_ref": "intrusion-set--00f67a77-86a4-4adf-be26-1a54fc713340",
-        "target_ref": "attack-pattern--851e071f-208d-4c79-adc6-5974c85c78f3"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--851e071f-208d-4c79-adc6-5974c85c78f3",
+        "id": "relationship--082485ea-c90a-49c6-af4a-fbb5e5b96757"
       },
       {
-        "id": "relationship--1bb8999a-16c3-420d-8feb-65b104d18fd9",
-        "relationship_type": "uses",
         "modified": "2026-09-28T16:07:22.573Z",
         "source_ref": "malware--b7c4047f-d56b-43b7-a0c8-65088a70d0cc",
-        "target_ref": "attack-pattern--3ccef7ae-cb5e-48f6-8302-897105fbf55c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3ccef7ae-cb5e-48f6-8302-897105fbf55c",
+        "id": "relationship--1bb8999a-16c3-420d-8feb-65b104d18fd9"
       },
       {
-        "id": "relationship--152e6822-7127-4384-bb4c-f6121ed36ae6",
-        "relationship_type": "uses",
         "modified": "2026-09-28T16:06:07.291Z",
         "source_ref": "malware--b7c4047f-d56b-43b7-a0c8-65088a70d0cc",
-        "target_ref": "attack-pattern--86850eff-2729-40c3-b85e-c4af26da4a2d"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--86850eff-2729-40c3-b85e-c4af26da4a2d",
+        "id": "relationship--152e6822-7127-4384-bb4c-f6121ed36ae6"
       },
       {
-        "id": "relationship--044701e4-2c5c-4574-8ac7-1d9034dff4d6",
-        "relationship_type": "uses",
         "modified": "2026-09-25T17:57:28.278Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--853c4192-4311-43e1-bfbb-b11b14911852"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--853c4192-4311-43e1-bfbb-b11b14911852",
+        "id": "relationship--044701e4-2c5c-4574-8ac7-1d9034dff4d6"
       },
       {
-        "id": "relationship--08271537-bd35-4141-a49e-c9c2efe09bed",
-        "relationship_type": "uses",
         "modified": "2026-09-25T16:55:20.768Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--e261a979-f354-41a8-963e-6cadac27c4bf"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--e261a979-f354-41a8-963e-6cadac27c4bf",
+        "id": "relationship--08271537-bd35-4141-a49e-c9c2efe09bed"
       },
       {
-        "id": "relationship--14c5552a-9352-4fb2-8904-aa8de6a4950a",
-        "relationship_type": "uses",
         "modified": "2026-09-24T22:25:53.730Z",
         "source_ref": "malware--7eaf437c-cde7-475b-87dd-d8573ca5406b",
-        "target_ref": "attack-pattern--671cd17f-a765-48fd-adc4-dad1941b1ae3"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--671cd17f-a765-48fd-adc4-dad1941b1ae3",
+        "id": "relationship--14c5552a-9352-4fb2-8904-aa8de6a4950a"
       },
       {
-        "id": "relationship--166d3d7e-8bba-49ea-b84e-5944fdf717e0",
-        "relationship_type": "uses",
         "modified": "2026-09-24T22:24:58.061Z",
         "source_ref": "malware--7eaf437c-cde7-475b-87dd-d8573ca5406b",
-        "target_ref": "attack-pattern--391d824f-0ef1-47a0-b0ee-c59a75e27670"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--391d824f-0ef1-47a0-b0ee-c59a75e27670",
+        "id": "relationship--166d3d7e-8bba-49ea-b84e-5944fdf717e0"
       },
       {
-        "id": "relationship--0624c9a4-4c9f-448c-99f0-c22a99480158",
-        "relationship_type": "uses",
         "modified": "2026-09-24T22:24:20.421Z",
         "source_ref": "malware--7eaf437c-cde7-475b-87dd-d8573ca5406b",
-        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--03d7999c-1f4c-42cc-8373-e7690d318104",
+        "id": "relationship--0624c9a4-4c9f-448c-99f0-c22a99480158"
       },
       {
-        "id": "relationship--18ca258c-d465-44f1-98c6-57bd908577a9",
-        "relationship_type": "uses",
         "modified": "2026-09-24T22:23:10.891Z",
         "source_ref": "malware--7eaf437c-cde7-475b-87dd-d8573ca5406b",
-        "target_ref": "attack-pattern--9efb1ea7-c37b-4595-9640-b7680cd84279"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--9efb1ea7-c37b-4595-9640-b7680cd84279",
+        "id": "relationship--18ca258c-d465-44f1-98c6-57bd908577a9"
       },
       {
-        "id": "relationship--19c9e7ee-69eb-4c1f-82de-727a5e37bcb8",
-        "relationship_type": "uses",
         "modified": "2026-09-24T18:50:51.305Z",
         "source_ref": "malware--363bc9c0-6e9b-4815-a072-1a92d0ad7502",
-        "target_ref": "attack-pattern--92d7da27-2d91-488e-a00c-059dc162766d"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--92d7da27-2d91-488e-a00c-059dc162766d",
+        "id": "relationship--19c9e7ee-69eb-4c1f-82de-727a5e37bcb8"
       },
       {
-        "id": "relationship--1ead4216-76d0-4062-ba4d-9eda4014e6f6",
-        "relationship_type": "uses",
         "modified": "2026-09-24T18:50:35.505Z",
         "source_ref": "malware--363bc9c0-6e9b-4815-a072-1a92d0ad7502",
-        "target_ref": "attack-pattern--e6919abc-99f9-4c6c-95a5-14761e7b2add"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--e6919abc-99f9-4c6c-95a5-14761e7b2add",
+        "id": "relationship--1ead4216-76d0-4062-ba4d-9eda4014e6f6"
       },
       {
-        "id": "relationship--03913b3d-2078-4ef1-b155-918cc9baf49c",
-        "relationship_type": "uses",
         "modified": "2026-09-23T22:38:03.835Z",
         "source_ref": "intrusion-set--973abd91-322f-4756-94b6-67381c4089b3",
-        "target_ref": "attack-pattern--deb98323-e13f-4b0c-8d94-175379069062"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--deb98323-e13f-4b0c-8d94-175379069062",
+        "id": "relationship--03913b3d-2078-4ef1-b155-918cc9baf49c"
       },
       {
-        "id": "relationship--0cf9ba59-b44a-4266-918f-c493f1485a76",
-        "relationship_type": "uses",
         "modified": "2026-09-23T22:00:17.608Z",
         "source_ref": "malware--73526d60-8813-4895-88ac-915c68dfe8dd",
-        "target_ref": "attack-pattern--34e793de-0274-4982-9c1a-246ed1c19dee"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--34e793de-0274-4982-9c1a-246ed1c19dee",
+        "id": "relationship--0cf9ba59-b44a-4266-918f-c493f1485a76"
       },
       {
-        "id": "relationship--134c03c1-4b34-4c3c-912a-16792cb01ee2",
-        "relationship_type": "uses",
         "modified": "2026-09-23T21:30:49.189Z",
         "source_ref": "malware--73526d60-8813-4895-88ac-915c68dfe8dd",
-        "target_ref": "attack-pattern--2acf44aa-542f-4366-b4eb-55ef5747759c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--2acf44aa-542f-4366-b4eb-55ef5747759c",
+        "id": "relationship--134c03c1-4b34-4c3c-912a-16792cb01ee2"
       },
       {
-        "id": "relationship--0ccb1bf9-94bc-4d0e-8e84-2baf7ddbd483",
-        "relationship_type": "uses",
         "modified": "2026-09-23T21:28:37.535Z",
         "source_ref": "malware--73526d60-8813-4895-88ac-915c68dfe8dd",
-        "target_ref": "attack-pattern--d2d642da-61ff-4211-b4df-7923c9ca220c"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--d2d642da-61ff-4211-b4df-7923c9ca220c",
+        "id": "relationship--0ccb1bf9-94bc-4d0e-8e84-2baf7ddbd483"
       },
       {
-        "id": "relationship--0f356b7d-a206-4dfd-950f-41abbb85a59f",
-        "relationship_type": "uses",
         "modified": "2026-09-23T18:36:09.847Z",
         "source_ref": "malware--73526d60-8813-4895-88ac-915c68dfe8dd",
-        "target_ref": "attack-pattern--d511a6f6-4a33-41d5-bc95-c343875d1377"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--d511a6f6-4a33-41d5-bc95-c343875d1377",
+        "id": "relationship--0f356b7d-a206-4dfd-950f-41abbb85a59f"
       },
       {
-        "id": "relationship--061d7039-8463-46bc-9f33-ac8153c5cf22",
-        "relationship_type": "uses",
         "modified": "2026-09-23T16:45:56.299Z",
         "source_ref": "malware--73526d60-8813-4895-88ac-915c68dfe8dd",
-        "target_ref": "attack-pattern--3aef9463-9a7a-43ba-8957-a867e07c1e6a"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3aef9463-9a7a-43ba-8957-a867e07c1e6a",
+        "id": "relationship--061d7039-8463-46bc-9f33-ac8153c5cf22"
       },
       {
-        "id": "relationship--04532a62-12c8-475b-ae10-8f4d035aeb53",
-        "relationship_type": "uses",
         "modified": "2026-09-22T22:26:58.416Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--3975dbb5-0e1e-4f5b-bae1-cf2ab84b46dc"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--3975dbb5-0e1e-4f5b-bae1-cf2ab84b46dc",
+        "id": "relationship--04532a62-12c8-475b-ae10-8f4d035aeb53"
       },
       {
-        "id": "relationship--0e79e44d-036a-478f-a6f5-1acc420095bf",
-        "relationship_type": "uses",
         "modified": "2026-09-22T22:23:13.760Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--354a7f88-63fb-41b5-a801-ce3b377b36f1",
+        "id": "relationship--0e79e44d-036a-478f-a6f5-1acc420095bf"
       },
       {
-        "id": "relationship--14f063a6-0819-4549-b9e0-44ee9e0f2fc8",
-        "relationship_type": "uses",
         "modified": "2026-09-22T22:22:05.892Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--e3a12395-188d-4051-9a16-ea8e14d07b88"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--e3a12395-188d-4051-9a16-ea8e14d07b88",
+        "id": "relationship--14f063a6-0819-4549-b9e0-44ee9e0f2fc8"
       },
       {
-        "id": "relationship--0eee3018-adc1-49b4-ac6b-12aae2b0f67e",
-        "relationship_type": "uses",
         "modified": "2026-09-22T22:14:04.669Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--837f9164-50af-4ac0-8219-379d8a74cefc"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--837f9164-50af-4ac0-8219-379d8a74cefc",
+        "id": "relationship--0eee3018-adc1-49b4-ac6b-12aae2b0f67e"
       },
       {
-        "id": "relationship--115aa415-fe5e-4e08-b629-f3da90c10fb2",
-        "relationship_type": "uses",
         "modified": "2026-09-22T22:05:52.823Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--34ab90a3-05f6-4259-8f21-621081fdaba5"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--34ab90a3-05f6-4259-8f21-621081fdaba5",
+        "id": "relationship--115aa415-fe5e-4e08-b629-f3da90c10fb2"
       },
       {
-        "id": "relationship--04d06aaa-505c-473e-ae33-7ef5e560a7a7",
-        "relationship_type": "uses",
         "modified": "2026-09-22T21:57:09.560Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--707399d6-ab3e-4963-9315-d9d3818cd6a0"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--707399d6-ab3e-4963-9315-d9d3818cd6a0",
+        "id": "relationship--04d06aaa-505c-473e-ae33-7ef5e560a7a7"
       },
       {
-        "id": "relationship--0b5cb8e1-14e9-4064-9276-632f8ee96230",
-        "relationship_type": "uses",
         "modified": "2026-09-22T21:24:12.998Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--a29aa77c-a88d-4f19-bab9-7751941b2e2d"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--a29aa77c-a88d-4f19-bab9-7751941b2e2d",
+        "id": "relationship--0b5cb8e1-14e9-4064-9276-632f8ee96230"
       },
       {
-        "id": "relationship--01794c3e-407a-42c1-b6ba-16ec85775011",
-        "relationship_type": "uses",
         "modified": "2026-09-22T21:21:36.772Z",
         "source_ref": "intrusion-set--1c3dcf91-b859-4aae-a09c-ae26dc8b6390",
-        "target_ref": "attack-pattern--149b477f-f364-4824-b1b5-aa1d56115869"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--149b477f-f364-4824-b1b5-aa1d56115869",
+        "id": "relationship--01794c3e-407a-42c1-b6ba-16ec85775011"
       },
       {
-        "id": "relationship--1d6a8206-686c-4c52-b282-8580b3afacd5",
-        "relationship_type": "uses",
         "modified": "2026-09-22T17:51:46.378Z",
         "source_ref": "intrusion-set--973abd91-322f-4756-94b6-67381c4089b3",
-        "target_ref": "attack-pattern--b21c3b2d-02e6-45b1-980b-e69051040839"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--b21c3b2d-02e6-45b1-980b-e69051040839",
+        "id": "relationship--1d6a8206-686c-4c52-b282-8580b3afacd5"
       },
       {
-        "id": "relationship--09bb5f5e-59bf-434d-aa49-8ad3ad94916e",
-        "relationship_type": "subtechnique-of",
         "modified": "2026-09-22T00:10:38.456Z",
         "source_ref": "attack-pattern--6aa4bc38-0713-4d40-ad0b-949d912da852",
-        "target_ref": "attack-pattern--bbde9781-60aa-4b8a-a911-895b0c1b3872"
+        "relationship_type": "subtechnique-of",
+        "target_ref": "attack-pattern--bbde9781-60aa-4b8a-a911-895b0c1b3872",
+        "id": "relationship--09bb5f5e-59bf-434d-aa49-8ad3ad94916e"
       },
       {
-        "id": "relationship--01c3b4b5-a4db-415b-8628-98491f799a0a",
-        "relationship_type": "uses",
         "modified": "2026-09-11T19:54:26.809Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--b200542e-e877-4395-875b-cf1a44537ca4"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--b200542e-e877-4395-875b-cf1a44537ca4",
+        "id": "relationship--01c3b4b5-a4db-415b-8628-98491f799a0a"
       },
       {
-        "id": "relationship--0b9a6189-858f-4f49-952a-21075b860dc6",
-        "relationship_type": "uses",
         "modified": "2026-09-11T19:50:46.342Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--970a3432-3237-47ad-bcca-7d8cbb217736"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--970a3432-3237-47ad-bcca-7d8cbb217736",
+        "id": "relationship--0b9a6189-858f-4f49-952a-21075b860dc6"
       },
       {
-        "id": "relationship--177888f1-a326-4642-98c3-66aa91ef18dd",
-        "relationship_type": "uses",
         "modified": "2026-09-11T19:43:47.041Z",
         "source_ref": "malware--947119be-4875-49aa-8247-776c34233063",
-        "target_ref": "attack-pattern--f1951e8a-500e-4a26-8803-76d95c4554b4"
+        "relationship_type": "uses",
+        "target_ref": "attack-pattern--f1951e8a-500e-4a26-8803-76d95c4554b4",
+        "id": "relationship--177888f1-a326-4642-98c3-66aa91ef18dd"
       },
       {
-        "id": "relationship--1ba59a68-1883-492d-8cd8-f22656eb58a4",
-        "relationship_type": "uses",
         "modified": "2026-09-09T18:44:33.659Z",
         "source_ref": "intrusion-set--bef4c620-0787-42a8-a96d-b7eb6e85917c",
-        "target_ref": "attack-pattern--b4694861-542c-48ea-9eb1-10d356e7140a"
-      },
-      {
-        "id": "relationship--03a65a95-b802-49ee-bec1-a65cccec0e89",
         "relationship_type": "uses",
-        "modified": "2026-09-09T18:44:33.623Z",
-        "source_ref": "tool--999c4e6e-b8dc-4b4f-8d6e-1b829f29997e",
-        "target_ref": "attack-pattern--b4694861-542c-48ea-9eb1-10d356e7140a"
+        "target_ref": "attack-pattern--b4694861-542c-48ea-9eb1-10d356e7140a",
+        "id": "relationship--1ba59a68-1883-492d-8cd8-f22656eb58a4"
       }
     ],
     "counts": {
-      "attack-pattern": 140,
+      "attack-pattern": 141,
       "intrusion-set": 5,
-      "malware": 14,
-      "tool": 1
+      "malware": 14
     },
     "license": "https://attack.mitre.org/resources/terms-of-use/"
   },
@@ -6245,8 +6260,8 @@
     }
   ],
   "collection": {
-    "checked_at": "2026-11-23T08:07:22+00:00",
-    "status": "published",
+    "checked_at": "2026-11-24T08:08:55+00:00",
+    "status": "quiet",
     "last_substantive_at": "2026-11-23T08:07:36+00:00",
     "weekly_window_end": "2026-11-23T08:00:00+00:00"
   }
